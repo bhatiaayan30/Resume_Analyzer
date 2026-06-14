@@ -7,6 +7,7 @@
   [![Django](https://img.shields.io/badge/Django-5.1-092E20?logo=django&logoColor=white)](#)
   [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?logo=postgresql&logoColor=white)](#)
   [![Groq](https://img.shields.io/badge/AI-Groq%20Llama--3-f55036?logo=meta&logoColor=white)](#)
+  [![CI](https://github.com/bhatiaayan30/resume-analyzer-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/bhatiaayan30/resume-analyzer-ai/actions/workflows/ci.yml)
 </div>
 
 ---

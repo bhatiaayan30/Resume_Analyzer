@@ -1,0 +1,10 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Language Statistics (GitHub)
+# Treat templates as HTML
+*.html linguist-language=HTML
+
+# Ignore certain directories from language stats
+venv/** linguist-vendored
+staticfiles/** linguist-vendored
