@@ -1,0 +1,386 @@
+{% extends "analyzer/base.html" %}
+{% block title %}Analysis Results{% endblock %}
+
+{% block extra_css %}
+/* CSS conic-gradient score ring */
+.score-ring {
+  --pct: 0;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--success) calc(var(--pct) * 1%),
+    rgba(255, 255, 255, 0.05) 0%
+  );
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  animation: loadRing 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  box-shadow: 0 0 30px rgba(52, 211, 153, 0.3), inset 0 0 20px rgba(52, 211, 153, 0.2);
+}
+
+@keyframes loadRing {
+  0% { transform: scale(0.6) rotate(-45deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.score-ring::after {
+  content: '';
+  position: absolute;
+  width: 90px; height: 90px;
+  background: var(--surface);
+  border-radius: 50%;
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+}
+.score-ring-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.score-num  { font-size: 32px; font-weight: 800; line-height: 1; color: var(--text-main); }
+.score-pct  { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-4">
+    
+    <a href="{% url 'index' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-brand transition-colors mb-8">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Analyze another resume
+    </a>
+
+    <!-- Dashboard Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Left Column: Metrics & Visuals -->
+        <div class="lg:col-span-1 space-y-8">
+            
+            <!-- Score Card -->
+            <div class="premium-card flex flex-col items-center justify-center text-center">
+                <div class="score-ring mb-6" style="--pct: {{ analysis.match_score }}">
+                    <div class="score-ring-inner">
+                      <div class="score-num">{{ analysis.match_score }}</div>
+                      <div class="score-pct">/ 100</div>
+                    </div>
+                </div>
+                
+                <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">
+                  {% if analysis.match_score >= 75 %}Strong Match
+                  {% elif analysis.match_score >= 50 %}Moderate Match
+                  {% else %}Weak Match
+                  {% endif %}
+                </h2>
+                <p class="text-sm text-gray-400 line-clamp-3 leading-relaxed">{{ job_desc_snippet }}</p>
+            </div>
+
+            <!-- Chart.js Visualization Card -->
+            <div class="premium-card">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Skill Alignment
+                </h3>
+                <div class="relative h-56 w-full">
+                    <canvas id="skillsChart"></canvas>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Right Column: Details & Insights -->
+        <div class="lg:col-span-2">
+            
+            <!-- Tab Navigation -->
+            <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-700/50 pb-4" id="tab-nav">
+                <button onclick="switchTab('skills')" id="btn-skills" class="tab-btn bg-brand/20 text-brand border-brand/50 px-4 py-2 text-sm font-semibold rounded-lg border transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Skills & ATS
+                </button>
+                <button onclick="switchTab('gaps')" id="btn-gaps" class="tab-btn bg-transparent text-gray-400 border-transparent hover:text-gray-200 hover:bg-white/5 px-4 py-2 text-sm font-semibold rounded-lg border transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    Gaps & Advice
+                </button>
+                <button onclick="switchTab('roadmap')" id="btn-roadmap" class="tab-btn bg-transparent text-gray-400 border-transparent hover:text-gray-200 hover:bg-white/5 px-4 py-2 text-sm font-semibold rounded-lg border transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Upskilling
+                </button>
+                <button onclick="switchTab('critique')" id="btn-critique" class="tab-btn bg-transparent text-gray-400 border-transparent hover:text-gray-200 hover:bg-white/5 px-4 py-2 text-sm font-semibold rounded-lg border transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    Writing Critique
+                </button>
+            </div>
+
+            <!-- Tab 1: Skills & ATS -->
+            <div id="tab-skills" class="tab-content space-y-8 block">
+                
+                <!-- ATS Formatting Alerts -->
+                <div class="premium-card">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        ATS Parsing Simulator
+                    </h3>
+                    {% if analysis.ats_format_issues %}
+                        <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-5 mb-4">
+                            <div class="flex gap-3 mb-3">
+                                <svg class="w-6 h-6 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <div>
+                                    <h4 class="text-amber-500 font-bold text-sm uppercase tracking-wider mb-1">Formatting Red Flags Detected</h4>
+                                    <p class="text-amber-200/80 text-sm leading-relaxed mb-4">Your resume contains elements that commonly break or confuse Applicant Tracking Systems (ATS). While our AI can read it, a standard corporate ATS might fail.</p>
+                                    <ul class="space-y-2">
+                                        {% for issue in analysis.ats_format_issues %}
+                                            <li class="flex items-start gap-2 text-sm text-amber-100">
+                                                <span class="text-amber-500 mt-0.5">•</span>
+                                                {{ issue }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-center gap-3">
+                            <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p class="text-emerald-300 text-sm font-medium">Excellent! No complex formatting, tables, or images detected. Highly ATS-compatible.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Skills Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Matched -->
+                    <div class="premium-card">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">✅ Matched Skills</h3>
+                        {% if analysis.matched_skills %}
+                            <div class="flex flex-wrap gap-2">
+                                {% for skill in analysis.matched_skills %}
+                                    <span class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 shadow-[0_0_10px_rgba(52,211,153,0.2)]">{{ skill }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-sm text-gray-500">No matching skills identified.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Missing -->
+                    <div class="premium-card">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">⚠️ Missing Skills</h3>
+                        {% if analysis.missing_skills %}
+                            <div class="flex flex-wrap gap-2">
+                                {% for skill in analysis.missing_skills %}
+                                    <span class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/50 shadow-[0_0_10px_rgba(244,63,94,0.2)]">{{ skill }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-sm text-emerald-400 font-medium">No missing skills — great alignment!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Gaps & Suggestions -->
+            <div id="tab-gaps" class="tab-content space-y-8 hidden">
+                <!-- Gaps -->
+                {% if analysis.experience_gaps %}
+                <div class="premium-card">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6 flex items-center gap-2">📊 Experience Gaps</h3>
+                    <ul class="space-y-4">
+                        {% for gap in analysis.experience_gaps %}
+                            <li class="p-4 rounded-r-xl border-l-4 border-gray-600 bg-white/5 text-gray-200 shadow-sm text-sm leading-relaxed">{{ gap }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Suggestions -->
+                <div class="premium-card">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6 flex items-center gap-2">💡 Strategic Suggestions</h3>
+                    {% if analysis.suggestions %}
+                        <ul class="space-y-4 text-gray-200 text-sm">
+                            {% for tip in analysis.suggestions %}
+                                <li class="p-5 rounded-xl border border-brand/30 bg-brand/10 shadow-[0_0_15px_rgba(139,92,246,0.1)] leading-relaxed flex gap-4 items-start">
+                                    <span class="flex-shrink-0 w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center font-bold text-xs">{{ forloop.counter }}</span>
+                                    <span>{{ tip }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-sm text-gray-500">No suggestions — resume looks well-matched.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Tab 3: Upskilling Roadmap -->
+            <div id="tab-roadmap" class="tab-content space-y-8 hidden">
+                <div class="premium-card relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-brand/10 rounded-bl-full transform translate-x-8 -translate-y-8 transition-transform group-hover:scale-110"></div>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-brand mb-6 flex items-center gap-2 relative z-10">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Upskilling & Improvement Roadmap
+                    </h3>
+                    
+                    {% if analysis.upskill_paths %}
+                        <div class="space-y-6 relative z-10">
+                            {% for path in analysis.upskill_paths %}
+                                <div class="bg-gray-800/50 rounded-xl border border-gray-700/50 overflow-hidden hover:border-brand/50 transition-colors">
+                                    <!-- Skill Header -->
+                                    <div class="px-5 py-4 bg-gray-900/50 border-b border-gray-700/50 flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center text-brand font-bold text-sm">
+                                            {{ forloop.counter }}
+                                        </div>
+                                        <h4 class="text-white font-semibold">{{ path.skill }}</h4>
+                                    </div>
+                                    
+                                    <!-- Content -->
+                                    <div class="p-5 space-y-4">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Learning Strategy</h5>
+                                            <p class="text-sm text-gray-300 leading-relaxed">{{ path.learning_strategy }}</p>
+                                        </div>
+                                        
+                                        {% if path.recommended_resources %}
+                                        <div>
+                                            <h5 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Recommended Resources</h5>
+                                            <div class="flex flex-wrap gap-2">
+                                                {% for resource in path.recommended_resources %}
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/5 text-gray-300 text-xs border border-white/10">
+                                                        <svg class="w-3 h-3 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                                        {{ resource }}
+                                                    </span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-sm text-gray-500 relative z-10">No specific upskilling paths needed — excellent profile!</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Tab 4: Writing Critique -->
+            <div id="tab-critique" class="tab-content space-y-8 hidden">
+                <div class="premium-card relative overflow-hidden">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-6 flex items-center gap-2 relative z-10">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        ✍️ Impact & Writing Critique
+                    </h3>
+                    
+                    {% if analysis.impact_critiques %}
+                        <div class="space-y-6 relative z-10">
+                            {% for item in analysis.impact_critiques %}
+                                <div class="bg-gray-800/40 rounded-xl border border-gray-700/50 p-5 space-y-4">
+                                    <!-- Original (Weak) -->
+                                    <div>
+                                        <h5 class="text-[10px] font-bold text-rose-400/80 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            Original Bullet Point
+                                        </h5>
+                                        <p class="text-sm text-gray-400 line-through decoration-rose-500/30">{{ item.original_bullet }}</p>
+                                    </div>
+                                    
+                                    <!-- The Critique -->
+                                    <div class="bg-rose-500/5 border-l-2 border-rose-500/30 pl-3 py-1">
+                                        <p class="text-xs text-rose-300 italic">{{ item.critique }}</p>
+                                    </div>
+
+                                    <!-- Rewrite (Strong) -->
+                                    <div class="pt-2 border-t border-gray-700/50">
+                                        <h5 class="text-[10px] font-bold text-emerald-400/80 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            Suggested High-Impact Rewrite
+                                        </h5>
+                                        <p class="text-sm text-gray-200 font-medium leading-relaxed">{{ item.suggested_rewrite }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-sm text-gray-500 relative z-10">Bullet points are strong and impactful!</p>
+                    {% endif %}
+                </div>
+            </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Safely pass Django vars to JS -->
+{{ analysis.matched_skills|json_script:"matched-skills-data" }}
+{{ analysis.missing_skills|json_script:"missing-skills-data" }}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const matched = JSON.parse(document.getElementById('matched-skills-data').textContent);
+        const missing = JSON.parse(document.getElementById('missing-skills-data').textContent);
+        
+        const ctx = document.getElementById('skillsChart').getContext('2d');
+        
+        // Dark theme for Chart.js
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Outfit', sans-serif";
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Matched Skills', 'Missing Skills'],
+                datasets: [{
+                    data: [matched.length, missing.length],
+                    backgroundColor: [
+                        'rgba(52, 211, 153, 0.8)', // Emerald
+                        'rgba(244, 63, 94, 0.8)'   // Rose
+                    ],
+                    borderColor: [
+                        'rgba(52, 211, 153, 1)',
+                        'rgba(244, 63, 94, 1)'
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 20, usePointStyle: true, font: { size: 12 } }
+                    }
+                }
+            }
+        });
+        // Tab Switching Logic
+        window.switchTab = function(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('block');
+                el.classList.add('hidden');
+            });
+            // Reset all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-brand/20', 'text-brand', 'border-brand/50');
+                el.classList.add('bg-transparent', 'text-gray-400', 'border-transparent');
+            });
+            
+            // Show active tab
+            const activeContent = document.getElementById('tab-' + tabId);
+            if (activeContent) {
+                activeContent.classList.remove('hidden');
+                activeContent.classList.add('block');
+            }
+            
+            // Highlight active button
+            const activeBtn = document.getElementById('btn-' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-transparent', 'text-gray-400', 'border-transparent');
+                activeBtn.classList.add('bg-brand/20', 'text-brand', 'border-brand/50');
+            }
+        };
+    });
+</script>
+{% endblock %}

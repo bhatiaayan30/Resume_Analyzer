@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Resume Analyzer{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Advanced Frontend Architecture -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'sans-serif'] },
+          colors: {
+            brand: {
+              DEFAULT: '#8b5cf6', // primary
+              hover: '#a78bfa',
+              light: 'rgba(139, 92, 246, 0.2)',
+            },
+            surface: 'rgba(17, 24, 39, 0.7)',
+            dark: '#030712'
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    :root {
+      --bg-color: #030712;
+      --surface: rgba(17, 24, 39, 0.7);
+      --primary: #8b5cf6;
+      --primary-hover: #a78bfa;
+      --primary-light: rgba(139, 92, 246, 0.2);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+      --success: #34d399;
+      --success-light: rgba(16, 185, 129, 0.2);
+      --warning: #fbbf24;
+      --warning-light: rgba(245, 158, 11, 0.2);
+      --danger: #f87171;
+      --danger-light: rgba(239, 68, 68, 0.2);
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 92, 246, 0.2);
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.3), transparent 30%),
+        radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.3), transparent 30%);
+      background-size: 200% 200%;
+      animation: moveGradients 15s ease infinite;
+      background-attachment: fixed;
+      color: var(--text-main);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    @keyframes moveGradients {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ── Header ────────────────────────────────────────────── */
+    .site-header {
+      background: rgba(3, 7, 18, 0.4);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 0 32px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-main);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #f8fafc, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
+      -webkit-text-fill-color: #fff; /* override gradient text from parent */
+    }
+
+    .site-nav {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+    }
+    
+    .site-nav a {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 15px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    .site-nav a:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* ── Main content ───────────────────────────────────────── */
+    main {
+      max-width: 800px;
+      margin: 48px auto;
+      padding: 0 24px;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Flash messages ─────────────────────────────────────── */
+    .messages {
+      list-style: none;
+      margin-bottom: 24px;
+    }
+    .messages li {
+      padding: 16px 20px;
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .messages li.error   { background: var(--danger-light); color: #991b1b; border: 1px solid #fecaca; }
+    .messages li.success { background: var(--success-light); color: #166534; border: 1px solid #a7f3d0; }
+    .messages li.warning { background: var(--warning-light); color: #854d0e; border: 1px solid #fde68a; }
+
+    /* Common Card Style for all pages */
+    .premium-card {
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
+    }
+    .premium-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(139, 92, 246, 0.4);
+    }
+
+    {% block extra_css %}{% endblock %}
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="logo" href="{% url 'index' %}">
+      Resume Analyzer
+      <span class="logo-badge">AI</span>
+    </a>
+    <nav class="site-nav">
+      <a href="{% url 'index' %}">Upload</a>
+      <a href="{% url 'history' %}">History</a>
+    </nav>
+  </header>
+
+  <main>
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block extra_js %}{% endblock %}
+
+</body>
+</html>
