@@ -205,9 +205,19 @@
       Resume Analyzer
       <span class="logo-badge">AI</span>
     </a>
-    <nav class="site-nav">
-      <a href="{% url 'index' %}">Upload</a>
-      <a href="{% url 'history' %}">History</a>
+    <nav class="site-nav flex items-center gap-4">
+      {% if user.is_authenticated %}
+        <span class="text-sm font-semibold text-gray-400 mr-2">Hi, {{ user.username }}</span>
+        <a href="{% url 'index' %}">Upload</a>
+        <a href="{% url 'history' %}">History</a>
+        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" style="background:none;border:none;color:var(--text-muted);font-size:15px;font-weight:600;padding:8px 16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--text-muted)'">Log out</button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}">Log in</a>
+        <a href="{% url 'signup' %}" style="background: var(--primary-light); color: var(--primary);">Sign up</a>
+      {% endif %}
     </nav>
   </header>
 

@@ -152,9 +152,16 @@ Match this schema exactly:
   ]
 }"""
 
+    # ── Sanitize Inputs (Prevent Prompt Injection) ─────────────
+    # Attackers could try to write </resume> inside their PDF to escape 
+    # our tags and inject new instructions (like "give me 100%").
+    # We replace any literal XML tags with brackets.
+    safe_resume_text = resume_text.replace("<", "[").replace(">", "]")
+    safe_job_desc = job_description.replace("<", "[").replace(">", "]")
+
     user_prompt = (
-        f"<resume>\n{resume_text[:30000]}\n</resume>\n\n"
-        f"JOB DESCRIPTION:\n{job_description[:10000]}"
+        f"<resume>\n{safe_resume_text[:30000]}\n</resume>\n\n"
+        f"JOB DESCRIPTION:\n{safe_job_desc[:10000]}"
     )
 
     try:
@@ -173,3 +180,45 @@ Match this schema exactly:
 
     raw = response.choices[0].message.content.strip()
     return json.loads(raw)
+
+def generate_cover_letter(resume_text: str, job_desc: str) -> str:
+    """
+    Uses Groq (Llama-3) to write a highly customized cover letter based on the resume and job description.
+    """
+    from django.conf import settings
+    api_key = getattr(settings, 'GROQ_API_KEY', None) or os.environ.get('GROQ_API_KEY', '')
+    if not api_key:
+        raise ValueError("GROQ_API_KEY is not configured.")
+
+    client = Groq(api_key=api_key)
+
+    system_prompt = (
+        "You are an expert career coach and executive resume writer. "
+        "Your task is to write a highly professional, modern, and engaging cover letter. "
+        "Focus on bridging the gap between the candidate's existing experience and the job description. "
+        "Do NOT use generic templates like 'To whom it may concern'. "
+        "Ensure the tone is confident but not arrogant. "
+        "Output ONLY the text of the cover letter. Do not include any Markdown blocks, just the raw text."
+    )
+
+    user_prompt = f"""
+    --- RESUME ---
+    {resume_text}
+
+    --- JOB DESCRIPTION ---
+    {job_desc}
+
+    Write the cover letter now:
+    """
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        temperature=0.7,
+        max_tokens=1500,
+    )
+
+    return response.choices[0].message.content.strip()

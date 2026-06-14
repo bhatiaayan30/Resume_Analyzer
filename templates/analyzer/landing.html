@@ -1,0 +1,125 @@
+{% extends "analyzer/base.html" %}
+
+{% block title %}Resume Analyzer AI - Land Your Dream Job{% endblock %}
+
+{% block extra_css %}
+/* Remove base max-width for full edge-to-edge landing page */
+main {
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.hero-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.glass-badge {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.feature-card {
+  background: rgba(17, 24, 39, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+.feature-card:hover {
+  transform: translateY(-5px);
+  background: rgba(17, 24, 39, 0.8);
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 10px 30px -10px rgba(139, 92, 246, 0.2);
+}
+{% endblock %}
+
+{% block content %}
+<div class="relative min-h-[calc(100vh-72px)] overflow-hidden flex flex-col">
+    <!-- Background Glow -->
+    <div class="hero-glow"></div>
+
+    <!-- Hero Section -->
+    <div class="relative z-10 max-w-7xl mx-auto px-6 pt-24 pb-32 text-center flex-1 flex flex-col justify-center items-center">
+        
+        <div class="glass-badge inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-brand-hover mb-8 animate-fade-in-up">
+            <span class="w-2 h-2 rounded-full bg-brand animate-pulse"></span>
+            Powered by Llama-3 AI
+        </div>
+
+        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight max-w-4xl animate-fade-in-up" style="animation-delay: 0.1s;">
+            Beat the ATS.<br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-pink-500">Land the Interview.</span>
+        </h1>
+        
+        <p class="text-lg md:text-xl text-gray-400 max-w-2xl mb-12 animate-fade-in-up leading-relaxed" style="animation-delay: 0.2s;">
+            Upload your resume and a job description. Our AI analyzes your fit, identifies missing skills, and instantly generates a highly-tailored cover letter to get you hired.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style="animation-delay: 0.3s;">
+            <a href="{% url 'signup' %}" class="bg-gradient-to-r from-brand to-indigo-600 hover:from-brand-hover hover:to-indigo-500 text-white font-bold py-4 px-8 rounded-xl shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+                Start Analyzing Free
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </a>
+            <a href="#features" class="bg-white/5 hover:bg-white/10 text-white font-medium py-4 px-8 rounded-xl border border-white/10 transition-all flex items-center justify-center">
+                How it works
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<!-- Features Section -->
+<div id="features" class="relative z-10 bg-black/40 border-t border-white/5 py-24">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Everything you need to stand out</h2>
+            <p class="text-gray-400">Stop guessing what recruiters want. Let AI map your exact experience to the job.</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="feature-card p-8 rounded-2xl">
+                <div class="w-12 h-12 rounded-xl bg-brand/20 flex items-center justify-center mb-6 border border-brand/30">
+                    <svg class="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-white">Instant Match Score</h3>
+                <p class="text-gray-400 leading-relaxed">See exactly how well your resume matches the job description before you apply, with detailed ATS parsing checks.</p>
+            </div>
+            
+            <!-- Feature 2 -->
+            <div class="feature-card p-8 rounded-2xl">
+                <div class="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center mb-6 border border-pink-500/30">
+                    <svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-white">Skill Gap Analysis</h3>
+                <p class="text-gray-400 leading-relaxed">Discover exactly which keywords you are missing, and get actionable upskilling roadmaps to bridge the gap.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-card p-8 rounded-2xl">
+                <div class="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-6 border border-indigo-500/30">
+                    <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-white">Magic Cover Letters</h3>
+                <p class="text-gray-400 leading-relaxed">Stop writing from scratch. Generate a highly persuasive, tailored cover letter based on your unique resume and the job.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="border-t border-white/5 py-12 text-center text-gray-500">
+    <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+        <div class="font-bold text-gray-300">Resume Analyzer AI</div>
+        <div class="text-sm">Powered by Groq & Llama-3</div>
+    </div>
+</footer>
+{% endblock %}

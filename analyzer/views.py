@@ -6,17 +6,25 @@ logic (text extraction, AI calls) lives in utils.py so it
 can be unit-tested without an HTTP request.
 """
 import os
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+import json
 
-from .utils import extract_text, analyze_with_ai
+from .utils import extract_text, analyze_with_ai, generate_cover_letter
 from .models import ResumeAnalysis
 
 def index(request):
-    """Serve the upload form (Step 1)."""
-    return render(request, 'analyzer/index.html')
+    """Serve the upload form (Step 1) or landing page."""
+    if request.user.is_authenticated:
+        return render(request, 'analyzer/index.html')
+    return render(request, 'analyzer/landing.html')
 
 
+@login_required
 @require_http_methods(["POST"])
 def analyze(request):
     """
@@ -39,12 +47,21 @@ def analyze(request):
     if not resume_file or not job_desc:
         return render_error('Both a resume file and a job description are required.', 400)
 
-    # ── 2. Validate file type ──────────────────────────────────
-    # Always validate server-side — the browser's accept= attribute
-    # is trivially bypassed.
+    # ── 2. Validate file type (Extension & Magic Numbers) ──────
     ext = os.path.splitext(resume_file.name)[1].lower()
     if ext not in ['.pdf', '.docx']:
         return render_error(f'Unsupported file type "{ext}". Please upload a PDF or DOCX.', 400)
+
+    # Security: Verify the actual file signature (magic numbers) to prevent spoofing
+    # PDF files start with b'%PDF-'
+    # DOCX files are ZIP archives and start with b'PK\x03\x04'
+    header = resume_file.read(10)
+    resume_file.seek(0) # Reset file pointer after reading!
+
+    if ext == '.pdf' and not header.startswith(b'%PDF-'):
+        return render_error('Invalid PDF file. The file appears to be corrupted or spoofed.', 400)
+    if ext == '.docx' and not header.startswith(b'PK\x03\x04'):
+        return render_error('Invalid DOCX file. The file appears to be corrupted or spoofed.', 400)
 
     # ── 3. Validate file size (2 MB cap) ──────────────────────
     if resume_file.size > 2 * 1024 * 1024:
@@ -69,19 +86,55 @@ def analyze(request):
         return render_error('AI analysis failed. Please try again in a moment.', 503)
 
     # ── 6. Save history & Render results ───────────────────────
-    ResumeAnalysis.objects.create(
+    analysis_record = ResumeAnalysis.objects.create(
+        user=request.user,
         filename=resume_file.name,
+        resume_text=resume_text,
+        job_desc_full=job_desc,
         job_desc_snippet=job_desc[:120],
         **analysis,
     )
 
     return render(request, 'analyzer/results.html', {
-        'analysis': analysis,
-        'job_desc_snippet': job_desc[:120],   # shown as a subtitle on results page
+        'analysis': analysis_record, # Pass the model instance so we have its ID for the React API
+        'job_desc_snippet': job_desc[:120],
         'filename': resume_file.name,
     })
 
+@login_required
 def history(request):
     """Serve the history of past analyses."""
-    analyses = ResumeAnalysis.objects.all()
+    analyses = ResumeAnalysis.objects.filter(user=request.user)
     return render(request, 'analyzer/history.html', {'analyses': analyses})
+
+def signup_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            try:
+                from django.db import IntegrityError
+                user = form.save()
+                login(request, user)
+                return redirect('index')
+            except IntegrityError:
+                form.add_error('username', 'An account with that username already exists.')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/signup.html', {'form': form})
+
+@login_required
+@require_http_methods(["POST"])
+def generate_cover_letter_api(request, analysis_id):
+    """API endpoint for the React component to generate a cover letter asynchronously."""
+    record = get_object_or_404(ResumeAnalysis, id=analysis_id, user=request.user)
+    
+    if record.cover_letter:
+        return JsonResponse({"cover_letter": record.cover_letter})
+        
+    try:
+        letter = generate_cover_letter(record.resume_text, record.job_desc_full)
+        record.cover_letter = letter
+        record.save()
+        return JsonResponse({"cover_letter": letter})
+    except Exception as exc:
+        return JsonResponse({"error": str(exc)}, status=500)

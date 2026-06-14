@@ -8,20 +8,21 @@ once the basic flow is working.
 from django.db import models
 
 
+from django.contrib.auth.models import User
+
 class ResumeAnalysis(models.Model):
     """
     Stores the result of each AI analysis so users can
     browse their history without re-uploading.
-
-    Usage (in views.py, after analyze_with_ai returns):
-        ResumeAnalysis.objects.create(
-            filename=resume_file.name,
-            job_desc_snippet=job_desc[:120],
-            **analysis,           # unpacks all five fields
-        )
     """
+    user              = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     created_at        = models.DateTimeField(auto_now_add=True)
     filename          = models.CharField(max_length=255)
+    
+    # Raw text used for generating cover letters later
+    resume_text       = models.TextField(blank=True)
+    job_desc_full     = models.TextField(blank=True)
+    cover_letter      = models.TextField(blank=True)
     job_desc_snippet  = models.CharField(max_length=200, blank=True)
 
     # AI results — stored as JSON arrays

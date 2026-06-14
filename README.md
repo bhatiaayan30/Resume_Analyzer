@@ -1,137 +1,86 @@
-# Resume Analyzer — Django + Python + OpenAI
+<div align="center">
+  <h1>✨ Resume Analyzer AI</h1>
+  <p><strong>Beat the ATS. Land the Interview.</strong></p>
+  <p>An intelligent, highly-tailored resume analysis tool powered by Llama-3, Django, and Supabase.</p>
 
-A web app where users upload a resume (PDF/DOCX) and paste a job description.
-The backend extracts the text, calls the OpenAI API, and returns a structured
-analysis: match score, matched skills, missing skills, experience gaps, and
-actionable improvement suggestions.
+  [![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)](#)
+  [![Django](https://img.shields.io/badge/Django-5.1-092E20?logo=django&logoColor=white)](#)
+  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?logo=postgresql&logoColor=white)](#)
+  [![Groq](https://img.shields.io/badge/AI-Groq%20Llama--3-f55036?logo=meta&logoColor=white)](#)
+</div>
 
 ---
 
-## Quick start
+## ⚡ Overview
 
+Resume Analyzer AI is an enterprise-grade web application designed to help job seekers bypass Applicant Tracking Systems (ATS) and optimize their applications. By uploading a resume (PDF/DOCX) and providing a target job description, the AI engine extracts text, maps skills, and instantly generates a comprehensive alignment report.
+
+## 🚀 Key Features
+
+- **🎯 Instant Match Scoring:** Get a precise 0-100 score indicating how well your resume matches the job description.
+- **🛡️ ATS Formatting Checks:** Detects tables, complex layouts, and invisible text that break standard corporate parsing systems.
+- **🔍 Skill Gap Analysis:** Identifies exactly which keywords you have matched, which ones you are missing, and suggests actionable upskilling roadmaps.
+- **✍️ Magic Cover Letters:** Automatically generates a persuasive, tailored cover letter bridging your unique experience to the specific role using Groq's blazing-fast Llama-3 model.
+- **🔒 Secure Authentication:** Built-in user accounts and history tracking powered by a Supabase PostgreSQL database.
+
+## 🛠️ Tech Stack
+
+- **Backend:** Django 5.1, Python 3.12
+- **Database:** PostgreSQL (via Supabase Session Pooling)
+- **AI Engine:** Groq API (Llama-3-8b-8192 for near-instant inference)
+- **Frontend:** HTML5, Tailwind CSS (via CDN), Vanilla JavaScript, React 18 (standalone)
+- **Parsing:** `pdfplumber`, `python-docx`
+- **Deployment:** Google Cloud Run (Containerized via Docker)
+
+---
+
+## 💻 Getting Started (Local Development)
+
+### 1. Clone & Install
 ```bash
-# 1. Bootstrap the Django project (creates manage.py + resume_analyzer/ package)
-django-admin startproject resume_analyzer
-cd resume_analyzer
-
-# 2. Create the app
-python manage.py startapp analyzer
-
-# 3. Copy the files from this scaffold into place:
-#    analyzer/views.py       → analyzer/views.py
-#    analyzer/utils.py       → analyzer/utils.py
-#    analyzer/urls.py        → analyzer/urls.py
-#    analyzer/models.py      → analyzer/models.py
-#    analyzer/apps.py        → analyzer/apps.py
-#    resume_analyzer/urls.py → resume_analyzer/urls.py
-#    (replace the generated settings.py with the one from this scaffold)
-#    templates/              → templates/
-
-# 4. Install dependencies
+git clone https://github.com/bhatiaayan30/resume-analyzer-ai.git
+cd resume-analyzer-ai
 pip install -r requirements.txt
+```
 
-# 5. Configure environment
-cp .env.example .env
-# Edit .env — add your OPENAI_API_KEY and a generated SECRET_KEY
+### 2. Environment Variables
+Create a `.env` file in the root directory:
+```env
+SECRET_KEY=django-insecure-your-secret-key-here
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1,*
+GROQ_API_KEY=gsk_your_groq_api_key
+DATABASE_URL=postgresql://user:password@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
+```
 
-# 6. Set up the database
+### 3. Database & Run
+```bash
 python manage.py migrate
-
-# 7. Run
 python manage.py runserver
-# Open http://localhost:8000
 ```
+Visit `http://localhost:8000` to view the application.
 
 ---
 
-## File map
+## 🐳 Deployment (Google Cloud Run)
 
-```
-resume_analyzer/
-├── requirements.txt
-├── .env.example               ← copy to .env and fill in
-├── resume_analyzer/
-│   ├── settings.py            ← reads from .env via decouple
-│   └── urls.py                ← project-level routing
-└── analyzer/
-    ├── views.py               ★ validates input, calls utils, renders response
-    ├── utils.py               ★ text extraction + AI analysis (testable without HTTP)
-    ├── urls.py                ← app-level routing
-    ├── models.py              ← ResumeAnalysis model (Step 5 — history feature)
-    └── templates/analyzer/
-        ├── base.html          ← shared layout, header, CSS reset
-        ├── index.html         ← upload form
-        └── results.html       ← match score, skills, suggestions
-```
+This project is fully containerized and production-ready for Google Cloud Run.
+
+1. Connect your GitHub repository to Google Cloud Console.
+2. Navigate to **Cloud Run** → **Create Service**.
+3. Select **Continuously deploy from a repository** and choose this repo.
+4. Set the `GROQ_API_KEY`, `DATABASE_URL`, and `SECRET_KEY` in the Environment Variables section.
+5. Deploy. Google Cloud Buildpacks will automatically detect the `Dockerfile`, install `gunicorn` + `whitenoise`, and serve your app globally.
 
 ---
 
-## Build steps (from the roadmap widget)
+## 🏗️ Architecture Design
 
-| Step | What | Key files |
-|------|------|-----------|
-| 1 ✅ | Project setup + upload form | `index.html`, `views.py` (index) |
-| 2 ✅ | Text extraction backend | `utils.py` → `extract_text()` |
-| 3 ✅ | AI analysis function | `utils.py` → `analyze_with_ai()` |
-| 4 ✅ | Results page | `results.html`, `views.py` (analyze) |
-| 5    | Polish + deploy | `models.py`, rate limiting, streaming, Docker |
+- **`analyzer/views.py`**: Logic-thin HTTP handlers. Handles routing, form validation, Magic Number binary file verification (spoofing protection), and rate limits.
+- **`analyzer/utils.py`**: The core AI logic and text extraction engine. Highly decoupled so it can be unit-tested without spinning up a Django HTTP client.
+- **`templates/analyzer/`**: Contains the glassmorphic, responsive Tailwind UI. The Cover Letter generator utilizes a standalone React component for seamless asynchronous rendering.
 
 ---
-
-## Step 5 — things to add next
-
-**History (Resume model)**
-Uncomment the save call in `views.py` once you've run:
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
-**Rate limiting** — add `django-ratelimit` to the analyze view:
-```python
-from ratelimit.decorators import ratelimit
-
-@ratelimit(key='ip', rate='10/h', method='POST', block=True)
-def analyze(request):
-    ...
-```
-
-**Streaming** — ask the AI assistant:
-*"Add streaming support to analyze_with_ai using stream=True and Server-Sent Events
-so the analysis appears progressively instead of after a long wait."*
-
-**Deploy to Heroku**
-```bash
-echo "web: gunicorn resume_analyzer.wsgi" > Procfile
-heroku create
-heroku config:set OPENAI_API_KEY=sk-... SECRET_KEY=... DEBUG=False
-git push heroku main
-```
-
----
-
-## Interview talking points
-
-**Draw the request lifecycle on a whiteboard:**
-```
-Browser → POST /analyze/ → urls.py → views.analyze()
-  → extract_text()      (utils.py, pdfplumber / python-docx)
-  → analyze_with_ai()   (utils.py, OpenAI API)
-  → render results.html
-```
-
-**Why utils.py instead of everything in views.py?**
-Because `extract_text()` and `analyze_with_ai()` can be unit-tested without
-spinning up a Django test client — just call them directly with a file object
-and a string.
-
-**What if the PDF is scanned (image-only)?**
-`pdfplumber` returns empty strings for image-only pages.
-`extract_text()` checks for this and raises a `ValueError`, which the view
-catches and returns as a 422 response with a human-readable error message.
-
-**How do you ensure the AI returns valid JSON?**
-The system prompt gives it an explicit schema and says "no preamble, no markdown
-fences". `temperature=0.1` keeps output deterministic. The view wraps
-`json.loads()` in a try/except so a malformed response returns a 503 rather than
-a 500.
+<div align="center">
+  <i>Built to get you hired.</i>
+</div>

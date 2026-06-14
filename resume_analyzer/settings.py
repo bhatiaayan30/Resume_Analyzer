@@ -38,6 +38,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -72,11 +73,9 @@ WSGI_APPLICATION = 'resume_analyzer.wsgi.application'
 
 # ── Database ───────────────────────────────────────────────────
 # SQLite is fine for local dev. Swap to PostgreSQL for production.
+DATABASE_URL = config('DATABASE_URL', default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600
-    )
+    'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
 }
 
 
@@ -88,6 +87,12 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# Output emails (like password reset) to the console for local development
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 # ── Internationalisation ───────────────────────────────────────
 LANGUAGE_CODE = 'en-us'
@@ -98,6 +103,7 @@ USE_TZ        = True
 
 # ── Static files ───────────────────────────────────────────────
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
