@@ -7,25 +7,29 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='ResumeAnalysis',
+            name="ResumeAnalysis",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('filename', models.CharField(max_length=255)),
-                ('job_desc_snippet', models.CharField(blank=True, max_length=200)),
-                ('match_score', models.IntegerField(default=0)),
-                ('matched_skills', models.JSONField(default=list)),
-                ('missing_skills', models.JSONField(default=list)),
-                ('experience_gaps', models.JSONField(default=list)),
-                ('suggestions', models.JSONField(default=list)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("filename", models.CharField(max_length=255)),
+                ("job_desc_snippet", models.CharField(blank=True, max_length=200)),
+                ("match_score", models.IntegerField(default=0)),
+                ("matched_skills", models.JSONField(default=list)),
+                ("missing_skills", models.JSONField(default=list)),
+                ("experience_gaps", models.JSONField(default=list)),
+                ("suggestions", models.JSONField(default=list)),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
     ]

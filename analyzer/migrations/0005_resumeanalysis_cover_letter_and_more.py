@@ -8,29 +8,34 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('analyzer', '0004_resumeanalysis_impact_critiques'),
+        ("analyzer", "0004_resumeanalysis_impact_critiques"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='resumeanalysis',
-            name='cover_letter',
+            model_name="resumeanalysis",
+            name="cover_letter",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='resumeanalysis',
-            name='job_desc_full',
+            model_name="resumeanalysis",
+            name="job_desc_full",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='resumeanalysis',
-            name='resume_text',
+            model_name="resumeanalysis",
+            name="resume_text",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='resumeanalysis',
-            name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="resumeanalysis",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

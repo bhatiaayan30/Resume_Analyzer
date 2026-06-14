@@ -7,17 +7,18 @@ these functions can be tested independently without HTTP.
 Usage:
     from analyzer.utils import extract_text, analyze_with_ai
 """
-import os
+
 import json
+import os
 
 import pdfplumber
 from docx import Document
 from groq import Groq
 
-
 # ──────────────────────────────────────────────────────────────
 # Text extraction
 # ──────────────────────────────────────────────────────────────
+
 
 def extract_text(file_obj, ext: str) -> str:
     """
@@ -35,28 +36,32 @@ def extract_text(file_obj, ext: str) -> str:
     """
     ats_format_issues = []
 
-    if ext == '.pdf':
+    if ext == ".pdf":
         pages = []
         with pdfplumber.open(file_obj) as pdf:
             has_tables = False
             has_images = False
-            
+
             for page in pdf.pages:
                 if page.extract_tables():
                     has_tables = True
                 if page.images:
                     has_images = True
-                    
+
                 page_text = page.extract_text()
                 if page_text:
                     pages.append(page_text)
 
-        text = '\n'.join(pages).strip()
-        
+        text = "\n".join(pages).strip()
+
         if has_tables:
-            ats_format_issues.append("Resume contains tables. Most corporate ATS parsers (like Workday) cannot reliably extract text from inside tables, leading to missing information.")
+            ats_format_issues.append(
+                "Resume contains tables. Most corporate ATS parsers (like Workday) cannot reliably extract text from inside tables, leading to missing information."
+            )
         if has_images:
-            ats_format_issues.append("Resume contains images or complex graphics. ATS systems strip all visual elements, and image-based text is completely ignored.")
+            ats_format_issues.append(
+                "Resume contains images or complex graphics. ATS systems strip all visual elements, and image-based text is completely ignored."
+            )
 
         if not text:
             # Most common user error — scanned / image-based PDF
@@ -65,7 +70,7 @@ def extract_text(file_obj, ext: str) -> str:
                 "Please upload a text-based PDF, or run it through an OCR tool "
                 "(e.g. Adobe Acrobat, Google Drive) and re-export."
             )
-            
+
         # Garbled text check
         alnum_count = sum(c.isalnum() for c in text)
         if len(text) > 0 and (alnum_count / len(text)) < 0.5:
@@ -73,19 +78,20 @@ def extract_text(file_obj, ext: str) -> str:
                 "The extracted text appears garbled or heavily formatted with non-standard characters. "
                 "The PDF might have font encoding issues."
             )
-            
-            
+
         return text, ats_format_issues
 
-    elif ext == '.docx':
+    elif ext == ".docx":
         doc = Document(file_obj)
         if len(doc.tables) > 0:
-            ats_format_issues.append("Your DOCX resume contains tables. ATS systems often scramble or fail to read text embedded inside tables.")
-            
+            ats_format_issues.append(
+                "Your DOCX resume contains tables. ATS systems often scramble or fail to read text embedded inside tables."
+            )
+
         paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
         if not paragraphs:
             raise ValueError("The DOCX file appears to be empty.")
-        return '\n'.join(paragraphs), ats_format_issues
+        return "\n".join(paragraphs), ats_format_issues
 
     raise ValueError(f"Unsupported extension: {ext!r}")
 
@@ -93,6 +99,7 @@ def extract_text(file_obj, ext: str) -> str:
 # ──────────────────────────────────────────────────────────────
 # AI analysis
 # ──────────────────────────────────────────────────────────────
+
 
 def analyze_with_ai(resume_text: str, job_description: str) -> dict:
     """
@@ -112,11 +119,11 @@ def analyze_with_ai(resume_text: str, job_description: str) -> dict:
         json.JSONDecodeError : AI returned non-JSON.
     """
     from django.conf import settings
-    api_key = getattr(settings, 'GROQ_API_KEY', None) or os.environ.get('GROQ_API_KEY', '')
+
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
     if not api_key:
         raise RuntimeError(
-            "GROQ_API_KEY environment variable is not set. "
-            "Add it to your .env file."
+            "GROQ_API_KEY environment variable is not set. " "Add it to your .env file."
         )
 
     client = Groq(api_key=api_key)
@@ -153,7 +160,7 @@ Match this schema exactly:
 }"""
 
     # ── Sanitize Inputs (Prevent Prompt Injection) ─────────────
-    # Attackers could try to write </resume> inside their PDF to escape 
+    # Attackers could try to write </resume> inside their PDF to escape
     # our tags and inject new instructions (like "give me 100%").
     # We replace any literal XML tags with brackets.
     safe_resume_text = resume_text.replace("<", "[").replace(">", "]")
@@ -169,11 +176,11 @@ Match this schema exactly:
             model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user",   "content": user_prompt},
+                {"role": "user", "content": user_prompt},
             ],
             temperature=0.1,
             max_tokens=1000,
-            response_format={"type": "json_object"}
+            response_format={"type": "json_object"},
         )
     except Exception as e:
         raise RuntimeError(f"Groq API Error: {str(e)}") from e
@@ -181,12 +188,14 @@ Match this schema exactly:
     raw = response.choices[0].message.content.strip()
     return json.loads(raw)
 
+
 def generate_cover_letter(resume_text: str, job_desc: str) -> str:
     """
     Uses Groq (Llama-3) to write a highly customized cover letter based on the resume and job description.
     """
     from django.conf import settings
-    api_key = getattr(settings, 'GROQ_API_KEY', None) or os.environ.get('GROQ_API_KEY', '')
+
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
     if not api_key:
         raise ValueError("GROQ_API_KEY is not configured.")
 
@@ -215,7 +224,7 @@ def generate_cover_letter(resume_text: str, job_desc: str) -> str:
         model="llama-3.3-70b-versatile",
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
+            {"role": "user", "content": user_prompt},
         ],
         temperature=0.7,
         max_tokens=1500,

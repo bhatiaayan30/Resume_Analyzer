@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('analyzer', '0002_resumeanalysis_upskill_paths'),
+        ("analyzer", "0002_resumeanalysis_upskill_paths"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='resumeanalysis',
-            name='ats_format_issues',
+            model_name="resumeanalysis",
+            name="ats_format_issues",
             field=models.JSONField(default=list),
         ),
     ]

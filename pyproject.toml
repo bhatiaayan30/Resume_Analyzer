@@ -1,0 +1,17 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "resume_analyzer.settings"
+python_files = ["test_*.py", "*_tests.py"]
+addopts = "--cov=analyzer --cov-report=term-missing"
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]

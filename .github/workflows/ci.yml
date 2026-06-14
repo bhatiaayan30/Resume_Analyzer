@@ -26,10 +26,15 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Run Checks
+    - name: Run Linter & Formatter
+      run: |
+        black --check .
+        ruff check .
+    - name: Run Tests & Coverage
       env:
         SECRET_KEY: 'dummy-key-for-testing'
         DEBUG: 'True'
         DATABASE_URL: 'sqlite:///db.sqlite3'
       run: |
         python manage.py check
+        pytest
