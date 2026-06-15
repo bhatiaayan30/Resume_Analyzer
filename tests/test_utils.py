@@ -1,6 +1,9 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from analyzer.utils import analyze_with_ai
+
 
 @patch('analyzer.utils.Groq')
 def test_analyze_with_ai_success(mock_groq_class):

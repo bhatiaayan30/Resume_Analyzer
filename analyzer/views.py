@@ -11,10 +11,9 @@ import os
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
-from django_ratelimit.decorators import ratelimit
 
 from .models import ResumeAnalysis
 from .utils import analyze_with_ai, extract_text, generate_cover_letter

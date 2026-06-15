@@ -1,8 +1,10 @@
 import pytest
-from django.urls import reverse
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import AnonymousUser, User
 from django.test import RequestFactory
+from django.urls import reverse
+
 from analyzer.views import index, signup_view
+
 
 @pytest.fixture
 def factory():
