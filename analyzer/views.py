@@ -17,6 +17,8 @@ from django.views.decorators.http import require_http_methods
 
 from .models import ResumeAnalysis
 from .utils import analyze_with_ai, extract_text, generate_cover_letter
+from django_q.tasks import async_task
+from .tasks import process_resume_analysis
 
 
 def index(request):
@@ -26,7 +28,6 @@ def index(request):
     return render(request, "analyzer/landing.html")
 
 
-@login_required
 @require_http_methods(["POST"])
 def analyze(request):
     """
@@ -41,9 +42,18 @@ def analyze(request):
     resume_file = request.FILES.get("resume")
     job_desc = request.POST.get("job_description", "").strip()
 
-    # Helper to render errors back to the index page
+    # Helper to render errors back as JSON
     def render_error(error_msg, status_code):
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json':
+            return JsonResponse({"status": "error", "message": error_msg}, status=status_code)
         return render(request, "analyzer/index.html", {"error": error_msg}, status=status_code)
+
+    # ── 0. Freemium Limits ─────────────────────────────────────
+    if not request.user.is_authenticated:
+        scan_count = request.session.get('scan_count', 0)
+        if scan_count >= 3:
+            return render_error("You have reached your limit of 3 free scans. Please create an account to continue.", 403)
+        request.session['scan_count'] = scan_count + 1
 
     # ── 1. Validate presence ───────────────────────────────────
     if not resume_file or not job_desc:
@@ -54,11 +64,8 @@ def analyze(request):
     if ext not in [".pdf", ".docx"]:
         return render_error(f'Unsupported file type "{ext}". Please upload a PDF or DOCX.', 400)
 
-    # Security: Verify the actual file signature (magic numbers) to prevent spoofing
-    # PDF files start with b'%PDF-'
-    # DOCX files are ZIP archives and start with b'PK\x03\x04'
     header = resume_file.read(10)
-    resume_file.seek(0)  # Reset file pointer after reading!
+    resume_file.seek(0)
 
     if ext == ".pdf" and not header.startswith(b"%PDF-"):
         return render_error("Invalid PDF file. The file appears to be corrupted or spoofed.", 400)
@@ -73,38 +80,53 @@ def analyze(request):
     try:
         resume_text, ats_format_issues = extract_text(resume_file, ext)
     except ValueError as exc:
-        # e.g. scanned PDF with no text layer
         return render_error(str(exc), 422)
 
-    # ── 5. AI analysis ─────────────────────────────────────────
-    try:
-        analysis = analyze_with_ai(resume_text, job_desc)
-        analysis["ats_format_issues"] = ats_format_issues
-    except Exception as exc:
-        import sys
-        import traceback
-
-        print(f"[analyzer] AI error: {exc}", file=sys.stderr)
-        traceback.print_exc(file=sys.stderr)
-        return render_error("AI analysis failed. Please try again in a moment.", 503)
-
-    # ── 6. Save history & Render results ───────────────────────
+    # ── 5. Create Pending Record ────────────────────────────────
     analysis_record = ResumeAnalysis.objects.create(
-        user=request.user,
+        user=request.user if request.user.is_authenticated else None,
         filename=resume_file.name,
         resume_text=resume_text,
         job_desc_full=job_desc,
         job_desc_snippet=job_desc[:120],
-        **analysis,
+        status='pending',
+        ats_format_issues=ats_format_issues
     )
 
+    # ── 6. Queue Async Task ─────────────────────────────────────
+    async_task(process_resume_analysis, analysis_record.id)
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json':
+        return JsonResponse({"status": "success", "analysis_id": analysis_record.id})
+    else:
+        # Fallback for non-JS
+        return redirect('analysis_results', analysis_id=analysis_record.id)
+
+
+def analysis_status(request, analysis_id):
+    """API endpoint to poll the status of an async analysis."""
+    record = get_object_or_404(ResumeAnalysis, id=analysis_id)
+    if record.user and request.user != record.user:
+        return JsonResponse({"status": "error", "message": "Unauthorized"}, status=403)
+    return JsonResponse({"status": record.status})
+
+
+def analysis_results(request, analysis_id):
+    """Serve the results page for a completed analysis."""
+    record = get_object_or_404(ResumeAnalysis, id=analysis_id)
+    if record.user and request.user != record.user:
+        return redirect('index')
+    
+    if record.status == 'error':
+        return render(request, "analyzer/index.html", {"error": "AI analysis failed during background processing. Please try again."})
+        
     return render(
         request,
         "analyzer/results.html",
         {
-            "analysis": analysis_record,  # Pass the model instance so we have its ID for the React API
-            "job_desc_snippet": job_desc[:120],
-            "filename": resume_file.name,
+            "analysis": record,
+            "job_desc_snippet": record.job_desc_snippet,
+            "filename": record.filename,
         },
     )
 

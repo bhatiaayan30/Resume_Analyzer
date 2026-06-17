@@ -1,5 +1,4 @@
-.git
-.gitignore
+venv/
 .env
 db.sqlite3
 __pycache__/
@@ -8,6 +7,8 @@ __pycache__/
 *.pyd
 .Python
 env/
-venv/
-.venv/
-staticfiles/
+.pytest_cache/
+htmlcov/
+.coverage
+.git/
+.github/

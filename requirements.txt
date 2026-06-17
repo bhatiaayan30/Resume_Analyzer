@@ -13,3 +13,9 @@ pytest>=7.0.0
 pytest-django>=4.5.0
 pytest-cov>=4.1.0
 reportlab>=4.0.0
+PyMuPDF
+django-q2
+cryptography
+psycopg2-binary
+supervisor
+stripe>=7.0.0

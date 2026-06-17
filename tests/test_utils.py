@@ -5,11 +5,11 @@ import pytest
 from analyzer.utils import analyze_with_ai
 
 
-@patch('analyzer.utils.Groq')
+@patch("analyzer.utils.Groq")
 def test_analyze_with_ai_success(mock_groq_class):
     mock_client = mock_groq_class.return_value
     mock_response = MagicMock()
-    mock_response.choices[0].message.content = '''{
+    mock_response.choices[0].message.content = """{
         "match_score": 85,
         "matched_skills": ["Python", "Django"],
         "missing_skills": ["Docker"],
@@ -17,7 +17,7 @@ def test_analyze_with_ai_success(mock_groq_class):
         "suggestions": ["Learn Docker"],
         "upskill_paths": [],
         "impact_critiques": []
-    }'''
+    }"""
     mock_client.chat.completions.create.return_value = mock_response
 
     # Run the function
@@ -28,13 +28,15 @@ def test_analyze_with_ai_success(mock_groq_class):
     assert "Python" in result["matched_skills"]
     assert "Docker" in result["missing_skills"]
 
-@patch('analyzer.utils.Groq')
+
+@patch("analyzer.utils.Groq")
 def test_analyze_with_ai_malformed_json(mock_groq_class):
     mock_client = mock_groq_class.return_value
     mock_response = MagicMock()
-    mock_response.choices[0].message.content = 'Not a JSON object'
+    mock_response.choices[0].message.content = "Not a JSON object"
     mock_client.chat.completions.create.return_value = mock_response
 
     import json
+
     with pytest.raises(json.JSONDecodeError):
         analyze_with_ai("Resume", "Job")

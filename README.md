@@ -20,14 +20,18 @@ Resume Analyzer AI is an enterprise-grade web application designed to help job s
 
 - **🎯 Instant Match Scoring:** Get a precise 0-100 score indicating how well your resume matches the job description.
 - **🛡️ ATS Formatting Checks:** Detects tables, complex layouts, and invisible text that break standard corporate parsing systems.
-- **🔍 Skill Gap Analysis:** Identifies exactly which keywords you have matched, which ones you are missing, and suggests actionable upskilling roadmaps.
-- **✍️ Magic Cover Letters:** Automatically generates a persuasive, tailored cover letter bridging your unique experience to the specific role using Groq's blazing-fast Llama-3 model.
+- **✍️ Impact & Writing Critique:** Suggests high-impact rewrites for weak bullet points with detailed AI critiques.
+- **📈 Upskilling Roadmap:** Identifies missing skills and generates an upskilling strategy with clickable resource links.
+- **🎙️ Interview Prep:** Generates 10 to 15 highly tailored interview questions covering technical skills, behavioral situations, and gaps.
+- **⚡ Async Processing:** Fast, non-blocking UI using `django-q` background workers to handle intensive AI tasks.
+- **✉️ Magic Cover Letters:** Automatically generates a persuasive, tailored cover letter bridging your unique experience to the specific role using Groq's blazing-fast Llama-3 model.
 - **🔒 Secure Authentication:** Built-in user accounts and history tracking powered by a Supabase PostgreSQL database.
 
 ## 🛠️ Tech Stack
 
 - **Backend:** Django 5.1, Python 3.12
 - **Database:** PostgreSQL (via Supabase Session Pooling)
+- **Background Task Worker:** Django-Q
 - **AI Engine:** Groq API (Llama-3-8b-8192 for near-instant inference)
 - **Frontend:** HTML5, Tailwind CSS (via CDN), Vanilla JavaScript, React 18 (standalone)
 - **Parsing:** `pdfplumber`, `python-docx`
@@ -59,6 +63,13 @@ DATABASE_URL=postgresql://user:password@aws-1-ap-southeast-1.pooler.supabase.com
 python manage.py migrate
 python manage.py runserver
 ```
+
+**Note:** You must also start the background worker in a separate terminal:
+```bash
+python manage.py qcluster
+```
+*(Windows Users: If `qcluster` gets stuck looping after `Ctrl+C`, run the provided `kill_qcluster.bat` script to terminate it cleanly.)*
+
 Visit `http://localhost:8000` to view the application.
 
 ---

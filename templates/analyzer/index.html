@@ -210,22 +210,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Handle form submission
-    form.addEventListener('submit', (e) => {
+    // Handle form submission asynchronously
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
         if (!fileInput.files.length) {
-            e.preventDefault();
             alert("Please select a resume file.");
             return;
         }
         if (!document.getElementById('job_description').value.trim()) {
-            e.preventDefault();
             alert("Please paste a job description.");
             return;
         }
 
         // Show loading state
         submitSpinner.style.display = 'block';
-        submitText.textContent = 'Analyzing...';
+        submitText.textContent = 'Uploading...';
         
         loadingOverlay.style.display = 'flex';
         // Small delay to allow display:flex to apply before changing opacity for transition
@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 10);
 
         let messageIndex = 0;
-        setInterval(() => {
+        const msgInterval = setInterval(() => {
             if (messageIndex < loadingMessages.length - 1) {
                 messageIndex++;
                 loadingText.style.opacity = '0';
@@ -243,7 +243,52 @@ document.addEventListener('DOMContentLoaded', function() {
                     loadingText.style.opacity = '1';
                 }, 300);
             }
-        }, 2500);
+        }, 3000);
+
+        // Submit via fetch
+        const formData = new FormData(form);
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await response.json();
+            
+            if (!response.ok || data.status === 'error') {
+                throw new Error(data.message || "Failed to start analysis");
+            }
+
+            const analysisId = data.analysis_id;
+            
+            // Poll for status
+            const pollInterval = setInterval(async () => {
+                try {
+                    const statusRes = await fetch(`/analysis-status/${analysisId}/`);
+                    const statusData = await statusRes.json();
+                    
+                    if (statusData.status === 'completed') {
+                        clearInterval(pollInterval);
+                        clearInterval(msgInterval);
+                        window.location.href = `/results/${analysisId}/`;
+                    } else if (statusData.status === 'error') {
+                        throw new Error("AI analysis failed during processing.");
+                    }
+                } catch (pollErr) {
+                    clearInterval(pollInterval);
+                    clearInterval(msgInterval);
+                    alert(pollErr.message);
+                    window.location.reload();
+                }
+            }, 2000);
+
+        } catch (err) {
+            clearInterval(msgInterval);
+            alert(err.message);
+            window.location.reload();
+        }
     });
 });
 </script>
