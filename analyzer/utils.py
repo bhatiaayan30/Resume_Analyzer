@@ -10,18 +10,26 @@ Usage:
 
 import json
 import os
+from typing import Dict, Any, Tuple, List
 
 import fitz  # PyMuPDF
 import pdfplumber
 from docx import Document
 from groq import Groq
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+from analyzer.prompt_builder import (
+    build_analysis_prompt,
+    build_cover_letter_system_prompt,
+    build_cover_letter_user_prompt,
+)
 
 # ──────────────────────────────────────────────────────────────
 # Text extraction
 # ──────────────────────────────────────────────────────────────
 
 
-def extract_text(file_obj, ext: str) -> str:
+def extract_text(file_obj: Any, ext: str) -> Tuple[str, List[str]]:
     """
     Extract plain text from an uploaded PDF or DOCX file object.
 
@@ -113,7 +121,8 @@ def extract_text(file_obj, ext: str) -> str:
 # ──────────────────────────────────────────────────────────────
 
 
-def analyze_with_ai(resume_text: str, job_description: str) -> dict:
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+def analyze_with_ai(resume_text: str, job_description: str) -> Dict[str, Any]:
     """
     Send resume + job description to Groq and return structured analysis.
 
@@ -141,43 +150,8 @@ def analyze_with_ai(resume_text: str, job_description: str) -> dict:
     client = Groq(api_key=api_key)
 
 
-    # ── Sanitize Inputs (Prevent Prompt Injection) ─────────────
-    safe_resume_text = resume_text.replace("<", "[").replace(">", "]")
-    safe_job_desc = job_description.replace("<", "[").replace(">", "]")
-
-    prompt = f"""
-    You are an expert ATS (Applicant Tracking System) simulator and elite technical recruiter.
-    Analyze the following resume against the job description using advanced semantic matching (do not rely purely on exact keywords, understand synonyms and context).
-    
-    Identify:
-    - Overused words, passive voice, and weak verbs in the Experience section.
-    - Lack of quantification (metrics, numbers) in achievements.
-    - Generate 10 to 15 highly tailored interview questions covering technical skills, behavioral situations, and experience gaps.
-    
-    Return ONLY a JSON object exactly matching this schema:
-    {{
-        "match_score": <integer 0-100, calculate a weighted score based on skills, experience overlap, and formatting>,
-        "matched_skills": [<list of strings>],
-        "missing_skills": [<list of strings>],
-        "experience_gaps": [<list of strings>],
-        "impact_critiques": [
-            {{"section": "Summary/Experience", "original_bullet": "string of original weak bullet point", "critique": "string identifying weak verbs, passive voice, or lack of metrics", "suggested_rewrite": "string of rewritten high-impact bullet point"}}
-        ],
-        "suggestions": [<list of strings for overall improvement>],
-        "upskill_paths": [
-            {{"skill": "string", "learning_strategy": "string detailing how to learn this skill", "recommended_resources": [{{"name": "string resource name", "url": "string URL to the resource"}}]}}
-        ],
-        "interview_questions": [
-            {{"question": "string containing a tailored interview question based on the resume and JD", "answer": "detailed string with key points the candidate should cover"}}
-        ]
-    }}
-
-    Job Description:
-    {safe_job_desc[:10000]}
-
-    Resume:
-    {safe_resume_text[:30000]}
-    """
+    # ── Fetch Prompt from Builder ─────────────
+    prompt = build_analysis_prompt(resume_text, job_description)
 
     try:
         response = client.chat.completions.create(
@@ -196,6 +170,7 @@ def analyze_with_ai(resume_text: str, job_description: str) -> dict:
         raise RuntimeError(f"AI Analysis Failed: {exc}")
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 def generate_cover_letter(resume_text: str, job_desc: str) -> str:
     """
     Uses Groq (Llama-3) to write a highly customized cover letter based on the resume and job description.
@@ -208,24 +183,8 @@ def generate_cover_letter(resume_text: str, job_desc: str) -> str:
 
     client = Groq(api_key=api_key)
 
-    system_prompt = (
-        "You are an expert career coach and executive resume writer. "
-        "Your task is to write a highly professional, modern, and engaging cover letter. "
-        "Focus on bridging the gap between the candidate's existing experience and the job description. "
-        "Do NOT use generic templates like 'To whom it may concern'. "
-        "Ensure the tone is confident but not arrogant. "
-        "Output ONLY the text of the cover letter. Do not include any Markdown blocks, just the raw text."
-    )
-
-    user_prompt = f"""
-    --- RESUME ---
-    {resume_text}
-
-    --- JOB DESCRIPTION ---
-    {job_desc}
-
-    Write the cover letter now:
-    """
+    system_prompt = build_cover_letter_system_prompt()
+    user_prompt = build_cover_letter_user_prompt(resume_text, job_desc)
 
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",

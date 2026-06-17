@@ -32,9 +32,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.apple",
+    "allauth.socialaccount.providers.microsoft",
     "django_q",
     "analyzer.apps.AnalyzerConfig",
 ]
+
+SITE_ID = 1
 
 Q_CLUSTER = {
     "name": "resume_analyzer",
@@ -59,6 +68,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "resume_analyzer.urls"
@@ -99,6 +109,11 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
@@ -136,3 +151,32 @@ GROQ_API_KEY = config("GROQ_API_KEY", default="")
 STRIPE_PUBLIC_KEY = config("STRIPE_PUBLIC_KEY", default="")
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
 STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="")
+STRIPE_PRICE_ID_49 = config("STRIPE_PRICE_ID_49", default="")
+STRIPE_PRICE_ID_149 = config("STRIPE_PRICE_ID_149", default="")
+STRIPE_PRICE_ID_299 = config("STRIPE_PRICE_ID_299", default="")
+STRIPE_PRICE_ID_999 = config("STRIPE_PRICE_ID_999", default="")
+
+# ── Allauth Providers ──────────────────────────────────────────
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": config("GOOGLE_CLIENT_ID", default="dummy"),
+            "secret": config("GOOGLE_SECRET", default="dummy"),
+            "key": ""
+        }
+    },
+    "apple": {
+        "APP": {
+            "client_id": config("APPLE_CLIENT_ID", default="dummy"),
+            "secret": config("APPLE_SECRET", default="dummy"),
+            "key": ""
+        }
+    },
+    "microsoft": {
+        "APP": {
+            "client_id": config("MICROSOFT_CLIENT_ID", default="dummy"),
+            "secret": config("MICROSOFT_SECRET", default="dummy"),
+            "key": ""
+        }
+    }
+}

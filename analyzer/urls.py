@@ -19,4 +19,8 @@ urlpatterns = [
         views.export_cover_letter_pdf,
         name="export_cover_letter_pdf",
     ),
+    path("pricing/", views.pricing_view, name="pricing"),
+    path("create-checkout-session/", views.create_checkout_session, name="create_checkout_session"),
+    path("create-portal-session/", views.create_portal_session, name="create_portal_session"),
+    path("webhook/stripe/", views.stripe_webhook, name="stripe_webhook"),
 ]

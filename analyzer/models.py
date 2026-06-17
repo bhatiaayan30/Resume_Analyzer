@@ -15,6 +15,9 @@ from .fields import EncryptedTextField
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     is_premium = models.BooleanField(default=False)
+    subscription_tier = models.IntegerField(default=0) # 0=Free, 1=Tier1, 2=Tier2, 3=Tier3, 4=Tier4
+    current_period_start = models.DateTimeField(null=True, blank=True)
+    current_period_end = models.DateTimeField(null=True, blank=True)
     stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
     stripe_subscription_id = models.CharField(max_length=255, blank=True, null=True)
 

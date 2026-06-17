@@ -1,0 +1,147 @@
+{% extends "analyzer/base.html" %}
+
+{% block title %}Pricing - Resume Analyzer{% endblock %}
+
+{% block content %}
+<div class="text-center mb-12">
+    <h1 class="text-4xl font-extrabold mb-4" style="background: linear-gradient(135deg, #f8fafc, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        Unlock the Full Potential of Your Resume
+    </h1>
+    <p class="text-lg text-gray-400">Choose the plan that fits your career goals.</p>
+</div>
+
+{% if error %}
+<div class="bg-red-500/20 border border-red-500/50 text-red-200 p-4 rounded-lg mb-8 text-center">
+    {{ error }}
+</div>
+{% endif %}
+
+<div class="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
+    
+    <!-- Tier 1 -->
+    <div class="premium-card flex flex-col p-6">
+        <h2 class="text-xl font-bold mb-2">Starter</h2>
+        <p class="text-sm text-gray-400 mb-4">Perfect for quick checks.</p>
+        <div class="text-3xl font-extrabold mb-6 text-white">₹49<span class="text-sm font-normal text-gray-400">/mo</span></div>
+        <ul class="flex-1 space-y-3 mb-8 text-sm text-gray-300">
+            <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                20 resume scans / month
+            </li>
+            <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Basic ATS compatibility
+            </li>
+            <li class="flex items-center gap-2 text-gray-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                Magic Cover Letter
+            </li>
+        </ul>
+        {% if user.is_authenticated %}
+            {% if user.profile.is_premium and user.profile.subscription_tier == 1 %}
+                <a href="{% url 'create_portal_session' %}" class="w-full text-center py-2 rounded-lg bg-green-600 hover:bg-green-500 transition font-bold text-sm">Manage</a>
+            {% else %}
+                <a href="{% url 'create_checkout_session' %}?price_id={{ settings.STRIPE_PRICE_ID_49 }}" class="w-full text-center py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition font-bold text-sm">Subscribe</a>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'login' %}?next={% url 'pricing' %}" class="w-full text-center py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition font-bold text-sm">Log in</a>
+        {% endif %}
+    </div>
+
+    <!-- Tier 2 -->
+    <div class="premium-card flex flex-col p-6 relative overflow-hidden" style="border-color: var(--primary);">
+        <div class="absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">POPULAR</div>
+        <h2 class="text-xl font-bold mb-2 text-brand-hover">Pro</h2>
+        <p class="text-sm text-gray-400 mb-4">Active job seekers.</p>
+        <div class="text-3xl font-extrabold mb-6 text-white">₹149<span class="text-sm font-normal text-gray-400">/mo</span></div>
+        <ul class="flex-1 space-y-3 mb-8 text-sm text-gray-300">
+            <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                50 resume scans / month
+            </li>
+            <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Advanced ATS analysis
+            </li>
+            <li class="flex items-center gap-2 font-bold text-white">
+                <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Magic Cover Letter
+            </li>
+        </ul>
+        {% if user.is_authenticated %}
+            {% if user.profile.is_premium and user.profile.subscription_tier == 2 %}
+                <a href="{% url 'create_portal_session' %}" class="w-full text-center py-2 rounded-lg bg-green-600 hover:bg-green-500 transition font-bold text-sm">Manage</a>
+            {% else %}
+                <a href="{% url 'create_checkout_session' %}?price_id={{ settings.STRIPE_PRICE_ID_149 }}" class="w-full text-center py-2 rounded-lg bg-brand hover:bg-brand-hover transition font-bold text-sm shadow-lg shadow-brand/30">Subscribe</a>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'login' %}?next={% url 'pricing' %}" class="w-full text-center py-2 rounded-lg bg-brand hover:bg-brand-hover transition font-bold text-sm">Log in</a>
+        {% endif %}
+    </div>
+
+    <!-- Tier 3 -->
+    <div class="premium-card flex flex-col p-6">
+        <h2 class="text-xl font-bold mb-2">Elite</h2>
+        <p class="text-sm text-gray-400 mb-4">For aggressive applying.</p>
+        <div class="text-3xl font-extrabold mb-6 text-white">₹299<span class="text-sm font-normal text-gray-400">/mo</span></div>
+        <ul class="flex-1 space-y-3 mb-8 text-sm text-gray-300">
+            <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                100 resume scans / month
+            </li>
+            <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Advanced ATS analysis
+            </li>
+            <li class="flex items-center gap-2 font-bold text-white">
+                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Magic Cover Letter
+            </li>
+        </ul>
+        {% if user.is_authenticated %}
+            {% if user.profile.is_premium and user.profile.subscription_tier == 3 %}
+                <a href="{% url 'create_portal_session' %}" class="w-full text-center py-2 rounded-lg bg-green-600 hover:bg-green-500 transition font-bold text-sm">Manage</a>
+            {% else %}
+                <a href="{% url 'create_checkout_session' %}?price_id={{ settings.STRIPE_PRICE_ID_299 }}" class="w-full text-center py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition font-bold text-sm">Subscribe</a>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'login' %}?next={% url 'pricing' %}" class="w-full text-center py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition font-bold text-sm">Log in</a>
+        {% endif %}
+    </div>
+
+    <!-- Tier 4 -->
+    <div class="premium-card flex flex-col p-6">
+        <h2 class="text-xl font-bold mb-2 text-pink-400">Unlimited</h2>
+        <p class="text-sm text-gray-400 mb-4">Career coaches & pros.</p>
+        <div class="text-3xl font-extrabold mb-6 text-white">₹999<span class="text-sm font-normal text-gray-400">/mo</span></div>
+        <ul class="flex-1 space-y-3 mb-8 text-sm text-gray-300">
+            <li class="flex items-center gap-2 font-bold text-white">
+                <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Unlimited scans
+            </li>
+            <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Advanced ATS analysis
+            </li>
+            <li class="flex items-center gap-2 font-bold text-white">
+                <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Magic Cover Letter
+            </li>
+            <li class="flex items-center gap-2 font-bold text-white">
+                <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Priority Processing
+            </li>
+        </ul>
+        {% if user.is_authenticated %}
+            {% if user.profile.is_premium and user.profile.subscription_tier == 4 %}
+                <a href="{% url 'create_portal_session' %}" class="w-full text-center py-2 rounded-lg bg-green-600 hover:bg-green-500 transition font-bold text-sm">Manage</a>
+            {% else %}
+                <a href="{% url 'create_checkout_session' %}?price_id={{ settings.STRIPE_PRICE_ID_999 }}" class="w-full text-center py-2 rounded-lg bg-pink-600 hover:bg-pink-500 transition font-bold text-sm shadow-lg shadow-pink-600/30">Subscribe</a>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'login' %}?next={% url 'pricing' %}" class="w-full text-center py-2 rounded-lg bg-pink-600 hover:bg-pink-500 transition font-bold text-sm">Log in</a>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

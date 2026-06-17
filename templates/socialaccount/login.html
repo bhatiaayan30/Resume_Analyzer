@@ -1,0 +1,24 @@
+{% extends "analyzer/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sign In" %} - AI Resume Analyzer{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-12 relative">
+    <div class="absolute -inset-1 bg-gradient-to-r from-brand to-indigo-500 rounded-2xl blur opacity-25"></div>
+    <div class="premium-card relative text-center">
+        <h2 class="text-2xl font-bold text-white mb-4">Sign In Via {{ provider.name }}</h2>
+        
+        <p class="text-gray-300 mb-8">
+            {% blocktrans with provider.name as provider %}You are about to sign in using a third-party account from <span class="font-bold text-white">{{ provider }}</span>.{% endblocktrans %}
+        </p>
+        
+        <form method="post" action="{% url 'socialaccount_login' provider.id %}">
+            {% csrf_token %}
+            <button type="submit" class="w-full bg-brand text-white font-semibold py-3 px-4 rounded-xl hover:bg-brand/90 transition shadow-lg">
+                {% trans "Continue" %}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "analyzer/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sign Up" %} - AI Resume Analyzer{% endblock %}
+
+{% block content %}
+<style>
+    #signup_form input {
+        width: 100%;
+        background-color: rgba(31, 41, 55, 1);
+        border: 1px solid rgba(55, 65, 81, 1);
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        color: white;
+    }
+    #signup_form input:focus {
+        outline: none;
+        border-color: #6366f1;
+    }
+</style>
+
+<div class="max-w-md mx-auto mt-12 relative">
+    <div class="absolute -inset-1 bg-gradient-to-r from-brand to-indigo-500 rounded-2xl blur opacity-25"></div>
+    <div class="premium-card relative">
+        <h2 class="text-2xl font-bold text-white mb-4">Almost There!</h2>
+        
+        <p class="text-gray-300 mb-6 text-sm">
+            {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}You are about to use your <span class="font-bold text-white">{{provider_name}}</span> account to login. As a final step, please complete the following form:{% endblocktrans %}
+        </p>
+        
+        <form id="signup_form" method="post" action="{% url 'socialaccount_signup' %}" class="space-y-4">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <p class="text-red-400 text-sm mt-1">{{ field.errors.0 }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+            
+            <button type="submit" class="w-full bg-brand text-white font-semibold py-3 px-4 rounded-xl hover:bg-brand/90 transition shadow-lg mt-6">
+                {% trans "Complete Sign Up" %}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
