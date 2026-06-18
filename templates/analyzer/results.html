@@ -44,14 +44,23 @@
 <div class="min-h-screen pt-24 pb-12 bg-gray-900">
     <!-- Header Area -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <div class="flex items-center gap-4 mb-4">
-            <a href="{% url 'index' %}" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            </a>
-            <div>
-                <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Analysis Results</h1>
-                <p class="text-sm text-brand font-medium mt-1">Analyzing <span class="text-gray-300 font-mono">{{ filename }}</span></p>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div class="flex items-center gap-4">
+                <a href="{% url 'index' %}" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Analysis Results</h1>
+                    <p class="text-sm text-brand font-medium mt-1">Analyzing <span class="text-gray-300 font-mono">{{ filename }}</span></p>
+                </div>
             </div>
+            
+            {% if user.is_authenticated and user.profile.is_premium %}
+            <a href="{% url 'export_report_pdf' analysis.id %}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand/10 hover:bg-brand/20 text-brand-light text-sm font-semibold rounded-lg transition-colors border border-brand/30">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Download Report PDF
+            </a>
+            {% endif %}
         </div>
     </div>
 
@@ -138,10 +147,12 @@
                                     <h4 class="text-amber-500 font-bold text-sm uppercase tracking-wider mb-1">Formatting Red Flags Detected</h4>
                                     <p class="text-amber-200/80 text-sm leading-relaxed mb-4">Your resume contains elements that commonly break or confuse Applicant Tracking Systems (ATS). While our AI can read it, a standard corporate ATS might fail.</p>
                                     <ul class="space-y-2">
-                                        {% for issue in analysis.ats_format_issues %}
+                                        {% for issue in ats_format_issues_enriched %}
                                             <li class="flex items-start gap-2 text-sm text-amber-100">
                                                 <span class="text-amber-500 mt-0.5">•</span>
-                                                {{ issue }}
+                                                <div>
+                                                    <span class="font-bold">{{ issue.explanation }}</span>
+                                                </div>
                                             </li>
                                         {% endfor %}
                                     </ul>
@@ -156,33 +167,84 @@
                     {% endif %}
                 </div>
 
+                <!-- Searchability Checklist -->
+                <div class="premium-card">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        ATS Searchability
+                    </h3>
+                    <div class="space-y-3">
+                        {% for check in analysis.searchability_checks %}
+                            <div class="flex items-start gap-3 p-3 rounded-lg border {% if check.passed %}bg-emerald-500/10 border-emerald-500/30{% else %}bg-amber-500/10 border-amber-500/30{% endif %}">
+                                {% if check.passed %}
+                                    <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                {% else %}
+                                    <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                {% endif %}
+                                <div>
+                                    <h4 class="text-sm font-bold {% if check.passed %}text-emerald-300{% else %}text-amber-400{% endif %}">{{ check.check_name }}</h4>
+                                    <p class="text-xs text-gray-300 mt-0.5">{{ check.detail }}</p>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="text-sm text-gray-500">No searchability data available for this scan.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
                 <!-- Skills Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Matched -->
                     <div class="premium-card">
                         <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">✅ Matched Skills</h3>
-                        {% if analysis.matched_skills %}
-                            <div class="flex flex-wrap gap-2">
-                                {% for skill in analysis.matched_skills %}
-                                    <span class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 shadow-[0_0_10px_rgba(52,211,153,0.2)]">{{ skill }}</span>
+                        
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 mt-2">Hard Skills</h4>
+                        {% if hard_matched %}
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                {% for item in hard_matched %}
+                                    <span class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 shadow-[0_0_10px_rgba(52,211,153,0.2)]">{{ item.skill }}</span>
                                 {% endfor %}
                             </div>
                         {% else %}
-                            <p class="text-sm text-gray-500">No matching skills identified.</p>
+                            <p class="text-sm text-gray-500 mb-4">No hard skills matched.</p>
+                        {% endif %}
+
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Soft Skills</h4>
+                        {% if soft_matched %}
+                            <div class="flex flex-wrap gap-2">
+                                {% for item in soft_matched %}
+                                    <span class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 shadow-[0_0_10px_rgba(52,211,153,0.2)]">{{ item.skill }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-sm text-gray-500">No soft skills matched.</p>
                         {% endif %}
                     </div>
 
                     <!-- Missing -->
                     <div class="premium-card">
                         <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">⚠️ Missing Skills</h3>
-                        {% if analysis.missing_skills %}
-                            <div class="flex flex-wrap gap-2">
-                                {% for skill in analysis.missing_skills %}
-                                    <span class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/50 shadow-[0_0_10px_rgba(244,63,94,0.2)]">{{ skill }}</span>
+                        
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 mt-2">Hard Skills</h4>
+                        {% if hard_missing %}
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                {% for item in hard_missing %}
+                                    <span class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/50 shadow-[0_0_10px_rgba(244,63,94,0.2)]">{{ item.skill }}</span>
                                 {% endfor %}
                             </div>
                         {% else %}
-                            <p class="text-sm text-emerald-400 font-medium">No missing skills — great alignment!</p>
+                            <p class="text-sm text-emerald-400 font-medium mb-4">No missing hard skills!</p>
+                        {% endif %}
+
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Soft Skills</h4>
+                        {% if soft_missing %}
+                            <div class="flex flex-wrap gap-2">
+                                {% for item in soft_missing %}
+                                    <span class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/50 shadow-[0_0_10px_rgba(244,63,94,0.2)]">{{ item.skill }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-sm text-emerald-400 font-medium">No missing soft skills!</p>
                         {% endif %}
                     </div>
                 </div>

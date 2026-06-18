@@ -18,8 +18,8 @@ class UserProfile(models.Model):
     subscription_tier = models.IntegerField(default=0) # 0=Free, 1=Tier1, 2=Tier2, 3=Tier3, 4=Tier4
     current_period_start = models.DateTimeField(null=True, blank=True)
     current_period_end = models.DateTimeField(null=True, blank=True)
-    stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
-    stripe_subscription_id = models.CharField(max_length=255, blank=True, null=True)
+    razorpay_customer_id = models.CharField(max_length=255, blank=True, null=True)
+    razorpay_subscription_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username} Profile"
@@ -94,9 +94,13 @@ class ResumeAnalysis(models.Model):
     suggestions = models.JSONField(default=list)
     upskill_paths = models.JSONField(default=list)
     ats_format_issues = models.JSONField(default=list)
+    searchability_checks = models.JSONField(default=list)
     impact_critiques = models.JSONField(default=list)
     interview_questions = models.JSONField(default=list, blank=True)
-
+    
+    # Token Tracking
+    prompt_tokens = models.IntegerField(default=0, blank=True, null=True)
+    completion_tokens = models.IntegerField(default=0, blank=True, null=True)
     class Meta:
         ordering = ["-created_at"]
 

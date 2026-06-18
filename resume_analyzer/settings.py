@@ -147,16 +147,25 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 GROQ_API_KEY = config("GROQ_API_KEY", default="")
 
 
-# ── Stripe Payments ────────────────────────────────────────────
-STRIPE_PUBLIC_KEY = config("STRIPE_PUBLIC_KEY", default="")
-STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
-STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="")
-STRIPE_PRICE_ID_49 = config("STRIPE_PRICE_ID_49", default="")
-STRIPE_PRICE_ID_149 = config("STRIPE_PRICE_ID_149", default="")
-STRIPE_PRICE_ID_299 = config("STRIPE_PRICE_ID_299", default="")
-STRIPE_PRICE_ID_999 = config("STRIPE_PRICE_ID_999", default="")
+# ── Razorpay Settings ────────────────────────────────────────────
+RAZORPAY_KEY_ID = config("RAZORPAY_KEY_ID", default="rzp_test_placeholder")
+RAZORPAY_KEY_SECRET = config("RAZORPAY_KEY_SECRET", default="secret_placeholder")
+RAZORPAY_WEBHOOK_SECRET = config("RAZORPAY_WEBHOOK_SECRET", default="whsec_placeholder")
+
+# ── API Keys ───────────────────────────────────────────────────
+APP_API_KEY = config("APP_API_KEY", default="dummy-api-key-change-me")
+
+# Plan IDs for Razorpay
+RAZORPAY_PLAN_ID_49 = config("RAZORPAY_PLAN_ID_49", default="")
+RAZORPAY_PLAN_ID_149 = config("RAZORPAY_PLAN_ID_149", default="")
+RAZORPAY_PLAN_ID_299 = config("RAZORPAY_PLAN_ID_299", default="")
+RAZORPAY_PLAN_ID_999 = config("RAZORPAY_PLAN_ID_999", default="")
 
 # ── Allauth Providers ──────────────────────────────────────────
+SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
+
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "APP": {

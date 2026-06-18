@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Resume Analyzer Catcher",
+  "version": "1.0",
+  "description": "Capture Job Descriptions directly from job boards to analyze.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

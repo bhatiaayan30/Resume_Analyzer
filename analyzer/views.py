@@ -15,7 +15,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-import stripe
+import razorpay
 from django.conf import settings
 
 from .models import ResumeAnalysis, UserProfile
@@ -23,13 +23,13 @@ from .utils import analyze_with_ai, extract_text, generate_cover_letter
 from django_q.tasks import async_task
 from .tasks import process_resume_analysis
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
-
+razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
 def index(request):
     """Serve the upload form (Step 1) or landing page."""
     if request.user.is_authenticated:
-        return render(request, "analyzer/index.html")
+        recent_scans = ResumeAnalysis.objects.filter(user=request.user).order_by('created_at')
+        return render(request, "analyzer/index.html", {"recent_scans": recent_scans})
     return render(request, "analyzer/landing.html")
 
 
@@ -57,7 +57,9 @@ def analyze(request):
     if not request.user.is_authenticated:
         scan_count = request.session.get('scan_count', 0)
         if scan_count >= 1:
-            return render_error("You have reached your limit of 1 free scan. Please log in to continue.", 403)
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json':
+                return JsonResponse({"status": "limit_reached", "reason": "unauthenticated"}, status=403)
+            return redirect('account_login')
         request.session['scan_count'] = scan_count + 1
     else:
         profile = request.user.profile
@@ -79,44 +81,66 @@ def analyze(request):
             used_scans = ResumeAnalysis.objects.filter(user=request.user).count()
 
         if used_scans >= limit:
-            return render_error("You have reached your scan limit. Please upgrade your plan to continue.", 403)
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json':
+                return JsonResponse({"status": "limit_reached", "reason": "upgrade_required"}, status=403)
+            return redirect('pricing')
 
     # ── 1. Validate presence ───────────────────────────────────
-    if not resume_file or not job_desc:
-        return render_error("Both a resume file and a job description are required.", 400)
+    resume_input_type = request.POST.get("resume_input_type", "file")
+    resume_text_input = request.POST.get("resume_text", "").strip()
 
-    # ── 2. Validate file type (Extension & Magic Numbers) ──────
-    ext = os.path.splitext(resume_file.name)[1].lower()
-    if ext not in [".pdf", ".docx"]:
-        return render_error(f'Unsupported file type "{ext}". Please upload a PDF or DOCX.', 400)
+    if not job_desc:
+        return render_error("A job description is required.", 400)
 
-    header = resume_file.read(10)
-    resume_file.seek(0)
+    if resume_input_type == "file":
+        if not resume_file:
+            return render_error("A resume file is required.", 400)
 
-    if ext == ".pdf" and not header.startswith(b"%PDF-"):
-        return render_error("Invalid PDF file. The file appears to be corrupted or spoofed.", 400)
-    if ext == ".docx" and not header.startswith(b"PK\x03\x04"):
-        return render_error("Invalid DOCX file. The file appears to be corrupted or spoofed.", 400)
+        # ── 2. Validate file type (Extension & Magic Numbers) ──────
+        ext = os.path.splitext(resume_file.name)[1].lower()
+        if ext not in [".pdf", ".docx"]:
+            return render_error(f'Unsupported file type "{ext}". Please upload a PDF or DOCX.', 400)
 
-    # ── 3. Validate file size (2 MB cap) ──────────────────────
-    if resume_file.size > 2 * 1024 * 1024:
-        return render_error("File too large. Maximum size is 2 MB.", 400)
+        header = resume_file.read(10)
+        resume_file.seek(0)
 
-    # ── 4. Extract text ────────────────────────────────────────
-    try:
-        resume_text, ats_format_issues = extract_text(resume_file, ext)
-    except ValueError as exc:
-        return render_error(str(exc), 422)
+        if ext == ".pdf" and not header.startswith(b"%PDF-"):
+            return render_error("Invalid PDF file. The file appears to be corrupted or spoofed.", 400)
+        if ext == ".docx" and not header.startswith(b"PK\x03\x04"):
+            return render_error("Invalid DOCX file. The file appears to be corrupted or spoofed.", 400)
+
+        # ── 3. Validate file size (2 MB cap) ──────────────────────
+        if resume_file.size > 2 * 1024 * 1024:
+            return render_error("File too large. Maximum size is 2 MB.", 400)
+
+        # ── 4. Extract text ────────────────────────────────────────
+        try:
+            from .utils import check_searchability
+            resume_text, ats_format_issues, searchability_checks = extract_text(resume_file, ext)
+        except ValueError as exc:
+            return render_error(str(exc), 422)
+            
+        filename = resume_file.name
+    else:
+        if not resume_text_input:
+            return render_error("Resume text is required.", 400)
+            
+        resume_text = resume_text_input
+        ats_format_issues = []
+        from .utils import check_searchability
+        searchability_checks = check_searchability(resume_text)
+        filename = "Pasted Text"
 
     # ── 5. Create Pending Record ────────────────────────────────
     analysis_record = ResumeAnalysis.objects.create(
         user=request.user if request.user.is_authenticated else None,
-        filename=resume_file.name,
+        filename=filename,
         resume_text=resume_text,
         job_desc_full=job_desc,
         job_desc_snippet=job_desc[:120],
         status='pending',
-        ats_format_issues=ats_format_issues
+        ats_format_issues=ats_format_issues,
+        searchability_checks=searchability_checks
     )
 
     # ── 6. Queue Async Task ─────────────────────────────────────
@@ -137,6 +161,8 @@ def analysis_status(request, analysis_id):
     return JsonResponse({"status": record.status})
 
 
+from .ats_knowledge import ATS_FLAG_EXPLANATIONS
+
 def analysis_results(request, analysis_id):
     """Serve the results page for a completed analysis."""
     record = get_object_or_404(ResumeAnalysis, id=analysis_id)
@@ -145,7 +171,63 @@ def analysis_results(request, analysis_id):
     
     if record.status == 'error':
         return render(request, "analyzer/index.html", {"error": "AI analysis failed during background processing. Please try again."})
-        
+
+    # Enrich ATS format issues
+    enriched_issues = []
+    for issue_key in record.ats_format_issues:
+        enriched_issues.append({
+            "key": issue_key,
+            "explanation": ATS_FLAG_EXPLANATIONS.get(issue_key, str(issue_key))
+        })
+
+    # Separate Hard and Soft Skills
+    hard_matched = [s for s in record.matched_skills if isinstance(s, dict) and s.get('category', '').lower() == 'hard']
+    soft_matched = [s for s in record.matched_skills if isinstance(s, dict) and s.get('category', '').lower() == 'soft']
+    hard_missing = [s for s in record.missing_skills if isinstance(s, dict) and s.get('category', '').lower() == 'hard']
+    soft_missing = [s for s in record.missing_skills if isinstance(s, dict) and s.get('category', '').lower() == 'soft']
+    
+    # Legacy fallback for old records
+    if record.matched_skills and isinstance(record.matched_skills[0], str):
+        hard_matched = [{"skill": s, "category": "hard"} for s in record.matched_skills]
+    if record.missing_skills and isinstance(record.missing_skills[0], str):
+        hard_missing = [{"skill": s, "category": "hard"} for s in record.missing_skills]
+
+    # Before/After Diff Logic
+    diff_data = None
+    if record.user:
+        # Find previous scan with same job desc snippet (proxy for same JD) for this user
+        prev_scan = ResumeAnalysis.objects.filter(
+            user=record.user,
+            job_desc_snippet=record.job_desc_snippet,
+            created_at__lt=record.created_at,
+            status='completed'
+        ).order_by('-created_at').first()
+
+        if prev_scan:
+            score_delta = record.match_score - prev_scan.match_score
+            
+            # Extract simple lists of skills for diffing
+            def extract_skills(skill_list):
+                if not skill_list: return set()
+                if isinstance(skill_list[0], dict):
+                    return {s.get('skill', '') for s in skill_list}
+                return set(skill_list)
+
+            curr_matched = extract_skills(record.matched_skills)
+            prev_matched = extract_skills(prev_scan.matched_skills)
+            newly_matched = curr_matched - prev_matched
+            
+            prev_flags = set(prev_scan.ats_format_issues)
+            curr_flags = set(record.ats_format_issues)
+            resolved_flags = prev_flags - curr_flags
+
+            diff_data = {
+                "score_delta": score_delta,
+                "newly_matched_count": len(newly_matched),
+                "newly_matched": list(newly_matched),
+                "resolved_flags_count": len(resolved_flags),
+            }
+
     return render(
         request,
         "analyzer/results.html",
@@ -153,6 +235,12 @@ def analysis_results(request, analysis_id):
             "analysis": record,
             "job_desc_snippet": record.job_desc_snippet,
             "filename": record.filename,
+            "ats_format_issues_enriched": enriched_issues,
+            "hard_matched": hard_matched,
+            "soft_matched": soft_matched,
+            "hard_missing": hard_missing,
+            "soft_missing": soft_missing,
+            "diff_data": diff_data,
         },
     )
 
@@ -164,20 +252,29 @@ def history(request):
     return render(request, "analyzer/history.html", {"analyses": analyses})
 
 
+from django import forms
+
+class CustomUserCreationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+
+    class Meta(UserCreationForm.Meta):
+        fields = UserCreationForm.Meta.fields + ('email',)
+
 def signup_view(request):
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             try:
                 from django.db import IntegrityError
 
                 user = form.save()
-                login(request, user)
+                # Specify the backend since we have multiple
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 return redirect("index")
             except IntegrityError:
                 form.add_error("username", "An account with that username already exists.")
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     return render(request, "registration/signup.html", {"form": form})
 
 
@@ -234,135 +331,178 @@ def export_cover_letter_pdf(request, analysis_id):
     return response
 
 
-# ── Stripe Payments ────────────────────────────────────────────
+@login_required
+def export_report_pdf(request, analysis_id):
+    """Generates a PDF of the match report and returns it as a download."""
+    record = get_object_or_404(ResumeAnalysis, id=analysis_id, user=request.user)
+
+    if record.status != 'completed':
+        return HttpResponse("Report not ready yet.", status=400)
+
+    import io
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, ListFlowable, ListItem
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18
+    )
+    styles = getSampleStyleSheet()
+    Story = []
+
+    title_style = styles["Heading1"]
+    h2_style = styles["Heading2"]
+    normal_style = styles["Normal"]
+
+    Story.append(Paragraph(f"Resume Match Report", title_style))
+    Story.append(Spacer(1, 12))
+    
+    Story.append(Paragraph(f"Match Score: {record.match_score}/100", h2_style))
+    Story.append(Spacer(1, 12))
+
+    Story.append(Paragraph("Matched Skills:", h2_style))
+    matched_skills = record.matched_skills if record.matched_skills else []
+    for skill in matched_skills:
+        s_name = skill.get('skill', '') if isinstance(skill, dict) else skill
+        Story.append(Paragraph(f"• {s_name}", normal_style))
+    Story.append(Spacer(1, 12))
+
+    Story.append(Paragraph("Missing Skills:", h2_style))
+    missing_skills = record.missing_skills if record.missing_skills else []
+    for skill in missing_skills:
+        s_name = skill.get('skill', '') if isinstance(skill, dict) else skill
+        Story.append(Paragraph(f"• {s_name}", normal_style))
+    Story.append(Spacer(1, 12))
+
+    doc.build(Story)
+    buffer.seek(0)
+
+    response = HttpResponse(buffer, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="Match_Report_{record.id}.pdf"'
+    return response
+
+
+# ── Razorpay Payments ────────────────────────────────────────────
 
 def pricing_view(request):
     """Serve the pricing / upgrade page."""
     return render(request, "analyzer/pricing.html", {
-        "STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLIC_KEY
+        "RAZORPAY_KEY_ID": settings.RAZORPAY_KEY_ID
     })
 
 @login_required
-def create_checkout_session(request):
-    """Initiates a Stripe Checkout session."""
-    price_id = request.GET.get('price_id', settings.STRIPE_PRICE_ID_49)
+def create_razorpay_subscription(request):
+    """Initiates a Razorpay Subscription session."""
+    plan_id = request.GET.get('plan_id', settings.RAZORPAY_PLAN_ID_49)
     try:
-        checkout_session = stripe.checkout.Session.create(
-            customer=request.user.profile.stripe_customer_id if request.user.profile.stripe_customer_id else None,
-            customer_email=request.user.email if not request.user.profile.stripe_customer_id else None,
-            payment_method_types=['card'],
-            line_items=[
-                {
-                    'price': price_id,
-                    'quantity': 1,
-                },
-            ],
-            mode='subscription',
-            success_url=request.build_absolute_uri('/') + '?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=request.build_absolute_uri('/pricing/'),
-            client_reference_id=request.user.id,
-        )
-        return redirect(checkout_session.url, code=303)
+        # Create a subscription in Razorpay
+        sub = razorpay_client.subscription.create({
+            "plan_id": plan_id,
+            "customer_notify": 1,
+            "total_count": 120, # 10 years
+        })
+        
+        # We need to render a page that auto-submits the razorpay checkout form
+        # But for now, we redirect to a payment page or pass data back
+        return render(request, "analyzer/razorpay_checkout.html", {
+            "subscription_id": sub['id'],
+            "razorpay_key": settings.RAZORPAY_KEY_ID,
+            "user_email": request.user.email
+        })
     except Exception as e:
         return render(request, "analyzer/pricing.html", {"error": str(e)})
 
-@login_required
-def create_portal_session(request):
-    """Initiates a Stripe Customer Portal session."""
-    try:
-        portalSession = stripe.billing_portal.Session.create(
-            customer=request.user.profile.stripe_customer_id,
-            return_url=request.build_absolute_uri('/'),
-        )
-        return redirect(portalSession.url, code=303)
-    except Exception as e:
-        return render(request, "analyzer/index.html", {"error": str(e)})
-
 @csrf_exempt
-def stripe_webhook(request):
-    """Handles Stripe Webhook events."""
-    payload = request.body
-    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
-    event = None
-
+def razorpay_webhook(request):
+    """Handles Razorpay Webhook events."""
+    payload = request.body.decode('utf-8')
+    sig_header = request.META.get('HTTP_X_RAZORPAY_SIGNATURE', '')
+    
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
-        )
-    except ValueError as e:
-        return HttpResponse(status=400)
-    except stripe.error.SignatureVerificationError as e:
+        razorpay_client.utility.verify_webhook_signature(payload, sig_header, settings.RAZORPAY_WEBHOOK_SECRET)
+    except Exception as e:
         return HttpResponse(status=400)
 
-    # Handle the event
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        user_id = session.get('client_reference_id')
-        if user_id:
-            try:
-                from django.contrib.auth.models import User
-                user = User.objects.get(id=user_id)
-                profile = user.profile
-                profile.stripe_customer_id = session.get('customer')
-                sub_id = session.get('subscription')
-                profile.stripe_subscription_id = sub_id
-                profile.is_premium = True
-
-                sub = stripe.Subscription.retrieve(sub_id)
-                price_id = sub.plan.id
-                if price_id == settings.STRIPE_PRICE_ID_999:
-                    profile.subscription_tier = 4
-                elif price_id == settings.STRIPE_PRICE_ID_299:
-                    profile.subscription_tier = 3
-                elif price_id == settings.STRIPE_PRICE_ID_149:
-                    profile.subscription_tier = 2
-                elif price_id == settings.STRIPE_PRICE_ID_49:
-                    profile.subscription_tier = 1
-                else:
-                    profile.subscription_tier = 1
-                    
-                import datetime
-                profile.current_period_start = datetime.datetime.fromtimestamp(sub.current_period_start, tz=datetime.timezone.utc)
-                profile.current_period_end = datetime.datetime.fromtimestamp(sub.current_period_end, tz=datetime.timezone.utc)
-
-                profile.save()
-            except User.DoesNotExist:
-                pass
-
-    elif event['type'] == 'customer.subscription.deleted':
-        subscription = event['data']['object']
+    import json
+    import datetime
+    
+    event = json.loads(payload)
+    if event['event'] == 'subscription.charged':
+        sub_id = event['payload']['subscription']['entity']['id']
+        plan_id = event['payload']['subscription']['entity']['plan_id']
+        email = event['payload']['payment']['entity']['email']
+        
         try:
-            profile = UserProfile.objects.get(stripe_subscription_id=subscription.get('id'))
-            profile.is_premium = False
-            profile.subscription_tier = 0
+            from django.contrib.auth.models import User
+            user = User.objects.get(email=email)
+            profile = user.profile
+            profile.razorpay_subscription_id = sub_id
+            profile.is_premium = True
+            
+            if plan_id == settings.RAZORPAY_PLAN_ID_999:
+                profile.subscription_tier = 4
+            elif plan_id == settings.RAZORPAY_PLAN_ID_299:
+                profile.subscription_tier = 3
+            elif plan_id == settings.RAZORPAY_PLAN_ID_149:
+                profile.subscription_tier = 2
+            elif plan_id == settings.RAZORPAY_PLAN_ID_49:
+                profile.subscription_tier = 1
+            else:
+                profile.subscription_tier = 1
+                
+            # Razorpay gives timestamps
+            now = datetime.datetime.now(datetime.timezone.utc)
+            profile.current_period_start = now
+            profile.current_period_end = now + datetime.timedelta(days=30)
+            
             profile.save()
-        except UserProfile.DoesNotExist:
+        except User.DoesNotExist:
             pass
             
-    elif event['type'] == 'customer.subscription.updated':
-        subscription = event['data']['object']
+    return HttpResponse(status=200)
+
+# ── Public API ───────────────────────────────────────────────────
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+def api_analyze(request):
+    """
+    Public API endpoint for Resume Analyzer.
+    Accepts POST with 'resume_text' and 'job_desc'.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+        
+    auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+    expected_key = getattr(settings, "APP_API_KEY", "")
+    if not expected_key or auth_header != f"Bearer {expected_key}":
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+        
+    resume_text = request.POST.get("resume_text", "")
+    job_desc = request.POST.get("job_desc", "")
+    
+    if not resume_text or not job_desc:
         try:
-            profile = UserProfile.objects.get(stripe_subscription_id=subscription.get('id'))
-            if subscription.get('status') in ['active', 'trialing']:
-                profile.is_premium = True
-                price_id = subscription.get('plan').get('id')
-                if price_id == settings.STRIPE_PRICE_ID_999:
-                    profile.subscription_tier = 4
-                elif price_id == settings.STRIPE_PRICE_ID_299:
-                    profile.subscription_tier = 3
-                elif price_id == settings.STRIPE_PRICE_ID_149:
-                    profile.subscription_tier = 2
-                elif price_id == settings.STRIPE_PRICE_ID_49:
-                    profile.subscription_tier = 1
-                    
-                import datetime
-                profile.current_period_start = datetime.datetime.fromtimestamp(subscription.get('current_period_start'), tz=datetime.timezone.utc)
-                profile.current_period_end = datetime.datetime.fromtimestamp(subscription.get('current_period_end'), tz=datetime.timezone.utc)
-            else:
-                profile.is_premium = False
-                profile.subscription_tier = 0
-            profile.save()
-        except UserProfile.DoesNotExist:
+            data = json.loads(request.body)
+            resume_text = data.get("resume_text", "")
+            job_desc = data.get("job_desc", "")
+        except json.JSONDecodeError:
             pass
 
-    return HttpResponse(status=200)
+    if not resume_text or not job_desc:
+        return JsonResponse({"error": "resume_text and job_desc are required"}, status=400)
+        
+    try:
+        from .utils import analyze_with_ai
+        analysis_data, usage_data = analyze_with_ai(resume_text, job_desc)
+        return JsonResponse({
+            "status": "success", 
+            "data": analysis_data,
+            "usage": usage_data
+        })
+    except Exception as exc:
+        return JsonResponse({"error": str(exc)}, status=500)

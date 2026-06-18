@@ -30,7 +30,7 @@ def initiate_analysis(user: Any, resume_file: UploadedFile, job_desc: str) -> Tu
         return None, "File too large. Maximum size is 2 MB."
 
     try:
-        resume_text, ats_format_issues = extract_text(resume_file, ext)
+        resume_text, ats_format_issues, searchability_checks = extract_text(resume_file, ext)
     except ValueError as exc:
         return None, str(exc)
 
@@ -41,7 +41,8 @@ def initiate_analysis(user: Any, resume_file: UploadedFile, job_desc: str) -> Tu
         job_desc_full=job_desc,
         job_desc_snippet=job_desc[:120],
         status='pending',
-        ats_format_issues=ats_format_issues
+        ats_format_issues=ats_format_issues,
+        searchability_checks=searchability_checks
     )
 
     # Queue Async Task

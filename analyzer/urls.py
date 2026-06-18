@@ -19,8 +19,13 @@ urlpatterns = [
         views.export_cover_letter_pdf,
         name="export_cover_letter_pdf",
     ),
+    path(
+        "export-report/<int:analysis_id>/",
+        views.export_report_pdf,
+        name="export_report_pdf",
+    ),
     path("pricing/", views.pricing_view, name="pricing"),
-    path("create-checkout-session/", views.create_checkout_session, name="create_checkout_session"),
-    path("create-portal-session/", views.create_portal_session, name="create_portal_session"),
-    path("webhook/stripe/", views.stripe_webhook, name="stripe_webhook"),
+    path("create-razorpay-subscription/", views.create_razorpay_subscription, name="create_razorpay_subscription"),
+    path("webhook/razorpay/", views.razorpay_webhook, name="razorpay_webhook"),
+    path("api/analyze/", views.api_analyze, name="api_analyze"),
 ]

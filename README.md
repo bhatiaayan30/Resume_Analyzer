@@ -16,6 +16,9 @@
 
 Resume Analyzer AI is an enterprise-grade web application designed to help job seekers bypass Applicant Tracking Systems (ATS) and optimize their applications. By uploading a resume (PDF/DOCX) and providing a target job description, the AI engine extracts text, maps skills, and instantly generates a comprehensive alignment report.
 
+<!-- TODO: Replace with actual screenshots or GIF once deployed -->
+![Report Score Overview](/.github/assets/report_score.png)
+![Skill Gap Analysis](/.github/assets/skill_gap.png)
 ## 🚀 Key Features
 
 - **🎯 Instant Match Scoring:** Get a precise 0-100 score indicating how well your resume matches the job description.
@@ -43,8 +46,8 @@ Resume Analyzer AI is an enterprise-grade web application designed to help job s
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/bhatiaayan30/resume-analyzer-ai.git
-cd resume-analyzer-ai
+git clone https://github.com/bhatiaayan30/Resume_Analyzer.git
+cd Resume_Analyzer
 pip install -r requirements.txt
 ```
 
@@ -91,6 +94,21 @@ This project is fully containerized and production-ready for Google Cloud Run.
 - **`analyzer/views.py`**: Logic-thin HTTP handlers. Handles routing, form validation, Magic Number binary file verification (spoofing protection), and rate limits.
 - **`analyzer/utils.py`**: The core AI logic and text extraction engine. Highly decoupled so it can be unit-tested without spinning up a Django HTTP client.
 - **`templates/analyzer/`**: Contains the glassmorphic, responsive Tailwind UI. The Cover Letter generator utilizes a standalone React component for seamless asynchronous rendering.
+
+---
+
+## 🚧 Known Limitations & Roadmap
+
+### Current Limitations
+- **File Support:** Currently only supports PDF and DOCX files. Google Docs or LinkedIn profile imports are not supported.
+- **Language:** English-language resumes only.
+- **Scope:** This is an analysis tool, not a job application tracker or resume builder.
+
+### Roadmap
+- **ATS Searchability Checks:** Verify if basic candidate-identifying information (name, contact, dates) is parseable by ATS systems.
+- **Skill Categorization:** Split keyword gaps into hard skills vs. soft skills for targeted improvement.
+- **Score History Trends:** View score changes over time to track improvement across edits.
+- **Explainability Mode:** Transparent scoring that shows exactly how each deduction or flag was calculated.
 
 ---
 <div align="center">

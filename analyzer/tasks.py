@@ -16,7 +16,11 @@ def process_resume_analysis(analysis_id: int):
         resume_text = analysis_record.resume_text
         job_desc = analysis_record.job_desc_full
 
-        analysis_data = analyze_with_ai(resume_text, job_desc)
+        analysis_data, usage_data = analyze_with_ai(resume_text, job_desc)
+
+        # Update record with results
+        analysis_record.prompt_tokens = usage_data.get("prompt_tokens", 0)
+        analysis_record.completion_tokens = usage_data.get("completion_tokens", 0)
 
         # Update record with results
         analysis_record.match_score = analysis_data.get("match_score", 0)

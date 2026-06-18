@@ -207,8 +207,34 @@
       border-color: rgba(139, 92, 246, 0.4);
     }
 
+    /* Light Mode Overrides */
+    html.light {
+      --bg-color: #f8fafc;
+      --surface: rgba(255, 255, 255, 0.85);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border: rgba(0, 0, 0, 0.1);
+    }
+    html.light body {
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.1), transparent 30%),
+        radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.1), transparent 30%);
+    }
+    html.light .text-white { color: #0f172a !important; }
+    html.light .text-gray-400, html.light .text-gray-300 { color: #475569 !important; }
+    html.light .bg-gray-900, html.light .bg-gray-800 { background-color: #ffffff !important; }
+    html.light .bg-gray-900\/50, html.light .bg-gray-800\/50 { background-color: rgba(255, 255, 255, 0.6) !important; }
+    html.light .border-gray-700, html.light .border-gray-600 { border-color: #e2e8f0 !important; }
+    html.light .border-gray-700\/50 { border-color: rgba(226, 232, 240, 0.5) !important; }
+
     {% block extra_css %}{% endblock %}
   </style>
+  <script>
+    // Check theme before render to avoid flash
+    if (localStorage.getItem('theme') === 'light' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+        document.documentElement.classList.add('light');
+    }
+  </script>
 </head>
 <body>
 
@@ -217,6 +243,11 @@
       Resume Analyzer
     </a>
     <nav class="site-nav flex items-center gap-4">
+      <button id="theme-toggle" class="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 transition-colors" title="Toggle Theme" aria-label="Toggle dark mode" role="switch">
+          <svg id="theme-icon-dark" class="w-4 h-4 text-gray-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+          <svg id="theme-icon-light" class="w-4 h-4 text-amber-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+      </button>
+
       {% if user.is_authenticated %}
         <span class="text-sm font-semibold text-gray-400 mr-2">Hi, {{ user.username }}</span>
         <a href="{% url 'index' %}">Upload</a>
@@ -253,6 +284,33 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Theme Toggle Logic
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIconDark = document.getElementById('theme-icon-dark');
+        const themeIconLight = document.getElementById('theme-icon-light');
+
+        function updateThemeIcon() {
+            if (document.documentElement.classList.contains('light')) {
+                themeIconDark.classList.remove('hidden');
+                themeIconLight.classList.add('hidden');
+            } else {
+                themeIconLight.classList.remove('hidden');
+                themeIconDark.classList.add('hidden');
+            }
+        }
+
+        updateThemeIcon();
+
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('light');
+            if (document.documentElement.classList.contains('light')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeIcon();
+        });
+
         // Active nav link highlighting
         const currentPath = window.location.pathname;
         document.querySelectorAll('.site-nav a').forEach(link => {

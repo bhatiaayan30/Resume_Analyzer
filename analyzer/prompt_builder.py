@@ -3,8 +3,8 @@ from typing import Dict, Any
 ANALYSIS_JSON_SCHEMA = """
 {
     "match_score": <integer 0-100, calculate a weighted score based on skills, experience overlap, and formatting>,
-    "matched_skills": [<list of strings>],
-    "missing_skills": [<list of strings>],
+    "matched_skills": [{"skill": "string", "category": "hard|soft", "matched": true}],
+    "missing_skills": [{"skill": "string", "category": "hard|soft", "matched": false}],
     "experience_gaps": [<list of strings>],
     "impact_critiques": [
         {"section": "Summary/Experience", "original_bullet": "string of original weak bullet point", "critique": "string identifying weak verbs, passive voice, or lack of metrics", "suggested_rewrite": "string of rewritten high-impact bullet point"}
@@ -32,6 +32,7 @@ def build_analysis_prompt(resume_text: str, job_desc: str) -> str:
     - Overused words, passive voice, and weak verbs in the Experience section.
     - Lack of quantification (metrics, numbers) in achievements.
     - Generate 10 to 15 highly tailored interview questions covering technical skills, behavioral situations, and experience gaps.
+    - Extract skills and strictly categorize them as "hard" (technical, tools, specific knowledge) or "soft" (interpersonal, leadership, traits).
     
     Return ONLY a JSON object exactly matching this schema:
     {ANALYSIS_JSON_SCHEMA}

@@ -89,7 +89,12 @@
       <p class="text-lg text-gray-400 font-light">Upload a PDF or DOCX and paste a job description — get an AI match score in seconds.</p>
     </div>
 
-    <div class="premium-card max-w-2xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4">
+      
+      <!-- Upload Form Column -->
+      <div class="lg:col-span-2">
+        <div class="premium-card">
+
       {% if error %}
       <div class="bg-red-500/10 border-l-4 border-red-500 text-red-400 p-4 mb-6 rounded">
         <strong>Error:</strong> {{ error }}
@@ -99,20 +104,27 @@
       <form id="analyze-form" action="{% url 'analyze' %}" method="post" enctype="multipart/form-data" class="space-y-8">
           {% csrf_token %}
           
-          <!-- Drag & Drop Zone -->
+          <!-- Tabs for Resume Input -->
           <div class="space-y-3">
-              <label class="block text-sm font-semibold text-white">
-                  Resume <span class="text-gray-400 font-normal ml-2">(PDF or DOCX, max 2 MB)</span>
-              </label>
+              <div class="flex items-center justify-between mb-2">
+                  <label class="block text-sm font-semibold text-white">
+                      Resume Input
+                  </label>
+                  <div class="flex bg-gray-800 rounded-lg p-1">
+                      <button type="button" id="tab-upload" class="px-4 py-1 text-sm rounded-md bg-brand text-white font-medium transition-all">Upload File</button>
+                      <button type="button" id="tab-paste" class="px-4 py-1 text-sm rounded-md text-gray-400 hover:text-white font-medium transition-all">Paste Text</button>
+                  </div>
+              </div>
               
-              <div id="drop-zone" class="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-600 bg-black/20 hover:border-brand hover:bg-brand-light/10 rounded-xl cursor-pointer transition-all duration-300">
-                   
+              <!-- Drag & Drop Zone -->
+              <div id="upload-section" class="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-600 bg-black/20 hover:border-brand hover:bg-brand-light/10 rounded-xl cursor-pointer transition-all duration-300">
                    <div class="flex flex-col items-center justify-center pt-5 pb-6 pointer-events-none">
                        <svg class="w-10 h-10 mb-3 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                        </svg>
                        <p id="upload-prompt" class="text-base text-gray-300 font-medium">
-                           <span class="font-bold text-brand">Click to upload</span> or drag and drop
+                           <span class="font-bold text-brand">Click to upload</span> or drag and drop<br>
+                           <span class="text-sm font-normal text-gray-500">(PDF or DOCX, max 2 MB)</span>
                        </p>
                        <div id="file-display" class="hidden flex items-center space-x-2 text-brand">
                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -120,8 +132,15 @@
                        </div>
                    </div>
                    <!-- Hidden file input -->
-                   <input id="file-input" type="file" name="resume" accept=".pdf,.docx" class="hidden" required>
+                   <input id="file-input" type="file" name="resume" accept=".pdf,.docx" class="hidden">
               </div>
+
+              <!-- Paste Textarea -->
+              <div id="paste-section" class="hidden field">
+                  <textarea name="resume_text" id="resume_text" placeholder="Paste your resume text here..."></textarea>
+              </div>
+              
+              <input type="hidden" name="resume_input_type" id="resume_input_type" value="file">
           </div>
 
           <!-- JD Textarea -->
@@ -144,6 +163,39 @@
               <span id="submit-text">Analyze Resume</span>
           </button>
       </form>
+        </div>
+      </div>
+      
+      <!-- Score History Sidebar -->
+      <div class="lg:col-span-1">
+        <div class="premium-card h-full">
+            <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                Score Trend
+            </h3>
+            
+            {% if recent_scans|length >= 2 %}
+                <div class="relative h-64 w-full">
+                    <canvas id="scoreTrendChart"></canvas>
+                </div>
+                
+                <!-- Pass data to JS safely -->
+                <script type="application/json" id="score-trend-data">
+                    [
+                        {% for scan in recent_scans %}
+                            {"score": {{ scan.match_score }}, "date": "{{ scan.created_at|date:'M d' }}"}{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ]
+                </script>
+            {% else %}
+                <div class="flex flex-col items-center justify-center h-48 text-center bg-gray-800/30 rounded-xl border border-dashed border-gray-700/50">
+                    <svg class="w-10 h-10 text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <p class="text-sm text-gray-400">Complete at least 2 scans to<br>see your improvement trend.</p>
+                </div>
+            {% endif %}
+        </div>
+      </div>
+      
     </div>
 </div>
 {% endblock %}
@@ -210,12 +262,43 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Tab switching
+    const tabUpload = document.getElementById('tab-upload');
+    const tabPaste = document.getElementById('tab-paste');
+    const uploadSection = document.getElementById('upload-section');
+    const pasteSection = document.getElementById('paste-section');
+    const resumeInputType = document.getElementById('resume_input_type');
+
+    tabUpload.addEventListener('click', () => {
+        tabUpload.classList.replace('text-gray-400', 'text-white');
+        tabUpload.classList.replace('hover:text-white', 'bg-brand');
+        tabPaste.classList.replace('text-white', 'text-gray-400');
+        tabPaste.classList.replace('bg-brand', 'hover:text-white');
+        uploadSection.classList.remove('hidden');
+        pasteSection.classList.add('hidden');
+        resumeInputType.value = 'file';
+    });
+
+    tabPaste.addEventListener('click', () => {
+        tabPaste.classList.replace('text-gray-400', 'text-white');
+        tabPaste.classList.replace('hover:text-white', 'bg-brand');
+        tabUpload.classList.replace('text-white', 'text-gray-400');
+        tabUpload.classList.replace('bg-brand', 'hover:text-white');
+        pasteSection.classList.remove('hidden');
+        uploadSection.classList.add('hidden');
+        resumeInputType.value = 'text';
+    });
+
     // Handle form submission asynchronously
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        if (!fileInput.files.length) {
+        if (resumeInputType.value === 'file' && !fileInput.files.length) {
             alert("Please select a resume file.");
+            return;
+        }
+        if (resumeInputType.value === 'text' && !document.getElementById('resume_text').value.trim()) {
+            alert("Please paste your resume text.");
             return;
         }
         if (!document.getElementById('job_description').value.trim()) {
@@ -257,6 +340,16 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             const data = await response.json();
             
+            if (response.status === 403 && data.status === 'limit_reached') {
+                if (data.reason === 'unauthenticated') {
+                    window.location.href = '/accounts/login/?next=/';
+                    return;
+                } else if (data.reason === 'upgrade_required') {
+                    window.location.href = '/pricing/';
+                    return;
+                }
+            }
+
             if (!response.ok || data.status === 'error') {
                 throw new Error(data.message || "Failed to start analysis");
             }
@@ -291,5 +384,51 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Score Trend Chart Logic
+const trendDataEl = document.getElementById('score-trend-data');
+if (trendDataEl) {
+    const trendData = JSON.parse(trendDataEl.textContent);
+    const ctx = document.getElementById('scoreTrendChart').getContext('2d');
+    
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = "'Outfit', sans-serif";
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: trendData.map(d => d.date),
+            datasets: [{
+                label: 'Match Score',
+                data: trendData.map(d => d.score),
+                borderColor: '#8b5cf6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                pointBackgroundColor: '#ec4899',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) { return context.parsed.y + ' / 100'; }
+                    }
+                }
+            },
+            scales: {
+                y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
 </script>
 {% endblock %}
