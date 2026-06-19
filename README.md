@@ -52,13 +52,38 @@ pip install -r requirements.txt
 ```
 
 ### 2. Environment Variables
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory. You will need to configure various API keys for the full functionality:
+
+1. **Django Settings**:
+   - `SECRET_KEY`: A random secure string for Django.
+   - `DEBUG`: Set to `True` for local development, `False` for production.
+   - `ALLOWED_HOSTS`: Set to `localhost,127.0.0.1,*` for local testing.
+
+2. **Database (Supabase PostgreSQL)**:
+   - `DATABASE_URL`: Create a project on [Supabase](https://supabase.com/) and copy the connection string. (Note: You can comment this out to use local SQLite for basic testing).
+
+3. **Groq AI (Llama 3)**:
+   - `GROQ_API_KEY`: Get an API key from the [Groq Console](https://console.groq.com/).
+
+4. **Google OAuth (Authentication)**:
+   - `GOOGLE_CLIENT_ID` and `GOOGLE_SECRET`: Create credentials in the [Google Cloud Console](https://console.cloud.google.com/) under APIs & Services > Credentials.
+
+5. **Razorpay (Payments)**:
+   - `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`: Generate these from your [Razorpay Dashboard](https://dashboard.razorpay.com/) under Settings > API Keys.
+   - `RAZORPAY_WEBHOOK_SECRET`: A secure string you define for your webhook endpoint.
+
+Your `.env` file should look like this:
 ```env
-SECRET_KEY=django-insecure-your-secret-key-here
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1,*
-GROQ_API_KEY=gsk_your_groq_api_key
+SECRET_KEY=django-insecure-development-key-for-local-testing
+ALLOWED_HOSTS=localhost,127.0.0.1
 DATABASE_URL=postgresql://user:password@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
+GROQ_API_KEY=your_groq_api_key
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_SECRET=your_google_client_secret
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
 ```
 
 ### 3. Database & Run
@@ -77,15 +102,40 @@ Visit `http://localhost:8000` to view the application.
 
 ---
 
-## 🐳 Deployment (Google Cloud Run)
+## 🐳 Deployment (GitHub to Google Cloud Run)
 
-This project is fully containerized and production-ready for Google Cloud Run.
+This project is fully containerized and production-ready for Google Cloud Run, utilizing seamless GitHub integration.
 
-1. Connect your GitHub repository to Google Cloud Console.
-2. Navigate to **Cloud Run** → **Create Service**.
-3. Select **Continuously deploy from a repository** and choose this repo.
-4. Set the `GROQ_API_KEY`, `DATABASE_URL`, and `SECRET_KEY` in the Environment Variables section.
-5. Deploy. Google Cloud Buildpacks will automatically detect the `Dockerfile`, install `gunicorn` + `whitenoise`, and serve your app globally.
+### Procedure for GitHub to GCP Deployment:
+
+1. **Prepare Google Cloud Platform (GCP)**:
+   - Create a new project in the [Google Cloud Console](https://console.cloud.google.com/).
+   - Enable the **Cloud Run API** and **Cloud Build API** for your project.
+   - Set up billing for the project.
+
+2. **Connect GitHub to Cloud Run**:
+   - Navigate to **Cloud Run** in the GCP Console.
+   - Click **Create Service**.
+   - Select **Continuously deploy new revisions from a source repository**.
+   - Click **Set up with Cloud Build**.
+   - Select **GitHub** as the provider and authenticate.
+   - Choose your repository (`Resume_Analyzer`) and the branch (e.g., `main`).
+
+3. **Configure Build and Service Settings**:
+   - Build Type: Choose **Dockerfile** or let Cloud Buildpacks automatically detect the environment.
+   - Service Name: e.g., `resume-analyzer`.
+   - Region: Choose a region close to your users.
+   - Authentication: Select **Allow unauthenticated invocations** if this is a public web app.
+
+4. **Environment Variables**:
+   - Expand **Container, Connections, Security**.
+   - Add all your production environment variables from your `.env` file (e.g., `SECRET_KEY`, `GROQ_API_KEY`, `DATABASE_URL`, `GOOGLE_CLIENT_ID`, `RAZORPAY_KEY_ID`, etc.).
+   - Make sure `DEBUG` is set to `False` and `ALLOWED_HOSTS` includes your generated Cloud Run URL.
+
+5. **Deploy**:
+   - Click **Create**.
+   - GCP will now automatically pull the code from GitHub, build the Docker container, and deploy it.
+   - Any future pushes to the connected GitHub branch will automatically trigger a new build and deployment.
 
 ---
 
@@ -97,18 +147,11 @@ This project is fully containerized and production-ready for Google Cloud Run.
 
 ---
 
-## 🚧 Known Limitations & Roadmap
-
-### Current Limitations
+## 🚧 Known Limitations
 - **File Support:** Currently only supports PDF and DOCX files. Google Docs or LinkedIn profile imports are not supported.
 - **Language:** English-language resumes only.
 - **Scope:** This is an analysis tool, not a job application tracker or resume builder.
 
-### Roadmap
-- **ATS Searchability Checks:** Verify if basic candidate-identifying information (name, contact, dates) is parseable by ATS systems.
-- **Skill Categorization:** Split keyword gaps into hard skills vs. soft skills for targeted improvement.
-- **Score History Trends:** View score changes over time to track improvement across edits.
-- **Explainability Mode:** Transparent scoring that shows exactly how each deduction or flag was calculated.
 
 ---
 <div align="center">
