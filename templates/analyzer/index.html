@@ -151,7 +151,8 @@
               <textarea
                   name="job_description"
                   id="job_description"
-                  placeholder="e.g. We're looking for a Python backend engineer with experience in REST APIs, PostgreSQL, and cloud infrastructure (AWS or GCP)…"
+                  placeholder="e.g. We're looking for a Python backend engineer with experience in REST APIs... (Press Ctrl+Enter or Cmd+Enter to analyze)"
+                  onkeydown="if(event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); document.getElementById('analyze-form').requestSubmit(); }"
                   required></textarea>
           </div>
           

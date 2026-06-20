@@ -46,7 +46,7 @@
             <div class="flex-grow border-t border-gray-600"></div>
         </div>
 
-        <form method="post" class="space-y-4">
+        <form method="post" class="space-y-4" onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.querySelector('button[type=submit]').click(); }">
             {% csrf_token %}
             
             {% if form.errors %}
