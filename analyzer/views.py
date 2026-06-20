@@ -455,10 +455,19 @@ def export_report_pdf(request, analysis_id):
 
 # ── Razorpay Payments ────────────────────────────────────────────
 
+from django.utils import timezone
+
 def pricing_view(request):
     """Serve the pricing / upgrade page."""
+    current_tier = 0
+    if request.user.is_authenticated:
+        profile = request.user.profile
+        if profile.is_premium and profile.current_period_end and profile.current_period_end > timezone.now():
+            current_tier = profile.subscription_tier
+
     return render(request, "analyzer/pricing.html", {
-        "RAZORPAY_KEY_ID": settings.RAZORPAY_KEY_ID
+        "RAZORPAY_KEY_ID": settings.RAZORPAY_KEY_ID,
+        "current_tier": current_tier
     })
 
 @login_required
@@ -479,6 +488,33 @@ def create_razorpay_order(request):
     if tier not in base_prices:
         return render(request, "analyzer/pricing.html", {"error": "Invalid tier selected."})
     
+    profile = request.user.profile
+    now = timezone.now()
+    is_active = profile.is_premium and profile.current_period_end and profile.current_period_end > now
+
+    prorated_credit = 0
+
+    if is_active:
+        current_tier = profile.subscription_tier
+        if tier <= current_tier:
+            return render(request, "analyzer/pricing.html", {
+                "error": f"You are already on a higher or equal plan (Tier {current_tier}). Downgrading is not permitted while active.",
+                "RAZORPAY_KEY_ID": settings.RAZORPAY_KEY_ID,
+                "current_tier": current_tier
+            })
+        
+        # Upgrade: calculate proration
+        days_remaining = max(0, (profile.current_period_end - now).days)
+        start_date_for_math = profile.current_period_start or (profile.current_period_end - timezone.timedelta(days=30))
+        total_days = max(1, (profile.current_period_end - start_date_for_math).days)
+        
+        was_annual = total_days > 50
+        current_base = base_prices.get(current_tier, base_prices[1])
+        current_price = current_base['annual'] if was_annual else current_base['monthly']
+        
+        daily_rate = current_price / total_days
+        prorated_credit = int(days_remaining * daily_rate)
+
     price_inr = base_prices[tier]['annual'] if annual else base_prices[tier]['monthly']
 
     # Apply Coupon
@@ -492,9 +528,9 @@ def create_razorpay_order(request):
             else:
                 return render(request, "analyzer/pricing.html", {"error": "Coupon is invalid or expired."})
         except Coupon.DoesNotExist:
-            return render(request, "analyzer/pricing.html", {"error": "Coupon not found."})
+            return render(request, "analyzer/pricing.html", {"error": "Coupon not found.", "current_tier": getattr(request.user.profile, 'subscription_tier', 0)})
 
-    final_price_inr = max(1, price_inr - discount) # Minimum 1 INR
+    final_price_inr = max(1, price_inr - discount - prorated_credit)
     amount_in_paise = final_price_inr * 100
 
     try:
@@ -564,12 +600,15 @@ def razorpay_webhook(request):
                     start_date = profile.current_period_end
                 else:
                     start_date = now
+                    profile.current_period_start = now
                     
                 if is_annual:
                     profile.current_period_end = start_date + relativedelta(years=1)
                 else:
                     profile.current_period_end = start_date + relativedelta(months=1)
                     
+                # Reset start date to today if they are upgrading to a new tier, to restart proration math correctly
+                profile.current_period_start = now
                 profile.save()
                 
                 # Update coupon usage
