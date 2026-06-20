@@ -240,8 +240,58 @@ def analysis_results(request, analysis_id):
             "hard_missing": hard_missing,
             "soft_missing": soft_missing,
             "diff_data": diff_data,
+            "perms": get_premium_permissions(request.user, analysis_id),
         },
     )
+
+
+def get_premium_permissions(user, analysis_id):
+    """
+    Returns a dictionary of permissions for the given user and analysis.
+    """
+    record = get_object_or_404(ResumeAnalysis, id=analysis_id)
+    perms = {
+        "can_cover_letter": False,
+        "can_interview": False,
+        "can_critique": False,
+        "can_download_pdf": False,
+        "record": record,
+    }
+
+    # Helper to unlock all features
+    def unlock_all():
+        perms["can_cover_letter"] = True
+        perms["can_interview"] = True
+        perms["can_critique"] = True
+        perms["can_download_pdf"] = True
+
+    # 1. Unauthenticated user checking their one-time free scan
+    if not user.is_authenticated:
+        if record.user is None:
+            unlock_all()
+        return perms
+
+    # 2. Authenticated user trying to access someone else's record
+    if record.user and user != record.user:
+        return perms
+        
+    # 3. Check if this is the user's first scan (One Time Free)
+    first_scan = ResumeAnalysis.objects.filter(user=user).order_by('created_at').first()
+    if first_scan and first_scan.id == record.id:
+        unlock_all()
+        return perms
+        
+    # 4. Check regular premium status
+    if hasattr(user, 'profile') and user.profile.is_premium:
+        tier = user.profile.subscription_tier
+        if tier >= 2: # Pro, Elite, Unlimited
+            perms["can_cover_letter"] = True
+            perms["can_interview"] = True
+            perms["can_download_pdf"] = True
+        if tier >= 3: # Elite, Unlimited
+            perms["can_critique"] = True
+            
+    return perms
 
 
 @login_required
@@ -277,14 +327,14 @@ def signup_view(request):
     return render(request, "registration/signup.html", {"form": form})
 
 
-@login_required
 @require_http_methods(["POST"])
 def generate_cover_letter_api(request, analysis_id):
     """API endpoint for the React component to generate a cover letter asynchronously."""
-    if not request.user.profile.is_premium:
+    perms = get_premium_permissions(request.user, analysis_id)
+    if not perms["can_cover_letter"]:
         return JsonResponse({"error": "Premium subscription required to generate cover letters."}, status=403)
 
-    record = get_object_or_404(ResumeAnalysis, id=analysis_id, user=request.user)
+    record = perms["record"]
 
     if record.cover_letter:
         return JsonResponse({"cover_letter": record.cover_letter})
@@ -298,10 +348,13 @@ def generate_cover_letter_api(request, analysis_id):
         return JsonResponse({"error": str(exc)}, status=500)
 
 
-@login_required
 def export_cover_letter_pdf(request, analysis_id):
     """Generates a PDF of the cover letter and returns it as a download."""
-    record = get_object_or_404(ResumeAnalysis, id=analysis_id, user=request.user)
+    perms = get_premium_permissions(request.user, analysis_id)
+    if not perms["can_cover_letter"]:
+        return HttpResponse("Premium subscription required.", status=403)
+
+    record = perms["record"]
 
     if not record.cover_letter:
         return HttpResponse("Cover letter not generated yet.", status=400)
@@ -330,10 +383,13 @@ def export_cover_letter_pdf(request, analysis_id):
     return response
 
 
-@login_required
 def export_report_pdf(request, analysis_id):
     """Generates a PDF of the match report and returns it as a download."""
-    record = get_object_or_404(ResumeAnalysis, id=analysis_id, user=request.user)
+    perms = get_premium_permissions(request.user, analysis_id)
+    if not perms["can_download_pdf"]:
+        return HttpResponse("Pro, Elite, or Unlimited subscription required to download PDF report.", status=403)
+
+    record = perms["record"]
 
     if record.status != 'completed':
         return HttpResponse("Report not ready yet.", status=400)
