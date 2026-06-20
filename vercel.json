@@ -1,7 +1,7 @@
 {
   "builds": [
     {
-      "src": "resume_analyzer/wsgi.py",
+      "src": "index.py",
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
@@ -12,7 +12,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "resume_analyzer/wsgi.py"
+      "dest": "index.py"
     }
   ]
 }
