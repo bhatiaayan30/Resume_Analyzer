@@ -71,7 +71,7 @@
         <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" :class="annual ? 'translate-x-5' : 'translate-x-0'"></span>
     </button>
     <span class="font-medium flex items-center gap-2 transition-colors" :class="annual ? 'text-white' : 'text-gray-400'">
-        Annually <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/50">Save 20%</span>
+        Annually <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/50">Save 25%</span>
     </span>
 </div>
 
@@ -81,10 +81,10 @@
     <div class="premium-card flex flex-col p-6">
         <h2 class="text-xl font-bold mb-2">Starter</h2>
         <p class="text-sm text-gray-400 mb-4">Perfect for quick checks.</p>
-        <div class="text-3xl font-extrabold mb-6 text-white" x-text="'₹' + calculatePrice(49, 470)">₹49</div>
+        <div class="text-3xl font-extrabold mb-6 text-white" x-text="'₹' + calculatePrice(49, 441)">₹49</div>
         <div class="text-sm font-normal text-gray-400 mb-6 mt--4">
             <span x-text="annual ? '/yr' : '/mo'">/mo</span>
-            <span x-show="discount_percent > 0" class="ml-2 line-through text-xs text-gray-600" x-text="'₹' + (annual ? 470 : 49)"></span>
+            <span x-show="discount_percent > 0" class="ml-2 line-through text-xs text-gray-600" x-text="'₹' + (annual ? 441 : 49)"></span>
         </div>
         <ul class="flex-1 space-y-3 mb-8 text-sm text-gray-300">
             <li class="flex items-center gap-2">
@@ -134,10 +134,10 @@
         <div class="absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">POPULAR</div>
         <h2 class="text-xl font-bold mb-2 text-brand-hover">Pro</h2>
         <p class="text-sm text-gray-400 mb-4">Active job seekers.</p>
-        <div class="text-3xl font-extrabold mb-6 text-white" x-text="'₹' + calculatePrice(149, 1430)">₹149</div>
+        <div class="text-3xl font-extrabold mb-6 text-white" x-text="'₹' + calculatePrice(149, 1341)">₹149</div>
         <div class="text-sm font-normal text-gray-400 mb-6 mt--4">
             <span x-text="annual ? '/yr' : '/mo'">/mo</span>
-            <span x-show="discount_percent > 0" class="ml-2 line-through text-xs text-gray-600" x-text="'₹' + (annual ? 1430 : 149)"></span>
+            <span x-show="discount_percent > 0" class="ml-2 line-through text-xs text-gray-600" x-text="'₹' + (annual ? 1341 : 149)"></span>
         </div>
         <ul class="flex-1 space-y-3 mb-8 text-sm text-gray-300">
             <li class="flex items-center gap-2">
@@ -186,10 +186,10 @@
     <div class="premium-card flex flex-col p-6">
         <h2 class="text-xl font-bold mb-2">Elite</h2>
         <p class="text-sm text-gray-400 mb-4">For aggressive applying.</p>
-        <div class="text-3xl font-extrabold mb-6 text-white" x-text="'₹' + calculatePrice(299, 2870)">₹299</div>
+        <div class="text-3xl font-extrabold mb-6 text-white" x-text="'₹' + calculatePrice(299, 2691)">₹299</div>
         <div class="text-sm font-normal text-gray-400 mb-6 mt--4">
             <span x-text="annual ? '/yr' : '/mo'">/mo</span>
-            <span x-show="discount_percent > 0" class="ml-2 line-through text-xs text-gray-600" x-text="'₹' + (annual ? 2870 : 299)"></span>
+            <span x-show="discount_percent > 0" class="ml-2 line-through text-xs text-gray-600" x-text="'₹' + (annual ? 2691 : 299)"></span>
         </div>
         <ul class="flex-1 space-y-3 mb-8 text-sm text-gray-300">
             <li class="flex items-center gap-2">
@@ -242,10 +242,10 @@
     <div class="premium-card flex flex-col p-6">
         <h2 class="text-xl font-bold mb-2 text-pink-400">Unlimited</h2>
         <p class="text-sm text-gray-400 mb-4">Career coaches & pros.</p>
-        <div class="text-3xl font-extrabold mb-6 text-white" x-text="'₹' + calculatePrice(999, 9590)">₹999</div>
+        <div class="text-3xl font-extrabold mb-6 text-white" x-text="'₹' + calculatePrice(999, 8991)">₹999</div>
         <div class="text-sm font-normal text-gray-400 mb-6 mt--4">
             <span x-text="annual ? '/yr' : '/mo'">/mo</span>
-            <span x-show="discount_percent > 0" class="ml-2 line-through text-xs text-gray-600" x-text="'₹' + (annual ? 9590 : 999)"></span>
+            <span x-show="discount_percent > 0" class="ml-2 line-through text-xs text-gray-600" x-text="'₹' + (annual ? 8991 : 999)"></span>
         </div>
         <ul class="flex-1 space-y-3 mb-8 text-sm text-gray-300">
             <li class="flex items-center gap-2 font-bold text-white">
