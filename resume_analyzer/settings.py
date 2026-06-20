@@ -85,7 +85,7 @@ WSGI_APPLICATION = "resume_analyzer.wsgi.application"
 # ── Database ───────────────────────────────────────────────────
 # SQLite is fine for local dev. Swap to PostgreSQL for production.
 DATABASE_URL = config("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
-DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
+DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=0)}
 
 
 # ── Auth ───────────────────────────────────────────────────────
