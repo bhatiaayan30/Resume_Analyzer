@@ -182,7 +182,7 @@ def analyze_with_ai(resume_text: str, job_description: str) -> Tuple[Dict[str, A
     # ── Fetch Prompt from Builder ─────────────
     prompt = build_analysis_prompt(resume_text, job_description)
     
-    fast_model = os.environ.get("FAST_MODEL", "llama-3.1-8b-instant")
+    fast_model = os.environ.get("FAST_MODEL", "llama-3.3-70b-versatile")
 
     try:
         response = client.chat.completions.create(
