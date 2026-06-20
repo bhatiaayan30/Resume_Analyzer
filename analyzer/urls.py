@@ -26,7 +26,7 @@ urlpatterns = [
         name="export_report_pdf",
     ),
     path("pricing/", views.pricing_view, name="pricing"),
-    path("create-razorpay-subscription/", views.create_razorpay_subscription, name="create_razorpay_subscription"),
+    path("create-razorpay-order/", views.create_razorpay_order, name="create_razorpay_order"),
     path("webhook/razorpay/", views.razorpay_webhook, name="razorpay_webhook"),
     path("api/analyze/", views.api_analyze, name="api_analyze"),
 ]

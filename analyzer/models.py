@@ -106,3 +106,18 @@ class ResumeAnalysis(models.Model):
 
     def __str__(self):
         return f"{self.filename} — {self.match_score}% match ({self.created_at:%Y-%m-%d %H:%M})"
+
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=50, unique=True)
+    discount_percent = models.IntegerField(help_text="Discount percentage (0-100)")
+    max_uses = models.IntegerField(default=100, help_text="Maximum number of times this coupon can be used")
+    uses = models.IntegerField(default=0, help_text="Number of times this coupon has been used")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self):
+        return self.is_active and self.uses < self.max_uses
+
+    def __str__(self):
+        return f"{self.code} - {self.discount_percent}%"

@@ -16,9 +16,11 @@
 <script>
     var options = {
         "key": "{{ razorpay_key }}",
-        "subscription_id": "{{ subscription_id }}",
+        "amount": "{{ amount }}",
+        "currency": "INR",
+        "order_id": "{{ order_id }}",
         "name": "Resume Analyzer",
-        "description": "Premium Subscription Upgrade",
+        "description": "Premium Plan ({% if annual %}Annual{% else %}Monthly{% endif %})",
         "theme": {
             "color": "#a78bfa"
         },

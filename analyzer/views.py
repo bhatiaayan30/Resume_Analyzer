@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 import razorpay
 from django.conf import settings
 
-from .models import ResumeAnalysis, UserProfile
+from .models import JobDescription, Persona, ResumeAnalysis, ResumeVersion, UserProfile, Coupon
 from .utils import analyze_with_ai, extract_text, generate_cover_letter
 from .tasks import process_resume_analysis
 
@@ -462,23 +462,64 @@ def pricing_view(request):
     })
 
 @login_required
-def create_razorpay_subscription(request):
-    """Initiates a Razorpay Subscription session."""
-    plan_id = request.GET.get('plan_id', settings.RAZORPAY_PLAN_ID_49)
+def create_razorpay_order(request):
+    """Initiates a Razorpay Order session for one-time payments."""
+    tier = int(request.GET.get('tier', 1))
+    annual = request.GET.get('annual', 'false').lower() == 'true'
+    coupon_code = request.GET.get('coupon', '').strip()
+
+    # Determine base price
+    base_prices = {
+        1: {'monthly': 49, 'annual': 470},
+        2: {'monthly': 149, 'annual': 1430},
+        3: {'monthly': 299, 'annual': 2870},
+        4: {'monthly': 999, 'annual': 9590},
+    }
+    
+    if tier not in base_prices:
+        return render(request, "analyzer/pricing.html", {"error": "Invalid tier selected."})
+    
+    price_inr = base_prices[tier]['annual'] if annual else base_prices[tier]['monthly']
+
+    # Apply Coupon
+    discount = 0
+    if coupon_code:
+        try:
+            coupon = Coupon.objects.get(code__iexact=coupon_code)
+            if coupon.is_valid():
+                discount = int(price_inr * (coupon.discount_percent / 100.0))
+                # Note: We will increment `coupon.uses` ONLY when payment is successful (in webhook)
+            else:
+                return render(request, "analyzer/pricing.html", {"error": "Coupon is invalid or expired."})
+        except Coupon.DoesNotExist:
+            return render(request, "analyzer/pricing.html", {"error": "Coupon not found."})
+
+    final_price_inr = max(1, price_inr - discount) # Minimum 1 INR
+    amount_in_paise = final_price_inr * 100
+
     try:
-        # Create a subscription in Razorpay
-        sub = razorpay_client.subscription.create({
-            "plan_id": plan_id,
-            "customer_notify": 1,
-            "total_count": 120, # 10 years
+        # Create an Order in Razorpay
+        order = razorpay_client.order.create({
+            "amount": amount_in_paise,
+            "currency": "INR",
+            "receipt": f"receipt_tier_{tier}",
+            "notes": {
+                "tier": tier,
+                "annual": str(annual).lower(),
+                "user_id": request.user.id,
+                "coupon_code": coupon_code
+            }
         })
         
-        # We need to render a page that auto-submits the razorpay checkout form
-        # But for now, we redirect to a payment page or pass data back
         return render(request, "analyzer/razorpay_checkout.html", {
-            "subscription_id": sub['id'],
+            "order_id": order['id'],
             "razorpay_key": settings.RAZORPAY_KEY_ID,
-            "user_email": request.user.email
+            "user_email": request.user.email,
+            "amount": amount_in_paise,
+            "tier": tier,
+            "annual": annual,
+            "discount_applied": discount > 0,
+            "final_price_inr": final_price_inr
         })
     except Exception as e:
         return render(request, "analyzer/pricing.html", {"error": str(e)})
@@ -496,40 +537,54 @@ def razorpay_webhook(request):
 
     import json
     import datetime
+    from dateutil.relativedelta import relativedelta
+    from django.contrib.auth.models import User
     
     event = json.loads(payload)
-    if event['event'] == 'subscription.charged':
-        sub_id = event['payload']['subscription']['entity']['id']
-        plan_id = event['payload']['subscription']['entity']['plan_id']
-        email = event['payload']['payment']['entity']['email']
+    
+    # Listen for order payment capture
+    if event['event'] == 'payment.captured':
+        payment_entity = event['payload']['payment']['entity']
+        notes = payment_entity.get('notes', {})
         
-        try:
-            from django.contrib.auth.models import User
-            user = User.objects.get(email=email)
-            profile = user.profile
-            profile.razorpay_subscription_id = sub_id
-            profile.is_premium = True
-            
-            if plan_id == settings.RAZORPAY_PLAN_ID_999:
-                profile.subscription_tier = 4
-            elif plan_id == settings.RAZORPAY_PLAN_ID_299:
-                profile.subscription_tier = 3
-            elif plan_id == settings.RAZORPAY_PLAN_ID_149:
-                profile.subscription_tier = 2
-            elif plan_id == settings.RAZORPAY_PLAN_ID_49:
-                profile.subscription_tier = 1
-            else:
-                profile.subscription_tier = 1
+        user_id = notes.get('user_id')
+        tier = int(notes.get('tier', 0))
+        is_annual = notes.get('annual') == 'true'
+        coupon_code = notes.get('coupon_code')
+        
+        if user_id and tier > 0:
+            try:
+                user = User.objects.get(id=user_id)
+                profile = user.profile
+                profile.is_premium = True
+                profile.subscription_tier = tier
                 
-            # Razorpay gives timestamps
-            now = datetime.datetime.now(datetime.timezone.utc)
-            profile.current_period_start = now
-            profile.current_period_end = now + datetime.timedelta(days=30)
-            
-            profile.save()
-        except User.DoesNotExist:
-            pass
-            
+                now = datetime.datetime.now(datetime.timezone.utc)
+                if profile.current_period_end and profile.current_period_end > now:
+                    start_date = profile.current_period_end
+                else:
+                    start_date = now
+                    
+                if is_annual:
+                    profile.current_period_end = start_date + relativedelta(years=1)
+                else:
+                    profile.current_period_end = start_date + relativedelta(months=1)
+                    
+                profile.save()
+                
+                # Update coupon usage
+                if coupon_code:
+                    try:
+                        c = Coupon.objects.get(code__iexact=coupon_code)
+                        c.uses += 1
+                        c.save()
+                    except Coupon.DoesNotExist:
+                        pass
+            except User.DoesNotExist:
+                pass
+                
+        return HttpResponse(status=200)
+
     return HttpResponse(status=200)
 
 # ── Public API ───────────────────────────────────────────────────
