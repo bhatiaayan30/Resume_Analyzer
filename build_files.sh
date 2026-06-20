@@ -5,3 +5,6 @@ uv sync
 
 echo "Collect Static..."
 python manage.py collectstatic --noinput --clear
+
+echo "Run Migrations..."
+python manage.py migrate --noinput
