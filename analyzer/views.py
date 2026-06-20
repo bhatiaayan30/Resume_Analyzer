@@ -296,9 +296,24 @@ def get_premium_permissions(user, analysis_id):
 
 @login_required
 def history(request):
-    """Serve the history of past analyses."""
-    analyses = ResumeAnalysis.objects.filter(user=request.user)
+    """
+    Renders the history of past analyses for the logged-in user.
+    """
+    analyses = ResumeAnalysis.objects.filter(user=request.user).order_by(
+        "-created_at"
+    )
     return render(request, "analyzer/history.html", {"analyses": analyses})
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_analysis(request, analysis_id):
+    """
+    Deletes an analysis record for the logged-in user.
+    """
+    record = get_object_or_404(ResumeAnalysis, id=analysis_id, user=request.user)
+    record.delete()
+    return redirect('history')
 
 
 from django import forms

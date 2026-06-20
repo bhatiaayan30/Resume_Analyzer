@@ -8,6 +8,7 @@ urlpatterns = [
     path("analysis-status/<int:analysis_id>/", views.analysis_status, name="analysis_status"),
     path("results/<int:analysis_id>/", views.analysis_results, name="analysis_results"),
     path("history/", views.history, name="history"),
+    path("history/delete/<int:analysis_id>/", views.delete_analysis, name="delete_analysis"),
     path("signup/", views.signup_view, name="signup"),
     path(
         "generate-cover-letter/<int:analysis_id>/",
