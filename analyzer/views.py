@@ -587,6 +587,21 @@ def razorpay_webhook(request):
 
     return HttpResponse(status=200)
 
+def verify_coupon(request):
+    """Returns coupon validity and discount percentage."""
+    code = request.GET.get('code', '').strip()
+    if not code:
+        return JsonResponse({"valid": False, "error": "No code provided"})
+    
+    try:
+        coupon = Coupon.objects.get(code__iexact=code)
+        if coupon.is_valid():
+            return JsonResponse({"valid": True, "discount": coupon.discount_percent})
+        else:
+            return JsonResponse({"valid": False, "error": "Coupon is invalid or expired."})
+    except Coupon.DoesNotExist:
+        return JsonResponse({"valid": False, "error": "Coupon not found."})
+
 # ── Public API ───────────────────────────────────────────────────
 
 from django.http import JsonResponse

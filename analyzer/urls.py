@@ -27,6 +27,7 @@ urlpatterns = [
     ),
     path("pricing/", views.pricing_view, name="pricing"),
     path("create-razorpay-order/", views.create_razorpay_order, name="create_razorpay_order"),
+    path("api/verify-coupon/", views.verify_coupon, name="verify_coupon"),
     path("webhook/razorpay/", views.razorpay_webhook, name="razorpay_webhook"),
     path("api/analyze/", views.api_analyze, name="api_analyze"),
 ]
