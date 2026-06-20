@@ -27,6 +27,7 @@ dependencies = [
     "django-allauth[socialaccount]>=0.60.0",
     "tenacity==9.1.4",
     "django-environ==0.13.0",
+    "razorpay>=2.0.1",
 ]
 
 [tool.pytest.ini_options]
