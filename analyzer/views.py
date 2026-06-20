@@ -468,12 +468,12 @@ def create_razorpay_order(request):
     annual = request.GET.get('annual', 'false').lower() == 'true'
     coupon_code = request.GET.get('coupon', '').strip()
 
-    # Determine base price (25% discount for annual)
+    # Determine base price
     base_prices = {
-        1: {'monthly': 49, 'annual': 441},
-        2: {'monthly': 149, 'annual': 1341},
-        3: {'monthly': 299, 'annual': 2691},
-        4: {'monthly': 999, 'annual': 8991},
+        1: {'monthly': 49, 'annual': 499},
+        2: {'monthly': 149, 'annual': 1499},
+        3: {'monthly': 299, 'annual': 2999},
+        4: {'monthly': 999, 'annual': 9999},
     }
     
     if tier not in base_prices:
