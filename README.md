@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>✨ Resume Analyzer AI</h1>
+  <h1>Resume Analyzer AI</h1>
   <p><strong>Beat the ATS. Land the Interview.</strong></p>
   <p>An intelligent, highly-tailored resume analysis tool powered by Llama-3, Django, and Supabase.</p>
 
@@ -12,25 +12,25 @@
 
 ---
 
-## ⚡ Overview
+## Overview
 
 Resume Analyzer AI is an enterprise-grade web application designed to help job seekers bypass Applicant Tracking Systems (ATS) and optimize their applications. By uploading a resume (PDF/DOCX) and providing a target job description, the AI engine extracts text, maps skills, and instantly generates a comprehensive alignment report.
 
 <!-- TODO: Replace with actual screenshots or GIF once deployed -->
 ![Report Score Overview](/.github/assets/report_score.png)
 ![Skill Gap Analysis](/.github/assets/skill_gap.png)
-## 🚀 Key Features
+## Key Features
 
-- **🎯 Instant Match Scoring:** Get a precise 0-100 score indicating how well your resume matches the job description.
-- **🛡️ ATS Formatting Checks:** Detects tables, complex layouts, and invisible text that break standard corporate parsing systems.
-- **✍️ Impact & Writing Critique:** Suggests high-impact rewrites for weak bullet points with detailed AI critiques.
-- **📈 Upskilling Roadmap:** Identifies missing skills and generates an upskilling strategy with clickable resource links.
-- **🎙️ Interview Prep:** Generates 10 to 15 highly tailored interview questions covering technical skills, behavioral situations, and gaps.
-- **⚡ Async Processing:** Fast, non-blocking UI using `django-q` background workers to handle intensive AI tasks.
-- **✉️ Magic Cover Letters:** Automatically generates a persuasive, tailored cover letter bridging your unique experience to the specific role using Groq's blazing-fast Llama-3 model.
-- **🔒 Secure Authentication:** Built-in user accounts and history tracking powered by a Supabase PostgreSQL database.
+- **Instant Match Scoring:** Get a precise 0-100 score indicating how well your resume matches the job description.
+- **ATS Formatting Checks:** Detects tables, complex layouts, and invisible text that break standard corporate parsing systems.
+- **Impact & Writing Critique:** Suggests high-impact rewrites for weak bullet points with detailed AI critiques.
+- **Upskilling Roadmap:** Identifies missing skills and generates an upskilling strategy with clickable resource links.
+- **Interview Prep:** Generates 10 to 15 highly tailored interview questions covering technical skills, behavioral situations, and gaps.
+- **Async Processing:** Fast, non-blocking UI using `django-q` background workers to handle intensive AI tasks.
+- **Magic Cover Letters:** Automatically generates a persuasive, tailored cover letter bridging your unique experience to the specific role using Groq's blazing-fast Llama-3 model.
+- **Secure Authentication:** Built-in user accounts and history tracking powered by a Supabase PostgreSQL database.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend:** Django 5.1, Python 3.12
 - **Database:** PostgreSQL (via Supabase Session Pooling)
@@ -42,7 +42,7 @@ Resume Analyzer AI is an enterprise-grade web application designed to help job s
 
 ---
 
-## 💻 Getting Started (Local Development)
+## Getting Started (Local Development)
 
 ### 1. Clone & Install
 ```bash
@@ -102,7 +102,7 @@ Visit `http://localhost:8000` to view the application.
 
 ---
 
-## 🐳 Deployment (GitHub to Google Cloud Run)
+## Deployment (GitHub to Google Cloud Run)
 
 This project is fully containerized and production-ready for Google Cloud Run, utilizing seamless GitHub integration.
 
@@ -139,7 +139,7 @@ This project is fully containerized and production-ready for Google Cloud Run, u
 
 ---
 
-## 🏗️ Architecture Design
+## Architecture Design
 
 - **`analyzer/views.py`**: Logic-thin HTTP handlers. Handles routing, form validation, Magic Number binary file verification (spoofing protection), and rate limits.
 - **`analyzer/utils.py`**: The core AI logic and text extraction engine. Highly decoupled so it can be unit-tested without spinning up a Django HTTP client.
@@ -147,7 +147,7 @@ This project is fully containerized and production-ready for Google Cloud Run, u
 
 ---
 
-## 🚧 Known Limitations
+## Known Limitations
 - **File Support:** Currently only supports PDF and DOCX files. Google Docs or LinkedIn profile imports are not supported.
 - **Language:** English-language resumes only.
 - **Scope:** This is an analysis tool, not a job application tracker or resume builder.
