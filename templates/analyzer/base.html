@@ -208,13 +208,37 @@
     }
 
     /* Light Mode Overrides */
+    :root {
+      --bg-color: #050505;
+      --surface: rgba(20, 20, 25, 0.7);
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --primary-light: rgba(139, 92, 246, 0.15);
+      --border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --logo-grad-1: #f8fafc;
+      --logo-grad-2: #a78bfa;
+      --title-grad-1: #ffffff;
+      --title-grad-2: #d8b4fe;
+      --title-shadow: rgba(167, 139, 250, 0.4);
+    }
+    
     html.light {
       --bg-color: #f8fafc;
       --surface: rgba(255, 255, 255, 0.85);
       --text-main: #0f172a;
       --text-muted: #475569;
       --border: rgba(0, 0, 0, 0.1);
+      
+      --logo-grad-1: #4c1d95;
+      --logo-grad-2: #c026d3;
+      --title-grad-1: #4c1d95;
+      --title-grad-2: #db2777;
+      --title-shadow: rgba(219, 39, 119, 0.2);
     }
+    
     html.light body {
       background-image: 
         radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.1), transparent 30%),
@@ -226,6 +250,19 @@
     html.light .bg-gray-900\/50, html.light .bg-gray-800\/50 { background-color: rgba(255, 255, 255, 0.6) !important; }
     html.light .border-gray-700, html.light .border-gray-600 { border-color: #e2e8f0 !important; }
     html.light .border-gray-700\/50 { border-color: rgba(226, 232, 240, 0.5) !important; }
+
+    .logo {
+      background: linear-gradient(to right, var(--logo-grad-1), var(--logo-grad-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .gradient-text-title {
+      background: linear-gradient(135deg, var(--title-grad-1), var(--title-grad-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 40px var(--title-shadow);
+    }
 
     {% block extra_css %}{% endblock %}
   </style>
@@ -249,11 +286,24 @@
       </button>
 
       {% if user.is_authenticated %}
-        <span class="text-sm font-semibold text-gray-400 mr-2">Hi, {{ user.username }}</span>
+        <div class="flex items-center gap-2 mr-2">
+            <span class="text-sm font-semibold text-gray-400">Hi, {{ user.username }}</span>
+            {% if user.profile.is_premium %}
+                {% if user.profile.subscription_tier == 4 %}
+                    <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 shadow-[0_0_10px_rgba(236,72,153,0.3)]">Unlimited</span>
+                {% elif user.profile.subscription_tier == 3 %}
+                    <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold rounded-full bg-green-500/20 text-green-400 border border-green-500/30 shadow-[0_0_10px_rgba(74,222,128,0.3)]">Elite</span>
+                {% elif user.profile.subscription_tier == 2 %}
+                    <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold rounded-full bg-brand/20 text-brand-hover border border-brand/30 shadow-[0_0_10px_rgba(139,92,246,0.3)]">Pro</span>
+                {% elif user.profile.subscription_tier == 1 %}
+                    <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold rounded-full bg-gray-700 text-gray-300 border border-gray-600">Starter</span>
+                {% endif %}
+            {% endif %}
+        </div>
         <a href="{% url 'index' %}">Upload</a>
         <a href="{% url 'history' %}">History</a>
         {% if user.profile.is_premium %}
-            <a href="{% url 'create_portal_session' %}" class="text-brand-hover">Manage Subscription</a>
+            <a href="{% url 'pricing' %}" class="text-brand-hover">View Subscription</a>
         {% else %}
             <a href="{% url 'pricing' %}" class="text-brand font-bold" style="text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);">Upgrade to Premium</a>
         {% endif %}

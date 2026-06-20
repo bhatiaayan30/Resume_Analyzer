@@ -39,25 +39,12 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.apple",
     "allauth.socialaccount.providers.microsoft",
-    "django_q",
     "analyzer.apps.AnalyzerConfig",
 ]
 
 SITE_ID = 1
 
-Q_CLUSTER = {
-    "name": "resume_analyzer",
-    "workers": 4,
-    "recycle": 500,
-    "timeout": 120,
-    "retry": 130,
-    "compress": True,
-    "cpu_affinity": 1,
-    "save_limit": 250,
-    "queue_limit": 500,
-    "label": "Django Q",
-    "orm": "default",
-}
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

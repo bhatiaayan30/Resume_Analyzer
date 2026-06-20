@@ -20,7 +20,6 @@ from django.conf import settings
 
 from .models import ResumeAnalysis, UserProfile
 from .utils import analyze_with_ai, extract_text, generate_cover_letter
-from django_q.tasks import async_task
 from .tasks import process_resume_analysis
 
 razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -143,8 +142,8 @@ def analyze(request):
         searchability_checks=searchability_checks
     )
 
-    # ── 6. Queue Async Task ─────────────────────────────────────
-    async_task(process_resume_analysis, analysis_record.id)
+    # ── 6. Process Synchronously for Vercel ─────────────────────
+    process_resume_analysis(analysis_record.id)
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json':
         return JsonResponse({"status": "success", "analysis_id": analysis_record.id})

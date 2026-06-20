@@ -19,7 +19,6 @@ dependencies = [
     "pytest-cov>=4.1.0",
     "reportlab>=4.0.0",
     "PyMuPDF",
-    "django-q2",
     "cryptography",
     "psycopg2-binary",
     "supervisor",

@@ -8,10 +8,10 @@
   font-weight: 800; 
   margin-bottom: 8px; 
   letter-spacing: -1.5px;
-  background: linear-gradient(135deg, #ffffff, #d8b4fe);
+  background: linear-gradient(135deg, var(--title-grad-1), var(--title-grad-2));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 40px rgba(167, 139, 250, 0.4);
+  text-shadow: 0 0 40px var(--title-shadow);
 }
 
 /* Textarea */
@@ -203,7 +203,7 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const dropZone = document.getElementById('drop-zone');
+    const dropZone = document.getElementById('upload-section');
     const fileInput = document.getElementById('file-input');
     const uploadPrompt = document.getElementById('upload-prompt');
     const fileDisplay = document.getElementById('file-display');
