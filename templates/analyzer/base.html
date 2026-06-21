@@ -295,12 +295,6 @@
     html.light .border-gray-700\/60 {
         border-color: rgba(0, 0, 0, 0.15) !important;
     }
-    html.light .bg-brand.text-white,
-    html.light .bg-brand .text-white,
-    html.light button.bg-brand,
-    html.light a.bg-brand {
-        color: #ffffff !important;
-    }
     html.light .hover\:text-white:hover {
         color: #0f172a !important;
     }
@@ -308,6 +302,132 @@
         background-color: rgba(0, 0, 0, 0.03) !important;
         border-color: rgba(0, 0, 0, 0.05) !important;
     }
+
+    /* Redesigned Premium Glassmorphic Surfaces for Light Mode */
+    html.light .glass-card,
+    html.light .premium-card,
+    html.light .glass-panel,
+    html.light .feature-card,
+    html.light .contact-card {
+        background: rgba(255, 255, 255, 0.75) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.6) !important;
+        color: #0f172a !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03), 0 8px 10px -6px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    html.light .glass-card:hover,
+    html.light .premium-card:hover,
+    html.light .glass-panel:hover,
+    html.light .feature-card:hover,
+    html.light .contact-card:hover {
+        background: rgba(255, 255, 255, 0.85) !important;
+        border-color: rgba(139, 92, 246, 0.3) !important;
+        box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    /* Heading Contrast inside Light Panels */
+    html.light .glass-panel h3,
+    html.light .glass-panel h4,
+    html.light .feature-card h3,
+    html.light .feature-card h4,
+    html.light .premium-card h2,
+    html.light .premium-card h3,
+    html.light .premium-card h4,
+    html.light .contact-card h2,
+    html.light .contact-card h3 {
+        color: #0f172a !important;
+    }
+
+    /* How It Works step circles in Light Mode */
+    html.light .bg-\[\#1e1e24\] {
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        border-color: rgba(139, 92, 246, 0.4) !important;
+        box-shadow: 0 10px 20px rgba(139, 92, 246, 0.08) !important;
+    }
+
+    /* Modal / Loader overlays in Light Mode */
+    html.light .bg-\[\#1e1e24\]\/95 {
+        background-color: rgba(255, 255, 255, 0.95) !important;
+        color: #0f172a !important;
+    }
+    html.light .bg-\[\#1e1e24\]\/95 h4 {
+        color: #0f172a !important;
+    }
+
+    /* Form Inputs and Textareas in Light Mode */
+    html.light .bg-black\/20 {
+        background-color: rgba(0, 0, 0, 0.04) !important;
+    }
+    html.light .bg-black\/10 {
+        background-color: rgba(0, 0, 0, 0.02) !important;
+    }
+    html.light .border-gray-600 {
+        border-color: rgba(0, 0, 0, 0.1) !important;
+    }
+    html.light .border-gray-800 {
+        border-color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    /* Logo Marquee in Light Mode */
+    html.light .logo-marquee-content div {
+        color: #475569 !important;
+    }
+
+    /* Connect & Touch Buttons (Meet the Founder) */
+    html.light .bg-white\/5 {
+        background-color: rgba(0, 0, 0, 0.05) !important;
+    }
+    html.light .border-white\/10 {
+        border-color: rgba(0, 0, 0, 0.1) !important;
+    }
+    html.light .text-brand-light {
+        color: #6d28d9 !important;
+    }
+
+    /* Invert Sign-up Modal CTA Button */
+    html.light a.bg-white.text-gray-900,
+    html.light button.bg-white.text-gray-900 {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+    }
+    html.light a.bg-white.text-gray-900:hover,
+    html.light button.bg-white.text-gray-900:hover {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+    }
+
+    /* Ensure Dark Background Elements retain White Text (prevent global text overrides) */
+    html.light .bg-brand,
+    html.light .bg-brand-hover,
+    html.light .submit-btn,
+    html.light button[type="submit"],
+    html.light .bg-gray-700,
+    html.light .bg-blue-600,
+    html.light .bg-emerald-600,
+    html.light .bg-green-600,
+    html.light button.bg-gradient-to-r,
+    html.light a.bg-gradient-to-r {
+        color: #ffffff !important;
+    }
+    html.light .bg-brand *,
+    html.light .bg-brand-hover *,
+    html.light .submit-btn *,
+    html.light button[type="submit"] *,
+    html.light .bg-gray-700 *,
+    html.light .bg-blue-600 *,
+    html.light .bg-emerald-600 *,
+    html.light .bg-green-600 *,
+    html.light button.bg-gradient-to-r *,
+    html.light a.bg-gradient-to-r * {
+        color: inherit;
+    }
+    html.light button[type="submit"] span,
+    html.light .submit-btn span {
+        color: #ffffff !important;
+    }
+
 
     html.light input[type="text"], 
     html.light input[type="password"], 
