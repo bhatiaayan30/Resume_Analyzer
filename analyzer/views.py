@@ -6,21 +6,29 @@ logic (text extraction, AI calls) lives in utils.py so it
 can be unit-tested without an HTTP request.
 """
 
+import json
 import os
+from collections import Counter
 
+import razorpay
+from django import forms
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
-import razorpay
-from django.conf import settings
 
-from .models import JobDescription, Persona, ResumeAnalysis, ResumeVersion, UserProfile, Coupon, OTP
-from .utils import analyze_with_ai, extract_text, generate_cover_letter, generate_otp, send_email_otp, send_sms_otp
+from .ats_knowledge import ATS_FLAG_EXPLANATIONS
+from .models import Coupon, JobDescription, OTP, Persona, ResumeAnalysis, ResumeVersion, UserProfile, InterviewSession, InterviewMessage
 from .tasks import process_resume_analysis
+from .utils import (
+    analyze_with_ai, extract_text, generate_cover_letter, generate_otp, send_email_otp, send_sms_otp,
+    suggest_bullet_rewrites, generate_next_interview_question, evaluate_interview_answer, parse_resume_to_json
+)
 
 razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
@@ -204,8 +212,6 @@ def analysis_status(request, analysis_id):
     return JsonResponse({"status": record.status})
 
 
-from .ats_knowledge import ATS_FLAG_EXPLANATIONS
-
 def analysis_results(request, analysis_id):
     """Serve the results page for a completed analysis."""
     record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
@@ -284,16 +290,16 @@ def analysis_results(request, analysis_id):
             "hard_missing": hard_missing,
             "soft_missing": soft_missing,
             "diff_data": diff_data,
-            "perms": get_premium_permissions(request.user, analysis_id),
+            "perms": get_premium_permissions(request.user, record),
         },
     )
 
 
-def get_premium_permissions(user, analysis_id):
+def get_premium_permissions(user, record):
     """
-    Returns a dictionary of permissions for the given user and analysis.
+    Returns a dictionary of permissions for the given user and analysis record.
+    Accepts a ResumeAnalysis instance directly to avoid redundant DB queries.
     """
-    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
     perms = {
         "can_cover_letter": False,
         "can_interview": False,
@@ -373,8 +379,6 @@ def delete_analysis(request, analysis_id):
     return redirect('history')
 
 
-from django.views.decorators.csrf import ensure_csrf_cookie
-
 @login_required
 @ensure_csrf_cookie
 def settings_view(request):
@@ -419,8 +423,6 @@ def settings_view(request):
     })
 
 
-from django import forms
-
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
@@ -448,17 +450,33 @@ def signup_view(request):
 @require_http_methods(["POST"])
 def generate_cover_letter_api(request, analysis_id):
     """API endpoint for the React component to generate a cover letter asynchronously."""
-    perms = get_premium_permissions(request.user, analysis_id)
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
+    perms = get_premium_permissions(request.user, record)
     if not perms["can_cover_letter"]:
         return JsonResponse({"error": "Premium subscription required to generate cover letters."}, status=403)
 
-    record = perms["record"]
+    # Decode JSON body if options are sent, otherwise fallback to empty dict
+    try:
+        body = json.loads(request.body) if request.body else {}
+    except Exception:
+        body = {}
 
-    if record.cover_letter:
+    tone = body.get("tone", "Professional")
+    length = body.get("length", "Medium")
+    highlights = body.get("highlights", "")
+    force_regenerate = body.get("force_regenerate", False)
+
+    if record.cover_letter and not force_regenerate:
         return JsonResponse({"cover_letter": record.cover_letter})
 
     try:
-        letter = generate_cover_letter(record.resume_text, record.job_desc_full)
+        letter = generate_cover_letter(
+            record.resume_text, 
+            record.job_desc_full, 
+            tone=tone, 
+            length=length, 
+            highlights=highlights
+        )
         record.cover_letter = letter
         record.save()
         return JsonResponse({"cover_letter": letter})
@@ -468,11 +486,10 @@ def generate_cover_letter_api(request, analysis_id):
 
 def export_cover_letter_pdf(request, analysis_id):
     """Generates a PDF of the cover letter and returns it as a download."""
-    perms = get_premium_permissions(request.user, analysis_id)
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
+    perms = get_premium_permissions(request.user, record)
     if not perms["can_cover_letter"]:
         return HttpResponse("Premium subscription required.", status=403)
-
-    record = perms["record"]
 
     if not record.cover_letter:
         return HttpResponse("Cover letter not generated yet.", status=400)
@@ -503,11 +520,10 @@ def export_cover_letter_pdf(request, analysis_id):
 
 def export_report_pdf(request, analysis_id):
     """Generates a PDF of the match report and returns it as a download."""
-    perms = get_premium_permissions(request.user, analysis_id)
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
+    perms = get_premium_permissions(request.user, record)
     if not perms["can_download_pdf"]:
         return HttpResponse("Pro, Elite, or Unlimited subscription required to download PDF report.", status=403)
-
-    record = perms["record"]
 
     if record.status != 'completed':
         return HttpResponse("Report not ready yet.", status=400)
@@ -538,7 +554,7 @@ def export_report_pdf(request, analysis_id):
     pisa_status = pisa.CreatePDF(html_string, dest=buffer)
 
     if pisa_status.err:
-        return HttpResponse("We had some errors <pre>" + html_string + "</pre>")
+        return HttpResponse("Failed to generate PDF. Please try again later.", status=500)
 
     buffer.seek(0)
     response = HttpResponse(buffer, content_type="application/pdf")
@@ -548,8 +564,6 @@ def export_report_pdf(request, analysis_id):
 
 
 # ── Razorpay Payments ────────────────────────────────────────────
-
-from django.utils import timezone
 
 def pricing_view(request):
     """Serve the pricing / upgrade page."""
@@ -750,10 +764,6 @@ def verify_coupon(request):
 
 # ── Public API ───────────────────────────────────────────────────
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-
 @csrf_exempt
 def api_analyze(request):
     """
@@ -792,7 +802,6 @@ def api_analyze(request):
         })
     except Exception as exc:
         return JsonResponse({"error": str(exc)}, status=500)
-from collections import Counter
 
 @login_required
 def market_insights(request):
@@ -938,8 +947,8 @@ def verify_otp(request):
             return JsonResponse({"status": "error", "message": "Invalid purpose"}, status=400)
         code = data.get('code')
         
-        if purpose not in ['email', 'phone'] or not code:
-            return JsonResponse({"status": "error", "message": "Invalid request parameters"}, status=400)
+        if not code:
+            return JsonResponse({"status": "error", "message": "OTP code is required"}, status=400)
             
         otp_obj = OTP.objects.filter(
             user=request.user, 
@@ -985,5 +994,212 @@ def payment_failed(request):
 def contact_view(request):
     """Render the Contact Us support page."""
     return render(request, "analyzer/contact.html")
+
+
+@login_required
+@require_http_methods(["POST"])
+def start_interview_api(request, analysis_id):
+    """Starts a new mock interview session or resumes an active one."""
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
+    perms = get_premium_permissions(request.user, record)
+    if not perms["can_interview"]:
+        return JsonResponse({"error": "Upgrade to Pro, Elite, or Unlimited to access Mock Interviews."}, status=403)
+
+    session = InterviewSession.objects.filter(user=request.user, analysis=record, status="active").first()
+    is_new = False
+
+    if not session:
+        session = InterviewSession.objects.create(user=request.user, analysis=record)
+        is_new = True
+
+    messages = session.messages.all()
+
+    if is_new or messages.count() == 0:
+        # Generate the first interview question
+        first_question = generate_next_interview_question(record.resume_text, record.job_desc_full, [])
+        InterviewMessage.objects.create(session=session, sender="ai", message=first_question)
+        messages = session.messages.all()
+
+    messages_data = [
+        {
+            "id": msg.id,
+            "sender": msg.sender,
+            "message": msg.message,
+            "feedback": msg.feedback,
+            "score": msg.score,
+            "created_at": msg.created_at.isoformat(),
+        }
+        for msg in messages
+    ]
+
+    return JsonResponse({
+        "session_id": session.id,
+        "messages": messages_data,
+    })
+
+
+@login_required
+@require_http_methods(["POST"])
+def send_interview_message_api(request, session_id):
+    """Handles candidate's reply, evaluates it, and generates the next question."""
+    session = get_object_or_404(InterviewSession, id=session_id, user=request.user)
+    try:
+        body = json.loads(request.body)
+        user_answer = body.get("message", "").strip()
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not user_answer:
+        return JsonResponse({"error": "Answer cannot be empty"}, status=400)
+
+    # Get the last AI message (the question asked)
+    last_ai_msg = session.messages.filter(sender="ai").last()
+    question = last_ai_msg.message if last_ai_msg else "Tell me about your background."
+
+    # Evaluate the user's answer
+    evaluation = evaluate_interview_answer(question, user_answer, session.analysis.job_desc_full)
+    
+    # Save the user's message with score and feedback
+    user_msg = InterviewMessage.objects.create(
+        session=session,
+        sender="user",
+        message=user_answer,
+        feedback=evaluation.get("feedback", ""),
+        score=evaluation.get("score", 70)
+    )
+
+    # Fetch updated history for generating the next question
+    chat_history = [
+        {"sender": m.sender, "message": m.message}
+        for m in session.messages.all()
+    ]
+
+    # Generate the next question
+    next_question = generate_next_interview_question(
+        session.analysis.resume_text,
+        session.analysis.job_desc_full,
+        chat_history
+    )
+
+    # Save next question
+    InterviewMessage.objects.create(session=session, sender="ai", message=next_question)
+
+    # Return all messages in the session
+    messages_data = [
+        {
+            "id": msg.id,
+            "sender": msg.sender,
+            "message": msg.message,
+            "feedback": msg.feedback,
+            "score": msg.score,
+            "created_at": msg.created_at.isoformat(),
+        }
+        for msg in session.messages.all()
+    ]
+
+    return JsonResponse({
+        "session_id": session.id,
+        "messages": messages_data,
+    })
+
+
+@login_required
+@require_http_methods(["POST"])
+def suggest_bullet_rewrite_api(request, analysis_id):
+    """Returns 3 optimized rewrites for a specific resume bullet point."""
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
+    try:
+        body = json.loads(request.body)
+        bullet_point = body.get("bullet_point", "").strip()
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not bullet_point:
+        return JsonResponse({"error": "Bullet point cannot be empty"}, status=400)
+
+    suggestions = suggest_bullet_rewrites(bullet_point, record.job_desc_full)
+    return JsonResponse({"suggestions": suggestions})
+
+
+@login_required
+@require_http_methods(["POST"])
+def recalculate_score_api(request, analysis_id):
+    """Saves edited resume text and recalculates match analytics synchronously."""
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
+    try:
+        body = json.loads(request.body)
+        new_resume_text = body.get("resume_text", "").strip()
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not new_resume_text:
+        return JsonResponse({"error": "Resume text cannot be empty"}, status=400)
+
+    try:
+        # Update text
+        record.resume_text = new_resume_text
+        record.status = 'pending'
+        record.save()
+
+        # Recalculate synchronously
+        process_resume_analysis(str(record.slug))
+        
+        # Refresh record
+        record.refresh_from_db()
+        return JsonResponse({
+            "status": "success",
+            "match_score": record.match_score,
+            "category": record.category,
+            "matched_skills": record.matched_skills,
+            "missing_skills": record.missing_skills,
+            "suggestions": record.suggestions,
+            "experience_gaps": record.experience_gaps,
+            "impact_critiques": record.impact_critiques,
+            "ats_format_issues": record.ats_format_issues
+        })
+    except Exception as exc:
+        return JsonResponse({"error": str(exc)}, status=500)
+
+
+@login_required
+def export_resume_pdf(request, analysis_id):
+    """Parses resume to structured JSON if missing, and outputs standard resume PDF layouts."""
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
+    perms = get_premium_permissions(request.user, record)
+    if not perms["can_download_pdf"]:
+        return HttpResponse("Pro, Elite, or Unlimited subscription required to download resume PDF.", status=403)
+
+    template_layout = request.GET.get("template", "minimal").lower()
+    if template_layout not in ["minimal", "executive", "modern"]:
+        template_layout = "minimal"
+
+    # If structured JSON is not cached, parse the plain text resume
+    if not record.structured_resume:
+        structured_data = parse_resume_to_json(record.resume_text)
+        record.structured_resume = structured_data
+        record.save()
+
+    from django.template.loader import render_to_string
+    import io
+    from xhtml2pdf import pisa
+
+    context = {
+        "resume": record.structured_resume,
+    }
+
+    # Render HTML template
+    template_name = f"analyzer/resume_pdf_{template_layout}.html"
+    html_string = render_to_string(template_name, context)
+
+    buffer = io.BytesIO()
+    pisa_status = pisa.CreatePDF(html_string, dest=buffer)
+
+    if pisa_status.err:
+        return HttpResponse("Failed to generate resume PDF. Please try again.", status=500)
+
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="Optimized_Resume_{template_layout}.pdf"'
+    return response
 
 

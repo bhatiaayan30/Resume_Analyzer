@@ -4,23 +4,43 @@
     <meta charset="utf-8">
     <title>Resume Analyzer Catcher</title>
     <style>
-        body { width: 300px; padding: 16px; font-family: -apple-system, sans-serif; background: #030712; color: #f8fafc; }
-        h2 { font-size: 16px; margin-top: 0; }
-        p { font-size: 13px; color: #94a3b8; }
+        body { width: 300px; padding: 16px; font-family: -apple-system, sans-serif; background: #030712; color: #f8fafc; margin: 0; }
+        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; }
+        h2 { font-size: 16px; margin: 0 0 8px 0; color: #a78bfa; font-weight: 800; letter-spacing: -0.5px; }
+        p { font-size: 13px; color: #94a3b8; margin: 0 0 12px 0; line-height: 1.4; }
         button { 
-            width: 100%; padding: 10px; background: #8b5cf6; color: white; 
+            width: 100%; padding: 10px; background: linear-gradient(135deg, #8b5cf6, #ec4899); color: white; 
             border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
-            transition: 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
-        button:hover { background: #a78bfa; }
-        #status { margin-top: 10px; font-size: 12px; color: #34d399; display: none; }
+        button:hover { 
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+        }
+        button:active { transform: translateY(0); }
+        #status { margin-top: 10px; font-size: 12px; color: #34d399; display: none; text-align: center; font-weight: 500; }
+        .settings-link { margin-top: 12px; font-size: 11px; color: #64748b; cursor: pointer; text-decoration: none; display: block; text-align: right; transition: color 0.2s; }
+        .settings-link:hover { color: #a78bfa; }
+        #settings-panel { display: none; margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; }
+        label { font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px; font-weight: 600; }
+        input { width: 100%; padding: 6px 8px; font-size: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px; box-sizing: border-box; }
+        input:focus { outline: none; border-color: #8b5cf6; }
     </style>
 </head>
 <body>
-    <h2>Resume Analyzer</h2>
-    <p>Extract job description text from the current page and open the analyzer.</p>
-    <button id="capture-btn">Capture & Analyze</button>
-    <div id="status">Captured successfully! Opening app...</div>
+    <div class="card">
+        <h2>Resume Analyzer</h2>
+        <p>Extract job description text from the current page and open the analyzer.</p>
+        <button id="capture-btn">Capture & Analyze</button>
+        <div id="status">Captured successfully! Opening app...</div>
+        
+        <span id="settings-toggle" class="settings-link">⚙️ Options</span>
+        <div id="settings-panel">
+            <label for="server-url-input">Server URL</label>
+            <input type="text" id="server-url-input" value="http://127.0.0.1:8000/">
+        </div>
+    </div>
     <script src="popup.js"></script>
 </body>
 </html>

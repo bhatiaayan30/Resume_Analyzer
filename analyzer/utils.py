@@ -22,6 +22,10 @@ from analyzer.prompt_builder import (
     build_analysis_prompt,
     build_cover_letter_system_prompt,
     build_cover_letter_user_prompt,
+    build_bullet_rewrite_prompt,
+    build_interview_question_prompt,
+    build_interview_feedback_prompt,
+    build_resume_parser_prompt,
 )
 import re
 
@@ -244,7 +248,7 @@ def analyze_with_ai(resume_text: str, job_description: str) -> Tuple[Dict[str, A
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
-def generate_cover_letter(resume_text: str, job_desc: str) -> str:
+def generate_cover_letter(resume_text: str, job_desc: str, tone: str = "Professional", length: str = "Medium", highlights: str = "") -> str:
     """
     Uses Groq (Llama-3) to write a highly customized cover letter based on the resume and job description.
     """
@@ -256,8 +260,8 @@ def generate_cover_letter(resume_text: str, job_desc: str) -> str:
 
     client = Groq(api_key=api_key)
 
-    system_prompt = build_cover_letter_system_prompt()
-    user_prompt = build_cover_letter_user_prompt(resume_text, job_desc)
+    system_prompt = build_cover_letter_system_prompt(tone=tone)
+    user_prompt = build_cover_letter_user_prompt(resume_text, job_desc, length=length, highlights=highlights)
     
     quality_model = os.environ.get("QUALITY_MODEL", "llama-3.3-70b-versatile")
 
@@ -274,9 +278,9 @@ def generate_cover_letter(resume_text: str, job_desc: str) -> str:
     return response.choices[0].message.content.strip()
 
 def generate_otp() -> str:
-    """Generate a 6-digit numeric OTP."""
-    import random
-    return str(random.randint(100000, 999999))
+    """Generate a 6-digit numeric OTP using a cryptographically secure source."""
+    import secrets
+    return str(secrets.randbelow(900000) + 100000)
 
 def send_email_otp(user, otp_code: str):
     """Send OTP to user's email."""
@@ -322,7 +326,7 @@ def send_sms_otp(user, otp_code: str, phone_number: str):
     twilio_number = getattr(settings, 'TWILIO_PHONE_NUMBER', None)
 
     if not account_sid or not auth_token or not twilio_number:
-        logger.warning(f"Twilio credentials missing. Fallback: SMS OTP for {user.username} ({phone_number}) is {otp_code}")
+        logger.warning(f"Twilio credentials missing. SMS OTP for {user.username} could not be sent.")
         return
 
     try:
@@ -337,3 +341,140 @@ def send_sms_otp(user, otp_code: str, phone_number: str):
         logger.error(f"Failed to send SMS to {phone_number}: {e}")
         # In a real app, you might want to raise the exception or handle it
         pass
+
+def suggest_bullet_rewrites(bullet_point: str, job_desc: str) -> list:
+    """Gets 3 improved options for a resume bullet point from AI."""
+    from django.conf import settings
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        return [bullet_point] * 3
+        
+    try:
+        client = Groq(api_key=api_key)
+        prompt = build_bullet_rewrite_prompt(bullet_point, job_desc)
+        model = os.environ.get("FAST_MODEL", "llama3-8b-8192")
+        
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.5,
+            max_tokens=500
+        )
+        
+        content = response.choices[0].message.content.strip()
+        # Clean any markdown code fences if outputted
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+        content = content.strip()
+        
+        return json.loads(content)
+    except Exception as exc:
+        print(f"[utils.suggest_bullet_rewrites] Error: {exc}")
+        return [
+            f"{bullet_point} (Enhanced version 1 - Quantified outcome)",
+            f"{bullet_point} (Enhanced version 2 - Skill integration)",
+            f"{bullet_point} (Enhanced version 3 - Strong action verb)"
+        ]
+
+def generate_next_interview_question(resume_text: str, job_desc: str, chat_history: list) -> str:
+    """Generates the next question in the mock interview chat session."""
+    from django.conf import settings
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        return "Can you tell me about your experience working with technical systems?"
+        
+    try:
+        client = Groq(api_key=api_key)
+        prompt = build_interview_question_prompt(resume_text, job_desc, chat_history)
+        model = os.environ.get("FAST_MODEL", "llama3-8b-8192")
+        
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=300
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as exc:
+        print(f"[utils.generate_next_interview_question] Error: {exc}")
+        return "Tell me about your background and how it matches this role."
+
+def evaluate_interview_answer(question: str, answer: str, job_desc: str) -> dict:
+    """Evaluates candidate response and provides feedback and score."""
+    from django.conf import settings
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        return {"score": 75, "feedback": "Good response. Try to add more metrics."}
+        
+    try:
+        client = Groq(api_key=api_key)
+        prompt = build_interview_feedback_prompt(question, answer, job_desc)
+        model = os.environ.get("FAST_MODEL", "llama3-8b-8192")
+        
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=500
+        )
+        
+        content = response.choices[0].message.content.strip()
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+        content = content.strip()
+        
+        return json.loads(content)
+    except Exception as exc:
+        print(f"[utils.evaluate_interview_answer] Error: {exc}")
+        return {"score": 70, "feedback": f"Your response is noted. Focus on detailing matching skills. Error: {exc}"}
+
+def parse_resume_to_json(resume_text: str) -> dict:
+    """Converts plain text resume to structured JSON format."""
+    from django.conf import settings
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        return {"name": "Candidate", "experience": [], "skills": {}}
+        
+    try:
+        client = Groq(api_key=api_key)
+        prompt = build_resume_parser_prompt(resume_text)
+        model = os.environ.get("QUALITY_MODEL", "llama-3.3-70b-versatile")
+        
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=2000
+        )
+        
+        content = response.choices[0].message.content.strip()
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+        content = content.strip()
+        
+        return json.loads(content)
+    except Exception as exc:
+        print(f"[utils.parse_resume_to_json] Error: {exc}")
+        # Build basic fallback object by splitting text
+        lines = [l.strip() for l in resume_text.split("\n") if l.strip()]
+        name = lines[0] if lines else "Candidate"
+        return {
+            "name": name,
+            "contact": {"email": "", "phone": ""},
+            "summary": "AI Parsing fell back. Raw text available for editing.",
+            "experience": [{"role": "Professional", "company": "Experience", "duration": "", "bullets": [resume_text[:200]]}],
+            "education": [],
+            "skills": {"other": ["AI parsing failed"]}
+        }

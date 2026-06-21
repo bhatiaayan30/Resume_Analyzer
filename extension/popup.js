@@ -1,18 +1,57 @@
-document.getElementById('capture-btn').addEventListener('click', async () => {
-    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
-    chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: extractAndCopyJobDescription,
-    }, (results) => {
-        if (results && results[0] && results[0].result) {
-            document.getElementById('status').style.display = 'block';
-            setTimeout(() => {
-                // Change to the production URL when deployed
-                chrome.tabs.create({ url: 'http://127.0.0.1:8000/' });
-            }, 1000);
+document.addEventListener('DOMContentLoaded', () => {
+    const serverUrlInput = document.getElementById('server-url-input');
+    const settingsToggle = document.getElementById('settings-toggle');
+    const settingsPanel = document.getElementById('settings-panel');
+    const captureBtn = document.getElementById('capture-btn');
+
+    // Load saved settings
+    chrome.storage.sync.get({ serverUrl: 'http://127.0.0.1:8000/' }, (items) => {
+        if (serverUrlInput) {
+            serverUrlInput.value = items.serverUrl;
         }
     });
+
+    // Save settings on input change
+    if (serverUrlInput) {
+        serverUrlInput.addEventListener('input', () => {
+            let url = serverUrlInput.value.trim();
+            if (url && !url.endsWith('/')) {
+                url += '/';
+            }
+            chrome.storage.sync.set({ serverUrl: url });
+        });
+    }
+
+    // Toggle settings panel
+    if (settingsToggle) {
+        settingsToggle.addEventListener('click', () => {
+            if (settingsPanel.style.display === 'none' || !settingsPanel.style.display) {
+                settingsPanel.style.display = 'block';
+            } else {
+                settingsPanel.style.display = 'none';
+            }
+        });
+    }
+
+    if (captureBtn) {
+        captureBtn.addEventListener('click', async () => {
+            let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: extractAndCopyJobDescription,
+            }, (results) => {
+                if (results && results[0] && results[0].result) {
+                    document.getElementById('status').style.display = 'block';
+                    setTimeout(() => {
+                        chrome.storage.sync.get({ serverUrl: 'http://127.0.0.1:8000/' }, (items) => {
+                            chrome.tabs.create({ url: items.serverUrl });
+                        });
+                    }, 1000);
+                }
+            });
+        });
+    }
 });
 
 function extractAndCopyJobDescription() {

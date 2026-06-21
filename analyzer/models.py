@@ -42,9 +42,7 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
 
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    UserProfile.objects.get_or_create(user=instance)
+
 
 
 
@@ -115,6 +113,9 @@ class ResumeAnalysis(models.Model):
     # Token Tracking
     prompt_tokens = models.IntegerField(default=0, blank=True, null=True)
     completion_tokens = models.IntegerField(default=0, blank=True, null=True)
+    
+    # Cached structured resume JSON for template styling
+    structured_resume = models.JSONField(default=dict, blank=True)
     class Meta:
         ordering = ["-created_at"]
 
@@ -150,3 +151,26 @@ class OTP(models.Model):
 
     def __str__(self):
         return f"{self.purpose} OTP for {self.user.username}"
+
+class InterviewSession(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="interview_sessions")
+    analysis = models.ForeignKey(ResumeAnalysis, on_delete=models.CASCADE, related_name="interview_sessions")
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default="active") # active, completed
+
+    def __str__(self):
+        return f"Interview for {self.user.username} - {self.analysis.filename} ({self.created_at:%Y-%m-%d})"
+
+class InterviewMessage(models.Model):
+    session = models.ForeignKey(InterviewSession, on_delete=models.CASCADE, related_name="messages")
+    sender = models.CharField(max_length=10) # "user" or "ai"
+    message = models.TextField()
+    feedback = models.TextField(blank=True, null=True) # AI feedback on user's response
+    score = models.IntegerField(blank=True, null=True) # AI score on user's response (0-100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.sender.upper()} in Session {self.session.id}"

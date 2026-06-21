@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ resume.name }} - Resume</title>
+    <style>
+        @page {
+            size: letter portrait;
+            margin: 1.5cm;
+            @frame footer_frame {           
+                -pdf-frame-content: footer_content;
+                left: 50pt; width: 512pt; top: 770pt; height: 20pt;
+            }
+        }
+        body {
+            font-family: Times, "Times New Roman", serif;
+            font-size: 10.5pt;
+            line-height: 1.45;
+            color: #1e293b;
+        }
+        .header {
+            border-bottom: 2px solid #1e3a8a;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        .name {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin-bottom: 4px;
+        }
+        .contact-info {
+            font-size: 9.5pt;
+            color: #475569;
+        }
+        .contact-info td {
+            padding: 2px 0;
+        }
+        .section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #1e3a8a;
+            background-color: #f1f5f9;
+            padding: 4px 8px;
+            margin-top: 18px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .summary {
+            margin-bottom: 15px;
+            text-align: justify;
+            font-style: italic;
+        }
+        .item {
+            margin-bottom: 14px;
+        }
+        .item-title {
+            font-weight: bold;
+            font-size: 11pt;
+            color: #0f172a;
+        }
+        .item-subtitle {
+            font-weight: bold;
+            color: #334155;
+        }
+        .item-right {
+            text-align: right;
+            font-size: 9.5pt;
+            color: #475569;
+            font-weight: bold;
+        }
+        .bullets {
+            margin-top: 4px;
+            margin-bottom: 0;
+            padding-left: 15px;
+        }
+        .bullets li {
+            margin-bottom: 3.5px;
+            text-align: justify;
+        }
+        .skills-list {
+            margin-bottom: 10px;
+        }
+        .skill-item {
+            margin-bottom: 4px;
+        }
+        .footer {
+            font-size: 8.5pt;
+            color: #64748b;
+            text-align: center;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="footer_content" class="footer">
+        Confidential Resume • {{ resume.name }} • Page <pdf:pagenumber>
+    </div>
+
+    <!-- Header Section -->
+    <div class="header">
+        <table style="width: 100%;">
+            <tr>
+                <td style="vertical-align: middle;">
+                    <div class="name">{{ resume.name }}</div>
+                </td>
+                <td style="text-align: right; vertical-align: middle;" class="contact-info">
+                    {% if resume.contact.email %}<div>Email: {{ resume.contact.email }}</div>{% endif %}
+                    {% if resume.contact.phone %}<div>Phone: {{ resume.contact.phone }}</div>{% endif %}
+                    {% if resume.contact.location %}<div>Location: {{ resume.contact.location }}</div>{% endif %}
+                    {% if resume.contact.linkedin %}<div>LinkedIn: {{ resume.contact.linkedin }}</div>{% endif %}
+                    {% if resume.contact.github %}<div>GitHub: {{ resume.contact.github }}</div>{% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Summary Section -->
+    {% if resume.summary %}
+    <div class="section-title">Executive Summary</div>
+    <div class="summary">
+        {{ resume.summary }}
+    </div>
+    {% endif %}
+
+    <!-- Experience Section -->
+    {% if resume.experience %}
+    <div class="section-title">Professional Experience</div>
+    {% for job in resume.experience %}
+    <div class="item">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <span class="item-title">{{ job.role }}</span> | <span class="item-subtitle">{{ job.company }}</span>
+                    {% if job.location %}
+                    <span style="font-size: 9.5pt; color: #64748b;"> - {{ job.location }}</span>
+                    {% endif %}
+                </td>
+                <td class="item-right">
+                    {{ job.duration }}
+                </td>
+            </tr>
+        </table>
+        {% if job.bullets %}
+        <ul class="bullets">
+            {% for bullet in job.bullets %}
+            <li>{{ bullet }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Education Section -->
+    {% if resume.education %}
+    <div class="section-title">Education & Credentials</div>
+    {% for edu in resume.education %}
+    <div class="item">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <span class="item-title">{{ edu.degree }}</span>
+                    <br/>
+                    <span class="item-subtitle">{{ edu.institution }}</span>
+                    {% if edu.location %}
+                    <span style="font-size: 9.5pt; color: #64748b;"> - {{ edu.location }}</span>
+                    {% endif %}
+                </td>
+                <td class="item-right" style="vertical-align: middle;">
+                    {{ edu.duration }}
+                </td>
+            </tr>
+        </table>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Skills Section -->
+    {% if resume.skills %}
+    <div class="section-title">Core Competencies & Skills</div>
+    <div class="skills-list">
+        {% if resume.skills.languages %}
+        <div class="skill-item">
+            <strong>Core Languages:</strong> {{ resume.skills.languages|join:", " }}
+        </div>
+        {% endif %}
+        {% if resume.skills.frameworks %}
+        <div class="skill-item">
+            <strong>Frameworks & Libraries:</strong> {{ resume.skills.frameworks|join:", " }}
+        </div>
+        {% endif %}
+        {% if resume.skills.tools %}
+        <div class="skill-item">
+            <strong>Developer Tools & Platforms:</strong> {{ resume.skills.tools|join:", " }}
+        </div>
+        {% endif %}
+        {% if resume.skills.other %}
+        <div class="skill-item">
+            <strong>Additional Skills:</strong> {{ resume.skills.other|join:", " }}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</body>
+</html>

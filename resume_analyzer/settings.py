@@ -19,11 +19,8 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 # Require keys in production
 if not DEBUG:
-    SECRET_KEY = config("SECRET_KEY", default="django-insecure-fallback-key-do-not-use-in-prod")
-    ENCRYPTION_KEY = config("ENCRYPTION_KEY", default="m4XLU7wYoDxNunv7YahZPCmja_ryje0JiOYL5LBK1s0=")
-    if SECRET_KEY == "django-insecure-fallback-key-do-not-use-in-prod":
-        import warnings
-        warnings.warn("CRITICAL: Running in production without SECRET_KEY or ENCRYPTION_KEY set in environment variables! Using insecure fallbacks.")
+    SECRET_KEY = config("SECRET_KEY")
+    ENCRYPTION_KEY = config("ENCRYPTION_KEY")
 else:
     SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-this-before-deploying")
     ENCRYPTION_KEY = config("ENCRYPTION_KEY", default="m4XLU7wYoDxNunv7YahZPCmja_ryje0JiOYL5LBK1s0=")
@@ -100,7 +97,7 @@ WSGI_APPLICATION = "resume_analyzer.wsgi.application"
 # ── Database ───────────────────────────────────────────────────
 # SQLite is fine for local dev. Swap to PostgreSQL for production.
 DATABASE_URL = config("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
-DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=0)}
+DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=0 if DEBUG else 600)}
 
 
 # ── Auth ───────────────────────────────────────────────────────

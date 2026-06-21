@@ -36,5 +36,12 @@ urlpatterns = [
     path("api/verify-otp/", views.verify_otp, name="verify_otp"),
     path("payment-failed/", views.payment_failed, name="payment_failed"),
     path("contact/", views.contact_view, name="contact"),
+    
+    # New Premium Features
+    path("interview/start/<uuid:analysis_id>/", views.start_interview_api, name="start_interview_api"),
+    path("interview/send/<int:session_id>/", views.send_interview_message_api, name="send_interview_message_api"),
+    path("bullet-rewrite/<uuid:analysis_id>/", views.suggest_bullet_rewrite_api, name="suggest_bullet_rewrite_api"),
+    path("recalculate-score/<uuid:analysis_id>/", views.recalculate_score_api, name="recalculate_score_api"),
+    path("export-resume/<uuid:analysis_id>/", views.export_resume_pdf, name="export_resume_pdf"),
 ]
 

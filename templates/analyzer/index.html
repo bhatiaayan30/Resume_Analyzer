@@ -176,34 +176,39 @@
 
                <!-- Cloud / LinkedIn Section -->
                <div id="cloud-section" class="hidden flex flex-col w-full rounded-2xl border border-dashed border-gray-700/60 bg-slate-950/20 p-5 gap-4">
-                   <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                       <button type="button" id="btn-gdrive" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-brand/40 hover:bg-brand-light/5 transition-all gap-2 group">
-                           <span class="text-2xl">🤖</span>
-                           <span class="text-xs font-semibold text-gray-300 group-hover:text-white">Google Drive</span>
-                       </button>
-                       <button type="button" id="btn-dropbox" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-brand/40 hover:bg-brand-light/5 transition-all gap-2 group">
-                           <span class="text-2xl">📦</span>
-                           <span class="text-xs font-semibold text-gray-300 group-hover:text-white">Dropbox</span>
-                       </button>
-                       <button type="button" id="btn-onedrive" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-brand/40 hover:bg-brand-light/5 transition-all gap-2 group">
-                           <span class="text-2xl">☁️</span>
-                           <span class="text-xs font-semibold text-gray-300 group-hover:text-white">OneDrive</span>
-                       </button>
-                       <button type="button" id="btn-linkedin" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-brand/40 hover:bg-brand-light/5 transition-all gap-2 group">
-                           <span class="text-2xl">💼</span>
-                           <span class="text-xs font-semibold text-gray-300 group-hover:text-white">LinkedIn</span>
-                       </button>
+                   <div class="text-center text-xs text-gray-400 mb-2">
+                       <span class="inline-flex items-center gap-1.5 justify-center">
+                           <svg class="w-4 h-4 text-brand animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                           Get your resume from your cloud storage or profile, then upload it in the <strong>Upload File</strong> tab.
+                       </span>
                    </div>
-                   
-                   <input type="hidden" name="cloud_filename" id="cloud_filename" value="">
-
-                   <!-- Selected Cloud File Display -->
-                   <div id="cloud-display" class="hidden flex items-center justify-between p-4 bg-brand/10 border border-brand/20 rounded-xl text-brand">
-                       <div class="flex items-center space-x-2">
-                           <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                           <span id="cloud-selected-text" class="text-sm font-bold"></span>
-                       </div>
-                       <button type="button" id="btn-clear-cloud" class="text-xs text-gray-400 hover:text-white underline">Clear Selection</button>
+                   <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                       <a href="https://drive.google.com/" target="_blank" rel="noopener noreferrer" id="btn-gdrive" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#34A853]/60 hover:bg-[#34A853]/5 hover:shadow-[0_0_15px_rgba(52,168,83,0.15)] transition-all gap-2 group">
+                           <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                             <path d="M12.01 1.485c-2.082 0-3.754.02-3.743.047.01.02 1.708 3.001 3.774 6.62l3.76 6.574h3.76c2.081 0 3.753-.02 3.742-.047-.005-.02-1.708-3.001-3.775-6.62l-3.76-6.574z" fill="#FFC107"/>
+                             <path d="M7.25 3.214c-.005-.006-.85-1.49-2.255-4.103L1.365 5.43 0 7.82l1.89 3.298 1.885 3.297 3.62-6.335 3.618-6.33-1.88-3.287" fill="#2196F3"/>
+                             <path d="M9.509 15.867l-.203.348c-.114.198-.96 1.672-1.88 3.287a423.93 423.948 0 0 1-1.698 2.97c-.01.026 3.24.042 7.222.042h7.244l1.796-3.157c.992-1.734 1.85-3.23 1.906-3.323l.104-.167h-7.249z" fill="#4CAF50"/>
+                           </svg>
+                           <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">Google Drive</span>
+                       </a>
+                       <a href="https://www.dropbox.com/" target="_blank" rel="noopener noreferrer" id="btn-dropbox" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#0061FE]/60 hover:bg-[#0061FE]/5 hover:shadow-[0_0_15px_rgba(0,97,254,0.15)] transition-all gap-2 group">
+                           <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="#0061FE" xmlns="http://www.w3.org/2000/svg">
+                             <path d="M6 1.807L0 5.629l6 3.822 6.001-3.822L6 1.807zM18 1.807l-6 3.822 6 3.822 6-3.822-6-3.822zM0 13.274l6 3.822 6.001-3.822L6 9.452l-6 3.822zM18 9.452l-6 3.822 6 3.822 6-3.822-6-3.822zM6 18.371l6.001 3.822 6-3.822-6-3.822L6 18.371z"/>
+                           </svg>
+                           <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">Dropbox</span>
+                       </a>
+                       <a href="https://onedrive.live.com/" target="_blank" rel="noopener noreferrer" id="btn-onedrive" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#0078D4]/60 hover:bg-[#0078D4]/5 hover:shadow-[0_0_15px_rgba(0,120,212,0.15)] transition-all gap-2 group">
+                           <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="#0078D4" xmlns="http://www.w3.org/2000/svg">
+                             <path d="M19.453 9.95q.961.058 1.787.468.826.41 1.442 1.066.615.657.966 1.512.352.856.352 1.816 0 1.008-.387 1.893-.386.885-1.049 1.547-.662.662-1.546 1.049-.885.387-1.893.387H6q-1.242 0-2.332-.475-1.09-.475-1.904-1.29-.815-.814-1.29-1.903Q0 14.93 0 13.688q0-.985.31-1.887.311-.903.862-1.658.55-.756 1.324-1.325.774-.568 1.711-.861.434-.129.85-.187.416-.06.861-.082h.012q.515-.786 1.207-1.413.691-.627 1.5-1.066.808-.44 1.705-.668.896-.229 1.845-.229 1.278 0 2.456.417 1.177.416 2.144 1.16.967.744 1.658 1.78.692 1.038 1.008 2.28zm-7.265-4.137q-1.325 0-2.52.544-1.195.545-2.04 1.565.446.117.85.299.405.181.792.416l4.78 2.86 2.731-1.15q.27-.117.545-.204.276-.088.58-.147-.293-.937-.855-1.705-.563-.768-1.319-1.318-.755-.551-1.658-.856-.902-.304-1.886-.304zM2.414 16.395l9.914-4.184-3.832-2.297q-.586-.351-1.23-.539-.645-.188-1.325-.188-.914 0-1.722.364-.809.363-1.412.978-.604.616-.955 1.436-.352.82-.352 1.723 0 .703.234 1.423.235.721.68 1.284zm16.711 1.793q.563 0 1.078-.176.516-.176.961-.516l-7.23-4.324-10.301 4.336q.527.328 1.13.504.604.175 1.237.175zm3.012-1.852q.363-.727.363-1.523 0-.774-.293-1.407t-.791-1.072q-.498-.44-1.166-.68-.668-.24-1.406-.24-.422 0-.838.1t-.815.252q-.398.152-.785.334-.386.181-.761.345Z"/>
+                           </svg>
+                           <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">OneDrive</span>
+                       </a>
+                       <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" id="btn-linkedin" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#0077B5]/60 hover:bg-[#0077B5]/5 hover:shadow-[0_0_15px_rgba(0,119,181,0.15)] transition-all gap-2 group">
+                           <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="#0077B5" xmlns="http://www.w3.org/2000/svg">
+                             <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                           </svg>
+                           <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">LinkedIn</span>
+                       </a>
                    </div>
                </div>
                
@@ -405,8 +410,9 @@ document.addEventListener('DOMContentLoaded', function() {
             alert("Please take or upload a photo of your resume.");
             return;
         }
-        if (resumeInputType.value === 'cloud' && !cloudFilenameInput.value) {
-            alert("Please select a cloud file or import your LinkedIn profile.");
+        if (resumeInputType.value === 'cloud') {
+            alert("Please download your resume from the cloud service, then select 'Upload File' or 'Paste Text' to submit it.");
+            tabUpload.click();
             return;
         }
         if (resumeInputType.value === 'text' && !document.getElementById('resume_text').value.trim()) {
@@ -548,251 +554,4 @@ if (trendDataEl) {
 }
 </script>
 
-<!-- Cloud Modals and Dialog Controller -->
-<div id="cloud-modal-container">
-    <!-- Cloud File Picker Modal -->
-    <div id="cloud-file-modal" style="display: none;" class="fixed inset-0 z-[110] flex items-center justify-center bg-dark/80 backdrop-blur-md p-4">
-        <div class="premium-card w-full max-w-md relative flex flex-col gap-4">
-            <h3 class="text-lg font-bold text-white">Select File from <span id="modal-cloud-title">Cloud</span></h3>
-            <p class="text-xs text-gray-400 -mt-2">Choose one of your synced resumes below to import.</p>
-            
-            <!-- Simulated search bar -->
-            <input type="text" placeholder="Search files..." class="w-full px-3 py-2 bg-gray-900/40 border border-white/5 rounded-lg text-sm focus:outline-none focus:border-brand">
-            
-            <!-- Mock files list -->
-            <div class="flex flex-col gap-2 max-h-60 overflow-y-auto">
-                <button type="button" class="mock-file-btn flex items-center justify-between p-3 bg-gray-900/20 hover:bg-brand-light/5 border border-white/5 hover:border-brand/40 rounded-xl text-left transition-all" data-filename="Software_Engineer_Resume_2026.pdf" data-resume-text="Ayan Bhatia&#10;Software Engineer&#10;Email: ayan@example.com&#10;Skills: Python, Django, React, Javascript, SQL, Docker, AWS, Git&#10;Experience: Backend Engineer at TechCorp (2024-Present)...">
-                    <div class="flex items-center gap-3">
-                        <span class="text-xl">📄</span>
-                        <div class="flex flex-col">
-                            <span class="text-sm font-semibold text-gray-300">Software_Engineer_Resume_2026.pdf</span>
-                            <span class="text-[10px] text-gray-500">PDF • 1.2 MB • Updated 2 days ago</span>
-                        </div>
-                    </div>
-                </button>
-                <button type="button" class="mock-file-btn flex items-center justify-between p-3 bg-gray-900/20 hover:bg-brand-light/5 border border-white/5 hover:border-brand/40 rounded-xl text-left transition-all" data-filename="Product_Manager_CV_Final.docx" data-resume-text="Sarah Jenkins&#10;Product Manager&#10;Email: sarah@example.com&#10;Skills: Product Strategy, Agile, Scrum, SQL, Jira, Analytics, UX Design&#10;Experience: Product Manager at InnovateLab (2023-Present)...">
-                    <div class="flex items-center gap-3">
-                        <span class="text-xl">📄</span>
-                        <div class="flex flex-col">
-                            <span class="text-sm font-semibold text-gray-300">Product_Manager_CV_Final.docx</span>
-                            <span class="text-[10px] text-gray-500">DOCX • 840 KB • Updated 1 week ago</span>
-                        </div>
-                    </div>
-                </button>
-                <button type="button" class="mock-file-btn flex items-center justify-between p-3 bg-gray-900/20 hover:bg-brand-light/5 border border-white/5 hover:border-brand/40 rounded-xl text-left transition-all" data-filename="Data_Scientist_Resume.pdf" data-resume-text="Marcus Vance&#10;Data Scientist&#10;Email: marcus@example.com&#10;Skills: Python, R, PyTorch, SQL, Pandas, Tableau, Machine Learning, Statistics&#10;Experience: Data Scientist at AlphaData (2022-Present)...">
-                    <div class="flex items-center gap-3">
-                        <span class="text-xl">📄</span>
-                        <div class="flex flex-col">
-                            <span class="text-sm font-semibold text-gray-300">Data_Scientist_Resume.pdf</span>
-                            <span class="text-[10px] text-gray-500">PDF • 2.1 MB • Updated 3 weeks ago</span>
-                        </div>
-                    </div>
-                </button>
-            </div>
-            
-            <!-- Simulated Loading Progress -->
-            <div id="modal-progress-container" class="hidden flex flex-col gap-2 border-t border-white/5 pt-4">
-                <div class="flex justify-between text-xs font-semibold text-gray-400">
-                    <span id="modal-progress-status">Downloading file from cloud...</span>
-                    <span id="modal-progress-percent">0%</span>
-                </div>
-                <div class="w-full bg-gray-800 rounded-full h-1.5">
-                    <div id="modal-progress-bar" class="bg-brand h-1.5 rounded-full" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-3 border-t border-white/5 pt-4">
-                <button type="button" id="btn-close-cloud-modal" class="px-4 py-2 bg-transparent hover:bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:text-white">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- LinkedIn Profile Scraper Modal -->
-    <div id="linkedin-modal" style="display: none;" class="fixed inset-0 z-[110] flex items-center justify-center bg-dark/80 backdrop-blur-md p-4">
-        <div class="premium-card w-full max-w-md relative flex flex-col gap-4">
-            <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                <span class="text-xl">💼</span>
-                Extract from LinkedIn Profile
-            </h3>
-            <p class="text-xs text-gray-400 -mt-2">Enter your LinkedIn profile URL below to extract your profile achievements directly.</p>
-            
-            <div class="space-y-4">
-                <div class="space-y-2">
-                    <label class="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider">LinkedIn Profile URL</label>
-                    <input type="url" id="linkedin-url" value="https://linkedin.com/in/ayan-bhatia" placeholder="e.g. https://linkedin.com/in/ayan-bhatia" class="w-full px-4 py-3 bg-gray-900/40 border border-white/5 rounded-xl text-sm focus:outline-none focus:border-brand">
-                </div>
-
-                <!-- Scraping Progress States -->
-                <div id="linkedin-status-container" class="hidden flex flex-col gap-3 p-4 bg-brand/5 border border-brand/20 rounded-xl">
-                    <div class="flex items-center gap-3 text-xs text-brand font-semibold">
-                        <svg class="animate-spin h-4 w-4 text-brand" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span id="linkedin-status-text">Connecting to LinkedIn APIs...</span>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end gap-3 border-t border-white/5 pt-4">
-                    <button type="button" id="btn-close-linkedin-modal" class="px-4 py-2 bg-transparent hover:bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:text-white">Cancel</button>
-                    <button type="button" id="btn-start-linkedin-scrape" class="px-5 py-2.5 bg-brand text-white hover:bg-brand-hover rounded-xl text-xs font-bold transition-all shadow-lg shadow-brand/10">Extract Profile</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const cloudFileModal = document.getElementById('cloud-file-modal');
-    const modalCloudTitle = document.getElementById('modal-cloud-title');
-    const btnGDrive = document.getElementById('btn-gdrive');
-    const btnDropbox = document.getElementById('btn-dropbox');
-    const btnOneDrive = document.getElementById('btn-onedrive');
-    const btnLinkedIn = document.getElementById('btn-linkedin');
-    const btnCloseCloudModal = document.getElementById('btn-close-cloud-modal');
-    const cloudDisplay = document.getElementById('cloud-display');
-    const cloudSelectedText = document.getElementById('cloud-selected-text');
-    const btnClearCloud = document.getElementById('btn-clear-cloud');
-    const cloudFilenameInput = document.getElementById('cloud_filename');
-    const resumeTextarea = document.getElementById('resume_text');
-    
-    let currentCloudProvider = '';
-
-    function openCloudModal(provider) {
-        currentCloudProvider = provider;
-        modalCloudTitle.textContent = provider;
-        document.getElementById('modal-progress-container').classList.add('hidden');
-        cloudFileModal.style.display = 'flex';
-    }
-
-    if (btnGDrive) btnGDrive.addEventListener('click', () => openCloudModal('Google Drive'));
-    if (btnDropbox) btnDropbox.addEventListener('click', () => openCloudModal('Dropbox'));
-    if (btnOneDrive) btnOneDrive.addEventListener('click', () => openCloudModal('OneDrive'));
-
-    if (btnCloseCloudModal) {
-        btnCloseCloudModal.addEventListener('click', () => {
-            cloudFileModal.style.display = 'none';
-        });
-    }
-
-    // Mock file select logic with progress bar
-    document.querySelectorAll('.mock-file-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const filename = btn.getAttribute('data-filename');
-            const resumeText = btn.getAttribute('data-resume-text');
-            
-            const progressContainer = document.getElementById('modal-progress-container');
-            const progressStatus = document.getElementById('modal-progress-status');
-            const progressPercent = document.getElementById('modal-progress-percent');
-            const progressBar = document.getElementById('modal-progress-bar');
-            
-            progressContainer.classList.remove('hidden');
-            progressStatus.textContent = "Downloading file from cloud...";
-            
-            let percent = 0;
-            const interval = setInterval(() => {
-                percent += 10;
-                progressPercent.textContent = percent + '%';
-                progressBar.style.width = percent + '%';
-                
-                if (percent >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        cloudFileModal.style.display = 'none';
-                        
-                        // Select the file
-                        cloudFilenameInput.value = `${filename} (${currentCloudProvider})`;
-                        resumeTextarea.value = resumeText;
-                        cloudSelectedText.textContent = `${filename} (${currentCloudProvider})`;
-                        
-                        cloudDisplay.classList.remove('hidden');
-                    }, 400);
-                }
-            }, 80);
-        });
-    });
-
-    if (btnClearCloud) {
-        btnClearCloud.addEventListener('click', () => {
-            cloudFilenameInput.value = '';
-            resumeTextarea.value = '';
-            cloudDisplay.classList.add('hidden');
-        });
-    }
-
-    // LinkedIn Selector Modal
-    const linkedinModal = document.getElementById('linkedin-modal');
-    const btnCloseLinkedinModal = document.getElementById('btn-close-linkedin-modal');
-    const btnStartLinkedinScrape = document.getElementById('btn-start-linkedin-scrape');
-    const linkedinUrlInput = document.getElementById('linkedin-url');
-    const linkedinStatusContainer = document.getElementById('linkedin-status-container');
-    const linkedinStatusText = document.getElementById('linkedin-status-text');
-
-    if (btnLinkedIn) {
-        btnLinkedIn.addEventListener('click', () => {
-            linkedinStatusContainer.classList.add('hidden');
-            linkedinModal.style.display = 'flex';
-        });
-    }
-
-    if (btnCloseLinkedinModal) {
-        btnCloseLinkedinModal.addEventListener('click', () => {
-            linkedinModal.style.display = 'none';
-        });
-    }
-
-    if (btnStartLinkedinScrape) {
-        btnStartLinkedinScrape.addEventListener('click', () => {
-            const url = linkedinUrlInput.value.trim();
-            if (!url) {
-                alert("Please enter a valid LinkedIn URL.");
-                return;
-            }
-
-            linkedinStatusContainer.classList.remove('hidden');
-            
-            const steps = [
-                "Connecting to LinkedIn API gateway...",
-                "Resolving profile identifier...",
-                "Scraping professional summary and bio...",
-                "Parsing work experience & education details...",
-                "Extracting skills checklist...",
-                "Formatting profile resume..."
-            ];
-
-            let stepIndex = 0;
-            const interval = setInterval(() => {
-                if (stepIndex < steps.length) {
-                    linkedinStatusText.textContent = steps[stepIndex];
-                    stepIndex++;
-                } else {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        linkedinModal.style.display = 'none';
-                        
-                        // Extract name from URL
-                        let name = "Ayan Bhatia";
-                        if (url.includes('/in/')) {
-                            const parts = url.split('/in/');
-                            if (parts[1]) {
-                                name = parts[1].replace(/[-_]/g, ' ').replace(/\//g, '').toUpperCase();
-                                name = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-                            }
-                        }
-
-                        const profileText = `${name}\nSoftware Engineer\nLinkedIn: ${url.replace('https://', '')}\n\nSummary:\nExperienced full-stack engineer and tech founder building AI products.\n\nSkills:\nPython, Django, React, JavaScript, AWS, Docker, Git, Machine Learning\n\nExperience:\nFounder & Lead Engineer at Resume Analyzer AI (2025-Present)\nSoftware Engineering Intern at FAANG Corp (2024)`;
-                        
-                        cloudFilenameInput.value = `LinkedIn Profile: ${name}`;
-                        resumeTextarea.value = profileText;
-                        cloudSelectedText.textContent = `LinkedIn Profile: ${name}`;
-                        
-                        cloudDisplay.classList.remove('hidden');
-                    }, 400);
-                }
-            }, 600);
-        });
-    }
-});
-</script>
 {% endblock %}

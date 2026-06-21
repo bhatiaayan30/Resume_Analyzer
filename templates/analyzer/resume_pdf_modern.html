@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ resume.name }} - Resume</title>
+    <style>
+        @page {
+            size: letter portrait;
+            margin: 1cm;
+            @frame footer_frame {           
+                -pdf-frame-content: footer_content;
+                left: 30pt; width: 552pt; top: 770pt; height: 18pt;
+            }
+        }
+        body {
+            font-family: Helvetica, sans-serif;
+            font-size: 9.5pt;
+            line-height: 1.35;
+            color: #334155;
+        }
+        .main-layout {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .sidebar {
+            width: 32%;
+            background-color: #f8fafc;
+            padding: 15px;
+            vertical-align: top;
+            border-right: 1px solid #e2e8f0;
+        }
+        .content {
+            width: 68%;
+            padding: 15px 15px 15px 25px;
+            vertical-align: top;
+        }
+        .name {
+            font-size: 20pt;
+            font-weight: bold;
+            color: #7c3aed; /* Modern Purple */
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+        .role-title {
+            font-size: 11pt;
+            color: #64748b;
+            margin-bottom: 15px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .sidebar-section-title {
+            font-size: 10pt;
+            font-weight: bold;
+            color: #7c3aed;
+            text-transform: uppercase;
+            border-bottom: 1.5px solid #7c3aed;
+            padding-bottom: 3px;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+        .section-title {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #7c3aed;
+            text-transform: uppercase;
+            border-bottom: 1.5px solid #e2e8f0;
+            padding-bottom: 3px;
+            margin-top: 18px;
+            margin-bottom: 10px;
+        }
+        .contact-item {
+            margin-bottom: 6px;
+            font-size: 8.5pt;
+            word-wrap: break-word;
+        }
+        .contact-label {
+            font-weight: bold;
+            color: #475569;
+        }
+        .summary {
+            text-align: justify;
+            margin-bottom: 15px;
+        }
+        .item {
+            margin-bottom: 12px;
+        }
+        .item-header {
+            margin-bottom: 2px;
+        }
+        .item-title {
+            font-weight: bold;
+            font-size: 10pt;
+            color: #1e1b4b;
+        }
+        .item-subtitle {
+            font-weight: bold;
+            color: #4f46e5;
+        }
+        .item-right {
+            font-size: 8.5pt;
+            color: #64748b;
+            font-weight: bold;
+        }
+        .bullets {
+            margin-top: 4px;
+            margin-bottom: 0;
+            padding-left: 12px;
+        }
+        .bullets li {
+            margin-bottom: 3px;
+            text-align: justify;
+        }
+        .edu-item {
+            margin-bottom: 10px;
+            font-size: 9pt;
+        }
+        .edu-degree {
+            font-weight: bold;
+            color: #334155;
+        }
+        .edu-inst {
+            color: #64748b;
+        }
+        .skill-tag {
+            background-color: #f1f5f9;
+            padding: 2px 6px;
+            margin-bottom: 4px;
+            margin-right: 4px;
+            border-radius: 4px;
+            font-size: 8.5pt;
+            color: #334155;
+            display: inline-block;
+        }
+        .footer {
+            font-size: 8pt;
+            color: #94a3b8;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="footer_content" class="footer">
+        Generated with AI Resume Optimizer • {{ resume.name }} • Page <pdf:pagenumber>
+    </div>
+
+    <table class="main-layout">
+        <tr>
+            <!-- Sidebar (Contact, Education, Skills) -->
+            <td class="sidebar">
+                <div class="sidebar-section-title" style="margin-top: 0;">Contact</div>
+                
+                {% if resume.contact.email %}
+                <div class="contact-item">
+                    <span class="contact-label">Email:</span><br/>
+                    {{ resume.contact.email }}
+                </div>
+                {% endif %}
+                
+                {% if resume.contact.phone %}
+                <div class="contact-item">
+                    <span class="contact-label">Phone:</span><br/>
+                    {{ resume.contact.phone }}
+                </div>
+                {% endif %}
+                
+                {% if resume.contact.location %}
+                <div class="contact-item">
+                    <span class="contact-label">Location:</span><br/>
+                    {{ resume.contact.location }}
+                </div>
+                {% endif %}
+                
+                {% if resume.contact.linkedin %}
+                <div class="contact-item">
+                    <span class="contact-label">LinkedIn:</span><br/>
+                    {{ resume.contact.linkedin }}
+                </div>
+                {% endif %}
+                
+                {% if resume.contact.github %}
+                <div class="contact-item">
+                    <span class="contact-label">GitHub:</span><br/>
+                    {{ resume.contact.github }}
+                </div>
+                {% endif %}
+
+                <!-- Education -->
+                {% if resume.education %}
+                <div class="sidebar-section-title">Education</div>
+                {% for edu in resume.education %}
+                <div class="edu-item">
+                    <div class="edu-degree">{{ edu.degree }}</div>
+                    <div class="edu-inst">{{ edu.institution }}</div>
+                    {% if edu.duration %}
+                    <div style="font-size: 8pt; color: #94a3b8;">{{ edu.duration }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <!-- Skills -->
+                {% if resume.skills %}
+                <div class="sidebar-section-title">Skills</div>
+                
+                {% if resume.skills.languages %}
+                <div style="font-weight: bold; margin-top: 5px; font-size: 8.5pt;">Languages:</div>
+                <div style="margin-bottom: 5px;">
+                    {% for s in resume.skills.languages %}
+                    <span class="skill-tag">{{ s }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if resume.skills.frameworks %}
+                <div style="font-weight: bold; margin-top: 5px; font-size: 8.5pt;">Frameworks:</div>
+                <div style="margin-bottom: 5px;">
+                    {% for s in resume.skills.frameworks %}
+                    <span class="skill-tag">{{ s }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if resume.skills.tools %}
+                <div style="font-weight: bold; margin-top: 5px; font-size: 8.5pt;">Tools:</div>
+                <div style="margin-bottom: 5px;">
+                    {% for s in resume.skills.tools %}
+                    <span class="skill-tag">{{ s }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if resume.skills.other %}
+                <div style="font-weight: bold; margin-top: 5px; font-size: 8.5pt;">Other:</div>
+                <div style="margin-bottom: 5px;">
+                    {% for s in resume.skills.other %}
+                    <span class="skill-tag">{{ s }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% endif %}
+            </td>
+
+            <!-- Main Content (Name, Summary, Experience) -->
+            <td class="content">
+                <div class="name" style="margin-top: 0;">{{ resume.name }}</div>
+                <div class="role-title">
+                    {% if resume.experience %}
+                        {{ resume.experience.0.role }}
+                    {% else %}
+                        Professional Resume
+                    {% endif %}
+                </div>
+
+                {% if resume.summary %}
+                <div class="section-title" style="margin-top: 0;">Profile Summary</div>
+                <div class="summary">
+                    {{ resume.summary }}
+                </div>
+                {% endif %}
+
+                {% if resume.experience %}
+                <div class="section-title">Professional Experience</div>
+                {% for job in resume.experience %}
+                <div class="item">
+                    <table style="width: 100%;">
+                        <tr>
+                            <td>
+                                <span class="item-title">{{ job.role }}</span>
+                                <br/>
+                                <span class="item-subtitle">{{ job.company }}</span>
+                                {% if job.location %}
+                                <span style="font-size: 8.5pt; color: #94a3b8;"> — {{ job.location }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="item-right" style="text-align: right; vertical-align: top; width: 100px;">
+                                {{ job.duration }}
+                            </td>
+                        </tr>
+                    </table>
+                    {% if job.bullets %}
+                    <ul class="bullets">
+                        {% for bullet in job.bullets %}
+                        <li>{{ bullet }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

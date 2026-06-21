@@ -1,9 +1,5 @@
-pytest
-pytest-django
-pytest-cov
-mypy
-flake8
-black
-isort
-django-stubs
-types-requests
+ruff>=0.1.0
+black>=23.0.0
+pytest>=7.0.0
+pytest-django>=4.5.0
+pytest-cov>=4.1.0

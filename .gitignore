@@ -3,15 +3,18 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.egg-info/
 
 # Django
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+staticfiles/
 
 # Virtual Environment
 venv/
+.venv/
 env/
 ENV/
 env.bak/
@@ -28,4 +31,9 @@ venv.bak/
 # Media/Static uploads
 media/
 uploads/
+
+# Testing & Linting
 .coverage
+.pytest_cache/
+.ruff_cache/
+htmlcov/
