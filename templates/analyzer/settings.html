@@ -42,7 +42,7 @@
                 this.isLoading = true;
                 
                 try {
-                    const res = await fetch("{% url 'request_otp' %}", {
+                    const res = await fetch('{% url "request_otp" %}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -68,7 +68,7 @@
                 this.isLoading = true;
                 this.otpError = '';
                 try {
-                    const res = await fetch("{% url 'verify_otp' %}", {
+                    const res = await fetch('{% url "verify_otp" %}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
