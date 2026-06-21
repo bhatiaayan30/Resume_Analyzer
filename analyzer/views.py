@@ -316,6 +316,19 @@ def delete_analysis(request, analysis_id):
     return redirect('history')
 
 
+@login_required
+def settings_view(request):
+    """
+    Renders the settings page showing user personal info.
+    """
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    total_scans = ResumeAnalysis.objects.filter(user=request.user).count()
+    return render(request, "analyzer/settings.html", {
+        "profile": profile,
+        "total_scans": total_scans
+    })
+
+
 from django import forms
 
 class CustomUserCreationForm(UserCreationForm):
