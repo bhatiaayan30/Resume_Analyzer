@@ -61,7 +61,7 @@ def analyze(request):
             return redirect('account_login')
         request.session['scan_count'] = scan_count + 1
     else:
-        profile = request.user.profile
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
         tier = profile.subscription_tier
         if tier == 4:
             limit = float('inf')
@@ -461,7 +461,7 @@ def pricing_view(request):
     """Serve the pricing / upgrade page."""
     current_tier = 0
     if request.user.is_authenticated:
-        profile = request.user.profile
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
         if profile.is_premium and profile.current_period_end and profile.current_period_end > timezone.now():
             current_tier = profile.subscription_tier
 
@@ -488,7 +488,7 @@ def create_razorpay_order(request):
     if tier not in base_prices:
         return render(request, "analyzer/pricing.html", {"error": "Invalid tier selected."})
     
-    profile = request.user.profile
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
     now = timezone.now()
     is_active = profile.is_premium and profile.current_period_end and profile.current_period_end > now
 
@@ -528,7 +528,8 @@ def create_razorpay_order(request):
             else:
                 return render(request, "analyzer/pricing.html", {"error": "Coupon is invalid or expired."})
         except Coupon.DoesNotExist:
-            return render(request, "analyzer/pricing.html", {"error": "Coupon not found.", "current_tier": getattr(request.user.profile, 'subscription_tier', 0)})
+            profile, _ = UserProfile.objects.get_or_create(user=request.user)
+            return render(request, "analyzer/pricing.html", {"error": "Coupon not found.", "current_tier": getattr(profile, 'subscription_tier', 0)})
 
     final_price_inr = max(1, price_inr - discount - prorated_credit)
     
@@ -596,7 +597,7 @@ def razorpay_webhook(request):
         if user_id and tier > 0:
             try:
                 user = User.objects.get(id=user_id)
-                profile = user.profile
+                profile, _ = UserProfile.objects.get_or_create(user=user)
                 profile.is_premium = True
                 profile.subscription_tier = tier
                 
@@ -698,7 +699,7 @@ def claim_free_trial(request):
     """
     Grants the user a one-time 24-hour Unlimited (Tier 4) trial.
     """
-    profile = request.user.profile
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
     if profile.has_used_free_trial:
         return JsonResponse({"error": "You have already used your free trial."}, status=400)
     
@@ -721,7 +722,8 @@ def market_insights(request):
     Global Market Trends Dashboard (Premium Feature).
     Aggregates anonymized skill data across all user scans.
     """
-    if not (request.user.profile.is_premium and request.user.profile.subscription_tier >= 1):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    if not (profile.is_premium and profile.subscription_tier >= 1):
         return redirect('pricing')
 
     # Aggregate data

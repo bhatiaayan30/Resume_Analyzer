@@ -222,7 +222,7 @@ def generate_cover_letter(resume_text: str, job_desc: str) -> str:
     system_prompt = build_cover_letter_system_prompt()
     user_prompt = build_cover_letter_user_prompt(resume_text, job_desc)
     
-    quality_model = os.environ.get("QUALITY_MODEL", "llama3-70b-8192")
+    quality_model = os.environ.get("QUALITY_MODEL", "llama-3.3-70b-versatile")
 
     response = client.chat.completions.create(
         model=quality_model,
