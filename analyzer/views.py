@@ -155,6 +155,15 @@ def analyze(request):
             filename = resume_image.name
         except Exception as exc:
             return render_error(str(exc), 422)
+    elif resume_input_type == "cloud":
+        if not resume_text_input:
+            return render_error("Cloud resume data is required.", 400)
+            
+        resume_text = resume_text_input
+        ats_format_issues = []
+        from .utils import check_searchability
+        searchability_checks = check_searchability(resume_text)
+        filename = request.POST.get("cloud_filename", "").strip() or "Cloud Import"
     else:
         if not resume_text_input:
             return render_error("Resume text is required.", 400)

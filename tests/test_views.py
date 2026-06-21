@@ -134,6 +134,38 @@ def test_contact_view(factory):
     assert b"+1 (800) 555-0199" in response.content
 
 
+@pytest.mark.django_db
+def test_cloud_import_analysis(factory):
+    """Submitting a cloud extraction should successfully create a ResumeAnalysis and return 200."""
+    from analyzer.views import analyze
+    from analyzer.models import ResumeAnalysis
+    
+    user = User.objects.create_user(username="clouduser", password="password")
+    
+    request = factory.post(reverse("analyze"), {
+        "resume_input_type": "cloud",
+        "resume_text": "Ayan Bhatia\nSoftware Engineer\nSkills: Python, Django, React",
+        "cloud_filename": "Software_Engineer_Resume_2026.pdf (Google Drive)",
+        "job_description": "We need a Software Engineer with Python skills.",
+    })
+    request.user = user
+    request.session = {}
+    request.META['HTTP_X_REQUESTED_WITH'] = 'XMLHttpRequest'
+    
+    response = analyze(request)
+    assert response.status_code == 200
+    
+    import json
+    data = json.loads(response.content)
+    assert data["status"] == "success"
+    
+    # Assert database record details
+    analysis_record = ResumeAnalysis.objects.get(slug=data["analysis_id"])
+    assert analysis_record.filename == "Software_Engineer_Resume_2026.pdf (Google Drive)"
+    assert "Python" in analysis_record.resume_text
+
+
+
 
 
 
