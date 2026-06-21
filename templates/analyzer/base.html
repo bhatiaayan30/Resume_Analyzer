@@ -584,10 +584,10 @@
           <a href="{% url 'settings' %}" class="text-gray-300 hover:text-white transition-colors" title="Account Settings">
               <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
           </a>
-          <form action="{% url 'logout' %}" method="post" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" style="background:none;border:none;color:var(--danger);opacity:0.8;font-size:15px;font-weight:600;padding:8px 16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">Log out</button>
-          </form>
+            <form action="{% url 'logout' %}" method="post" style="display:inline;" class="logout-form">
+              {% csrf_token %}
+              <button type="submit" class="logout-btn" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">Log out</button>
+            </form>
         {% else %}
           <a href="{% url 'contact' %}">Contact Us</a>
           <a href="{% url 'login' %}">Log in</a>
@@ -620,6 +620,12 @@
          class="md:hidden border-t border-white/10 bg-gray-950/95 backdrop-blur-lg px-6 py-4 flex flex-col gap-3"
          style="display: none;">
          {% if user.is_authenticated %}
+              <div class="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-600 bg-black/20 hover:border-brand hover:bg-brand-light/10 rounded-xl cursor-pointer transition-all duration-300 upload-resume-box" @click="$refs.fileInput.click()">
+                 <div class="text-center" x-show="!fileName">
+                     <svg class="w-8 h-8 text-brand mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     </svg>
+                 </div>
+              </div>
               <div class="flex items-center justify-between border-b border-white/5 pb-2 mb-1">
                   <span class="text-sm font-semibold text-gray-400">Hi, {{ user.username }}</span>
                   {% if user.profile.is_premium %}
