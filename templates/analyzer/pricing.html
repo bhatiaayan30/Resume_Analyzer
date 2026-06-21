@@ -46,7 +46,11 @@
     calculatePrice(baseMonthly, baseAnnual) {
         let price = this.annual ? baseAnnual : baseMonthly;
         if (this.discount_percent > 0) {
-            return Math.max(1, Math.round(price - (price * (this.discount_percent / 100))));
+            let discounted = Math.max(1, Math.round(price - (price * (this.discount_percent / 100))));
+            if (discounted > 9 && discounted % 10 !== 9) {
+                discounted = Math.floor(discounted / 10) * 10 - 1;
+            }
+            return discounted;
         }
         return price;
     }

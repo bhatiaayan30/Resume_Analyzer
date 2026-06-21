@@ -531,6 +531,11 @@ def create_razorpay_order(request):
             return render(request, "analyzer/pricing.html", {"error": "Coupon not found.", "current_tier": getattr(request.user.profile, 'subscription_tier', 0)})
 
     final_price_inr = max(1, price_inr - discount - prorated_credit)
+    
+    if (discount > 0 or prorated_credit > 0) and final_price_inr > 9:
+        if final_price_inr % 10 != 9:
+            final_price_inr = (final_price_inr // 10) * 10 - 1
+            
     amount_in_paise = final_price_inr * 100
 
     try:
