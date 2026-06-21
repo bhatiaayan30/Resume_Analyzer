@@ -690,3 +690,24 @@ def api_analyze(request):
         })
     except Exception as exc:
         return JsonResponse({"error": str(exc)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def claim_free_trial(request):
+    """
+    Grants the user a one-time 24-hour Unlimited (Tier 4) trial.
+    """
+    profile = request.user.profile
+    if profile.has_used_free_trial:
+        return JsonResponse({"error": "You have already used your free trial."}, status=400)
+    
+    # Activate 24h Unlimited Trial
+    profile.is_premium = True
+    profile.subscription_tier = 4
+    profile.current_period_start = timezone.now()
+    profile.current_period_end = timezone.now() + timezone.timedelta(days=1)
+    profile.has_used_free_trial = True
+    profile.save()
+    
+    return JsonResponse({"message": "Free trial activated successfully. You now have 24 hours of Unlimited access!"})

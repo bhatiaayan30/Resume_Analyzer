@@ -60,6 +60,11 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 Download Report PDF
             </a>
+            {% else %}
+            <a href="{% url 'pricing' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-500 hover:text-gray-400 text-sm font-semibold rounded-lg transition-colors border border-gray-600" title="Requires Pro Tier or higher">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                Download Report PDF
+            </a>
             {% endif %}
         </div>
     </div>
@@ -454,7 +459,7 @@
             <!-- Tab 6: Cover Letter (React App) -->
             <div id="tab-cover-letter" class="tab-content space-y-8 hidden">
                 <div style="display:none;">{% csrf_token %}</div>
-                <div id="react-cover-letter-root" data-analysis-id="{{ analysis.id }}" data-can-cover-letter="{{ perms.can_cover_letter|yesno:'true,false' }}"></div>
+                <div id="react-cover-letter-root" data-analysis-id="{{ analysis.id }}" data-can-cover-letter="{{ perms.can_cover_letter|yesno:'true,false' }}" data-can-download-pdf="{{ perms.can_download_pdf|yesno:'true,false' }}"></div>
             </div>
 
         </div>
@@ -479,6 +484,7 @@
         const [copied, setCopied] = useState(false);
 
         const canCoverLetter = rootElement.getAttribute('data-can-cover-letter') === 'true';
+        const canDownloadPdf = rootElement.getAttribute('data-can-download-pdf') === 'true';
 
         const generateLetter = () => {
             setStatus('loading');
@@ -579,13 +585,24 @@
                                 Successfully Generated
                             </span>
                             <div className="flex items-center gap-2">
-                                <a 
-                                    href={`/export-cover-letter/${analysisId}/`}
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-brand/20 hover:bg-brand/30 text-brand text-sm rounded-lg border border-brand/50 transition-colors"
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                    Download PDF
-                                </a>
+                                {canDownloadPdf ? (
+                                    <a 
+                                        href={`/export-cover-letter/${analysisId}/`}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-brand/20 hover:bg-brand/30 text-brand text-sm rounded-lg border border-brand/50 transition-colors"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                        Download PDF
+                                    </a>
+                                ) : (
+                                    <a 
+                                        href="/pricing"
+                                        title="Requires Pro Tier or higher"
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-500 text-sm rounded-lg border border-gray-600 transition-colors"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                        Download PDF
+                                    </a>
+                                )}
                                 <button 
                                     onClick={copyToClipboard}
                                     className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg border border-gray-600 transition-colors"
