@@ -112,6 +112,7 @@
                   </label>
                   <div class="flex bg-gray-800 rounded-lg p-1">
                       <button type="button" id="tab-upload" class="px-4 py-1 text-sm rounded-md bg-brand text-white font-medium transition-all">Upload File</button>
+                      <button type="button" id="tab-camera" class="px-4 py-1 text-sm rounded-md text-gray-400 hover:text-white font-medium transition-all">Scan Photo</button>
                       <button type="button" id="tab-paste" class="px-4 py-1 text-sm rounded-md text-gray-400 hover:text-white font-medium transition-all">Paste Text</button>
                   </div>
               </div>
@@ -138,6 +139,26 @@
               <!-- Paste Textarea -->
               <div id="paste-section" class="hidden field">
                   <textarea name="resume_text" id="resume_text" placeholder="Paste your resume text here..."></textarea>
+              </div>
+
+              <!-- Camera Section -->
+              <div id="camera-section" class="hidden relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-600 bg-black/20 hover:border-brand hover:bg-brand-light/10 rounded-xl cursor-pointer transition-all duration-300">
+                   <div class="flex flex-col items-center justify-center pt-5 pb-6 pointer-events-none">
+                       <svg class="w-10 h-10 mb-3 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                       </svg>
+                       <p id="camera-prompt" class="text-base text-gray-300 font-medium text-center">
+                           <span class="font-bold text-brand">Tap to Open Camera</span><br>
+                           <span class="text-sm font-normal text-gray-500">(Take a clear photo of your resume)</span>
+                       </p>
+                       <div id="camera-display" class="hidden flex items-center space-x-2 text-brand">
+                           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                           <p id="camera-name-text" class="text-lg font-bold">Photo Captured</p>
+                       </div>
+                   </div>
+                   <!-- Hidden camera input -->
+                   <input id="camera-input" type="file" name="resume_image" accept="image/*" capture="environment" class="hidden">
               </div>
               
               <input type="hidden" name="resume_input_type" id="resume_input_type" value="file">
@@ -263,30 +284,61 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Camera handling
+    const cameraSection = document.getElementById('camera-section');
+    const cameraInput = document.getElementById('camera-input');
+    const cameraPrompt = document.getElementById('camera-prompt');
+    const cameraDisplay = document.getElementById('camera-display');
+    const cameraNameText = document.getElementById('camera-name-text');
+
+    cameraSection.addEventListener('click', () => {
+        cameraInput.click();
+    });
+
+    cameraInput.addEventListener('change', () => {
+        if (cameraInput.files.length > 0) {
+            cameraPrompt.classList.add('hidden');
+            cameraDisplay.classList.remove('hidden');
+        }
+    });
+
     // Tab switching
     const tabUpload = document.getElementById('tab-upload');
     const tabPaste = document.getElementById('tab-paste');
+    const tabCamera = document.getElementById('tab-camera');
     const uploadSection = document.getElementById('upload-section');
     const pasteSection = document.getElementById('paste-section');
     const resumeInputType = document.getElementById('resume_input_type');
 
+    function resetTabs() {
+        [tabUpload, tabPaste, tabCamera].forEach(t => {
+            t.classList.replace('text-white', 'text-gray-400');
+            t.classList.replace('bg-brand', 'hover:text-white');
+        });
+        [uploadSection, pasteSection, cameraSection].forEach(s => s.classList.add('hidden'));
+    }
+
     tabUpload.addEventListener('click', () => {
+        resetTabs();
         tabUpload.classList.replace('text-gray-400', 'text-white');
         tabUpload.classList.replace('hover:text-white', 'bg-brand');
-        tabPaste.classList.replace('text-white', 'text-gray-400');
-        tabPaste.classList.replace('bg-brand', 'hover:text-white');
         uploadSection.classList.remove('hidden');
-        pasteSection.classList.add('hidden');
         resumeInputType.value = 'file';
     });
 
+    tabCamera.addEventListener('click', () => {
+        resetTabs();
+        tabCamera.classList.replace('text-gray-400', 'text-white');
+        tabCamera.classList.replace('hover:text-white', 'bg-brand');
+        cameraSection.classList.remove('hidden');
+        resumeInputType.value = 'image';
+    });
+
     tabPaste.addEventListener('click', () => {
+        resetTabs();
         tabPaste.classList.replace('text-gray-400', 'text-white');
         tabPaste.classList.replace('hover:text-white', 'bg-brand');
-        tabUpload.classList.replace('text-white', 'text-gray-400');
-        tabUpload.classList.replace('bg-brand', 'hover:text-white');
         pasteSection.classList.remove('hidden');
-        uploadSection.classList.add('hidden');
         resumeInputType.value = 'text';
     });
 
@@ -296,6 +348,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (resumeInputType.value === 'file' && !fileInput.files.length) {
             alert("Please select a resume file.");
+            return;
+        }
+        if (resumeInputType.value === 'image' && !cameraInput.files.length) {
+            alert("Please take or upload a photo of your resume.");
             return;
         }
         if (resumeInputType.value === 'text' && !document.getElementById('resume_text').value.trim()) {

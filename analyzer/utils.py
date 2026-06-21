@@ -143,6 +143,43 @@ def extract_text(file_obj: Any, ext: str) -> Tuple[str, List[str], List[Dict[str
 
     raise ValueError(f"Unsupported extension: {ext!r}")
 
+def extract_text_from_image(image_bytes: bytes, mime_type: str) -> str:
+    """
+    Extract text from an image using Groq Vision API.
+    """
+    from django.conf import settings
+    import base64
+    
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        raise RuntimeError("GROQ_API_KEY environment variable is not set.")
+
+    client = Groq(api_key=api_key)
+    base64_encoded = base64.b64encode(image_bytes).decode('utf-8')
+    
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.2-11b-vision-preview",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Extract and transcribe all text from this resume image exactly as it appears. Do not include any conversational filler, markdown formatting blocks, or explanations. Only output the raw text."},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{mime_type};base64,{base64_encoded}",
+                            },
+                        },
+                    ],
+                }
+            ],
+            temperature=0.1,
+            max_tokens=4000,
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as exc:
+        raise RuntimeError(f"OCR Failed: {exc}")
 
 # ──────────────────────────────────────────────────────────────
 # AI analysis

@@ -120,6 +120,26 @@ def analyze(request):
             return render_error(str(exc), 422)
             
         filename = resume_file.name
+    elif resume_input_type == "image":
+        resume_image = request.FILES.get("resume_image")
+        if not resume_image:
+            return render_error("A resume photo is required.", 400)
+
+        # ── 3. Validate file size (10 MB cap for images) ──────────
+        if resume_image.size > 10 * 1024 * 1024:
+            return render_error("Image too large. Maximum size is 10 MB.", 400)
+
+        # ── 4. Extract text via OCR ────────────────────────────────
+        try:
+            from .utils import extract_text_from_image, check_searchability
+            image_bytes = resume_image.read()
+            mime_type = resume_image.content_type or "image/jpeg"
+            resume_text = extract_text_from_image(image_bytes, mime_type)
+            ats_format_issues = ["image_upload"] # Indicates formatting could not be fully parsed
+            searchability_checks = check_searchability(resume_text)
+            filename = resume_image.name
+        except Exception as exc:
+            return render_error(str(exc), 422)
     else:
         if not resume_text_input:
             return render_error("Resume text is required.", 400)
