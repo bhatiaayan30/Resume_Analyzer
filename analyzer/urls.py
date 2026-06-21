@@ -31,4 +31,5 @@ urlpatterns = [
     path("webhook/razorpay/", views.razorpay_webhook, name="razorpay_webhook"),
     path("api/analyze/", views.api_analyze, name="api_analyze"),
     path("claim-free-trial/", views.claim_free_trial, name="claim_free_trial"),
+    path("insights/", views.market_insights, name="market_insights"),
 ]

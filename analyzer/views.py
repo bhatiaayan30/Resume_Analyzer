@@ -711,3 +711,50 @@ def claim_free_trial(request):
     profile.save()
     
     return JsonResponse({"message": "Free trial activated successfully. You now have 24 hours of Unlimited access!"})
+
+
+from collections import Counter
+
+@login_required
+def market_insights(request):
+    """
+    Global Market Trends Dashboard (Premium Feature).
+    Aggregates anonymized skill data across all user scans.
+    """
+    if not (request.user.profile.is_premium and request.user.profile.subscription_tier >= 1):
+        return redirect('pricing')
+
+    # Aggregate data
+    analyses = ResumeAnalysis.objects.filter(status='completed')
+    total_scans = analyses.count()
+    
+    if total_scans == 0:
+        return render(request, "analyzer/insights.html", {"error": "Not enough data yet."})
+
+    avg_score = sum(a.match_score for a in analyses) / total_scans
+
+    matched_counter = Counter()
+    missing_counter = Counter()
+
+    for a in analyses:
+        for ms in (a.matched_skills or []):
+            skill_name = ms.get('skill', ms) if isinstance(ms, dict) else ms
+            matched_counter[str(skill_name).title()] += 1
+            
+        for ms in (a.missing_skills or []):
+            skill_name = ms.get('skill', ms) if isinstance(ms, dict) else ms
+            missing_counter[str(skill_name).title()] += 1
+
+    top_matched = matched_counter.most_common(10)
+    top_missing = missing_counter.most_common(10)
+
+    context = {
+        "total_scans": total_scans,
+        "avg_score": round(avg_score, 1),
+        "top_matched_labels": json.dumps([x[0] for x in top_matched]),
+        "top_matched_data": json.dumps([x[1] for x in top_matched]),
+        "top_missing_labels": json.dumps([x[0] for x in top_missing]),
+        "top_missing_data": json.dumps([x[1] for x in top_missing]),
+    }
+
+    return render(request, "analyzer/insights.html", context)
