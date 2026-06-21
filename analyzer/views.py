@@ -341,11 +341,10 @@ def history(request):
     chart_dates = [a.created_at.strftime('%m/%d') for a in chart_analyses]
     chart_scores = [a.match_score for a in chart_analyses]
     
-    import json
     context = {
         "analyses": analyses,
-        "chart_dates_json": json.dumps(chart_dates),
-        "chart_scores_json": json.dumps(chart_scores),
+        "chart_dates_json": chart_dates,
+        "chart_scores_json": chart_scores,
         "has_chart_data": len(chart_scores) >= 2
     }
     
@@ -824,10 +823,10 @@ def market_insights(request):
             context = {
                 "total_scans": 0,
                 "avg_score": 0,
-                "top_matched_labels": "[]",
-                "top_matched_data": "[]",
-                "top_missing_labels": "[]",
-                "top_missing_data": "[]",
+                "top_matched_labels": [],
+                "top_matched_data": [],
+                "top_missing_labels": [],
+                "top_missing_data": [],
                 "selected_category": selected_category,
                 "categories": CATEGORIES,
                 "error": f"Not enough data yet for category '{selected_category}'." if selected_category != "All" else "Not enough data yet."
@@ -854,10 +853,10 @@ def market_insights(request):
             context = {
                 "total_scans": total_scans,
                 "avg_score": round(avg_score, 1),
-                "top_matched_labels": json.dumps([x[0] for x in top_matched]),
-                "top_matched_data": json.dumps([x[1] for x in top_matched]),
-                "top_missing_labels": json.dumps([x[0] for x in top_missing]),
-                "top_missing_data": json.dumps([x[1] for x in top_missing]),
+                "top_matched_labels": [x[0] for x in top_matched],
+                "top_matched_data": [x[1] for x in top_matched],
+                "top_missing_labels": [x[0] for x in top_missing],
+                "top_missing_data": [x[1] for x in top_missing],
                 "selected_category": selected_category,
                 "categories": CATEGORIES,
             }
