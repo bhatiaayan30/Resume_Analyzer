@@ -42,9 +42,13 @@
     var rzp1 = new Razorpay(options);
     
     rzp1.on('payment.failed', function (response){
-        alert("Payment Failed: " + response.error.description);
-        window.location.href = "/pricing/";
+        var errorDesc = encodeURIComponent(response.error.description || 'Payment transaction failed.');
+        var errorCode = encodeURIComponent(response.error.code || 'payment_failed');
+        var orderId = encodeURIComponent((response.error.metadata && response.error.metadata.order_id) || '');
+        var paymentId = encodeURIComponent((response.error.metadata && response.error.metadata.payment_id) || '');
+        window.location.href = "/payment-failed/?error=" + errorDesc + "&code=" + errorCode + "&order_id=" + orderId + "&payment_id=" + paymentId;
     });
+
     
     // Automatically open the checkout modal
     document.addEventListener("DOMContentLoaded", function() {

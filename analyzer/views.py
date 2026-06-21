@@ -952,3 +952,18 @@ def verify_otp(request):
         return JsonResponse({"status": "success", "message": f"{purpose.capitalize()} verified successfully!"})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
+def payment_failed(request):
+    """Render a dedicated error page when payment fails."""
+    error = request.GET.get('error', 'Payment transaction failed. Please try again.')
+    code = request.GET.get('code', 'payment_failed')
+    order_id = request.GET.get('order_id', '')
+    payment_id = request.GET.get('payment_id', '')
+    return render(request, "analyzer/payment_failed.html", {
+        "error": error,
+        "code": code,
+        "order_id": order_id,
+        "payment_id": payment_id,
+    })
+

@@ -34,4 +34,6 @@ urlpatterns = [
     path("insights/", views.market_insights, name="market_insights"),
     path("api/request-otp/", views.request_otp, name="request_otp"),
     path("api/verify-otp/", views.verify_otp, name="verify_otp"),
+    path("payment-failed/", views.payment_failed, name="payment_failed"),
 ]
+
