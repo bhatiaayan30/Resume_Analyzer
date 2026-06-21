@@ -89,7 +89,7 @@
         </h3>
         <p class="text-sm text-gray-300 mb-4 relative z-10">Claim your one-time 24-hour Unlimited Trial. Experience every premium feature, completely free.</p>
         <button 
-            @click="claiming = true; fetch('{% url \'claim_free_trial\' %}', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}}).then(r=>r.json()).then(d=>{if(d.error) {error=d.error;claiming=false;} else {claimed=true; setTimeout(()=>window.location.reload(), 2000);}})"
+            @click="claiming = true; fetch('{% url 'claim_free_trial' %}', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}}).then(r=>r.json()).then(d=>{if(d.error) {error=d.error;claiming=false;} else {claimed=true; setTimeout(()=>window.location.reload(), 2000);}})"
             :disabled="claiming"
             class="relative z-10 bg-white text-gray-900 font-bold px-8 py-3 rounded-full hover:bg-gray-100 transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
         >
