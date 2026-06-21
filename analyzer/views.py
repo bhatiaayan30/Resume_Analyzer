@@ -366,13 +366,43 @@ def delete_analysis(request, analysis_id):
 @login_required
 def settings_view(request):
     """
-    Renders the settings page showing user personal info.
+    Renders the settings page showing user personal info, and handles updates.
     """
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     total_scans = ResumeAnalysis.objects.filter(user=request.user).count()
+    error = None
+    success = None
+
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip()
+        phone_number = request.POST.get("phone_number", "").strip()
+
+        if not username:
+            error = "Username cannot be empty."
+        else:
+            from django.contrib.auth.models import User
+            if User.objects.filter(username=username).exclude(id=request.user.id).exists():
+                error = "Username is already taken."
+            else:
+                try:
+                    # Update User
+                    request.user.username = username
+                    request.user.email = email
+                    request.user.save()
+
+                    # Update UserProfile
+                    profile.phone_number = phone_number
+                    profile.save()
+                    success = "Profile updated successfully!"
+                except Exception as e:
+                    error = f"An error occurred: {str(e)}"
+
     return render(request, "analyzer/settings.html", {
         "profile": profile,
-        "total_scans": total_scans
+        "total_scans": total_scans,
+        "error": error,
+        "success": success
     })
 
 

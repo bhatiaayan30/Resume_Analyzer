@@ -22,6 +22,7 @@ class UserProfile(models.Model):
     razorpay_customer_id = models.CharField(max_length=255, blank=True, null=True)
     razorpay_subscription_id = models.CharField(max_length=255, blank=True, null=True)
     has_used_free_trial = models.BooleanField(default=False)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
 
     def is_active_premium(self):
         if not self.is_premium:
