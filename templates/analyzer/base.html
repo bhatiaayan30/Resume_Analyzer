@@ -356,7 +356,7 @@
           <a href="{% url 'index' %}">Home</a>
           <a href="{% url 'history' %}">History</a>
           {% if user.profile.is_premium %}
-              <a href="{% url 'market_insights' %}" class="text-green-400 font-bold" style="text-shadow: 0 0 5px rgba(74,222,128,0.5);">Insights</a>
+              <a href="{% url 'market_insights' %}">Insights</a>
               <a href="{% url 'pricing' %}" class="text-brand-hover">View Subscription</a>
           {% else %}
               <a href="{% url 'market_insights' %}" class="text-gray-500 hover:text-gray-300 transition-colors" title="Premium Feature">Insights <span class="text-[10px] bg-pink-500/20 text-pink-400 px-1 py-0.5 rounded border border-pink-500/30">PRO</span></a>
@@ -417,7 +417,7 @@
              <a href="{% url 'index' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Home</a>
              <a href="{% url 'history' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">History</a>
              {% if user.profile.is_premium %}
-                 <a href="{% url 'market_insights' %}" class="text-green-400 font-bold py-2 px-3 rounded-lg hover:bg-white/5">Insights</a>
+                 <a href="{% url 'market_insights' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Insights</a>
                  <a href="{% url 'pricing' %}" class="text-brand-hover py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">View Subscription</a>
              {% else %}
                  <a href="{% url 'market_insights' %}" class="text-gray-400 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Insights <span class="text-[10px] bg-pink-500/20 text-pink-400 px-1 py-0.5 rounded border border-pink-500/30">PRO</span></a>
