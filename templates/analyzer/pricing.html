@@ -261,10 +261,10 @@
     <div class="premium-card flex flex-col p-6">
         <h2 class="text-xl font-bold mb-2 text-pink-400">Unlimited</h2>
         <p class="text-sm text-gray-400 mb-4">Career coaches & pros.</p>
-        <div class="text-3xl font-extrabold mb-6 text-white" x-text="'₹' + calculatePrice(999, 9999)">₹999</div>
+        <div class="text-3xl font-extrabold mb-6 text-white" x-text="'₹' + calculatePrice(599, 5999)">₹599</div>
         <div class="text-sm font-normal text-gray-400 mb-2 mt--4">
             <span x-text="annual ? '/yr' : '/mo'">/mo</span>
-            <span x-show="discount_percent > 0" class="ml-2 line-through text-xs text-gray-600" x-text="'₹' + (annual ? 9999 : 999)"></span>
+            <span x-show="discount_percent > 0" class="ml-2 line-through text-xs text-gray-600" x-text="'₹' + (annual ? 5999 : 599)"></span>
         </div>
         <div class="text-xs text-pink-400/80 mb-6 font-medium">
             ≈ <span x-text="annual ? '₹' + (calculatePrice(999, 9999) / 365).toFixed(1) : '₹' + (calculatePrice(999, 9999) / 30).toFixed(1)"></span> /day

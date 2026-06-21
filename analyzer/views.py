@@ -882,11 +882,13 @@ def request_otp(request):
         purpose = data.get('purpose')
         if purpose not in ['email', 'phone']:
             return JsonResponse({"status": "error", "message": "Invalid purpose"}, status=400)
-            
         if purpose == 'phone':
             phone_number = data.get('phone_number')
             if not phone_number:
-                return JsonResponse({"status": "error", "message": "Phone number required"}, status=400)
+                # Use existing phone number from profile if available
+                phone_number = getattr(request.user.profile, 'phone_number', None)
+                if not phone_number:
+                    return JsonResponse({"status": "error", "message": "Phone number required"}, status=400)
             request.user.profile.phone_number = phone_number
             request.user.profile.save()
             
@@ -918,6 +920,8 @@ def verify_otp(request):
     try:
         data = json.loads(request.body)
         purpose = data.get('purpose')
+        if purpose not in ['email', 'phone']:
+            return JsonResponse({"status": "error", "message": "Invalid purpose"}, status=400)
         code = data.get('code')
         
         if purpose not in ['email', 'phone'] or not code:
