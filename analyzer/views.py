@@ -364,7 +364,10 @@ def delete_analysis(request, analysis_id):
     return redirect('history')
 
 
+from django.views.decorators.csrf import ensure_csrf_cookie
+
 @login_required
+@ensure_csrf_cookie
 def settings_view(request):
     """
     Renders the settings page showing user personal info, and handles updates.

@@ -353,7 +353,7 @@
                   {% endif %}
               {% endif %}
           </div>
-          <a href="{% url 'index' %}">Upload</a>
+          <a href="{% url 'index' %}">Home</a>
           <a href="{% url 'history' %}">History</a>
           {% if user.profile.is_premium %}
               <a href="{% url 'market_insights' %}" class="text-green-400 font-bold" style="text-shadow: 0 0 5px rgba(74,222,128,0.5);">Insights</a>
@@ -367,7 +367,7 @@
           </a>
           <form action="{% url 'logout' %}" method="post" style="display:inline;">
             {% csrf_token %}
-            <button type="submit" style="background:none;border:none;color:var(--text-muted);font-size:15px;font-weight:600;padding:8px 16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--text-muted)'">Log out</button>
+            <button type="submit" style="background:none;border:none;color:var(--danger);opacity:0.8;font-size:15px;font-weight:600;padding:8px 16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">Log out</button>
           </form>
         {% else %}
           <a href="{% url 'login' %}">Log in</a>
@@ -414,7 +414,7 @@
                      {% endif %}
                  {% endif %}
              </div>
-             <a href="{% url 'index' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Upload</a>
+             <a href="{% url 'index' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Home</a>
              <a href="{% url 'history' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">History</a>
              {% if user.profile.is_premium %}
                  <a href="{% url 'market_insights' %}" class="text-green-400 font-bold py-2 px-3 rounded-lg hover:bg-white/5">Insights</a>

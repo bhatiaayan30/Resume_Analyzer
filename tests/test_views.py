@@ -82,3 +82,45 @@ def test_free_tier_monthly_limit(factory):
     assert data["status"] == "limit_reached"
 
 
+@pytest.mark.django_db
+def test_request_otp_email(factory):
+    from analyzer.views import request_otp
+    user = User.objects.create_user(username="otpuser", email="otp@example.com", password="password")
+    
+    import json
+    request = factory.post(reverse("request_otp"), json.dumps({"purpose": "email"}), content_type="application/json")
+    request.user = user
+    response = request_otp(request)
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["status"] == "success"
+
+
+@pytest.mark.django_db
+def test_verify_otp_email(factory):
+    from analyzer.views import request_otp, verify_otp
+    from analyzer.models import OTP
+    user = User.objects.create_user(username="otpuser2", email="otp2@example.com", password="password")
+    
+    import json
+    request = factory.post(reverse("request_otp"), json.dumps({"purpose": "email"}), content_type="application/json")
+    request.user = user
+    request_otp(request)
+    
+    otp_obj = OTP.objects.filter(user=user, purpose="email").first()
+    assert otp_obj is not None
+    
+    request_verify = factory.post(reverse("verify_otp"), json.dumps({"purpose": "email", "code": otp_obj.code}), content_type="application/json")
+    request_verify.user = user
+    response = verify_otp(request_verify)
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["status"] == "success"
+    
+    # Reload profile
+    user.profile.refresh_from_db()
+    assert user.profile.email_verified is True
+
+
+
+

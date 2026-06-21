@@ -41,24 +41,33 @@
                 this.otpCode = '';
                 this.isLoading = true;
                 
+                const csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+                const csrfToken = csrfEl ? csrfEl.value : '{{ csrf_token }}';
+                
                 try {
                     const res = await fetch('{% url "request_otp" %}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}'
+                            'X-CSRFToken': csrfToken
                         },
                         body: JSON.stringify({ purpose: purpose })
                     });
-                    const data = await res.json();
+                    
+                    let data = {};
+                    const contentType = res.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await res.json();
+                    }
+                    
                     if (res.ok) {
                         this.otpModalOpen = true;
-                        this.otpSuccess = data.message;
+                        this.otpSuccess = data.message || 'OTP sent successfully.';
                     } else {
-                        alert(data.message);
+                        alert(data.message || 'Server returned an error. Please try again.');
                     }
                 } catch (e) {
-                    alert('An error occurred.');
+                    alert('An error occurred: ' + e.message);
                 } finally {
                     this.isLoading = false;
                 }
@@ -67,24 +76,34 @@
             async verifyOTP() {
                 this.isLoading = true;
                 this.otpError = '';
+                
+                const csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+                const csrfToken = csrfEl ? csrfEl.value : '{{ csrf_token }}';
+                
                 try {
                     const res = await fetch('{% url "verify_otp" %}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}'
+                            'X-CSRFToken': csrfToken
                         },
                         body: JSON.stringify({ purpose: this.otpPurpose, code: this.otpCode })
                     });
-                    const data = await res.json();
+                    
+                    let data = {};
+                    const contentType = res.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await res.json();
+                    }
+                    
                     if (res.ok) {
                         this.otpModalOpen = false;
                         window.location.reload(); 
                     } else {
-                        this.otpError = data.message;
+                        this.otpError = data.message || 'Verification failed. Try again.';
                     }
                 } catch (e) {
-                    this.otpError = 'Verification failed. Try again.';
+                    this.otpError = 'Verification failed: ' + e.message;
                 } finally {
                     this.isLoading = false;
                 }
