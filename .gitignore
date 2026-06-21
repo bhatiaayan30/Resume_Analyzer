@@ -28,3 +28,4 @@ venv.bak/
 # Media/Static uploads
 media/
 uploads/
+.coverage

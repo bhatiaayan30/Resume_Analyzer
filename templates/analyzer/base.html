@@ -502,25 +502,45 @@
 
     /* Apple Button in Light Mode */
     html.light .apple-btn {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        border-color: #dadce0 !important;
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        border-color: #000000 !important;
     }
     html.light .apple-btn:hover {
-        background-color: #f8f9fa !important;
+        background-color: #333333 !important;
     }
     html.light .apple-btn svg path {
-        fill: #000000 !important;
+        fill: #ffffff !important;
+    }
+
+    /* Logout Button - Base (Dark Mode) */
+    .logout-btn {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+    .logout-btn:hover {
+        background-color: rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.5);
+        color: #fca5a5;
     }
 
     /* Logout Button in Light Mode */
     html.light .logout-btn {
         background-color: #f1f5f9 !important;
-        color: #0f172a !important;
-        border: 1px solid #d1d5db !important;
+        color: #dc2626 !important;
+        border: 1px solid #fca5a5 !important;
     }
     html.light .logout-btn:hover {
-        background-color: #e2e8f0 !important;
+        background-color: #fee2e2 !important;
+        border-color: #f87171 !important;
     }
 
     /* Upload Resume Box in Light Mode */
