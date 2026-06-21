@@ -185,15 +185,20 @@ SOCIALACCOUNT_PROVIDERS = {
     "apple": {
         "APP": {
             "client_id": config("APPLE_CLIENT_ID", default="dummy"),
-            "secret": config("APPLE_SECRET", default="dummy"),
-            "key": ""
+            "secret": config("APPLE_KEY_ID", default="dummy"),
+            "key": config("APPLE_TEAM_ID", default="dummy"),
+            "settings": {
+                "certificate_key": config("APPLE_PRIVATE_KEY", default=""),
+            }
         }
     },
     "microsoft": {
         "APP": {
             "client_id": config("MICROSOFT_CLIENT_ID", default="dummy"),
             "secret": config("MICROSOFT_SECRET", default="dummy"),
-            "key": ""
+            "settings": {
+                "tenant": config("MICROSOFT_TENANT", default="common"),
+            }
         }
     }
 }
