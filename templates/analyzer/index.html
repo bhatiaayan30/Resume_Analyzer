@@ -14,27 +14,30 @@
   text-shadow: 0 0 40px var(--title-shadow);
 }
 
-/* Textarea */
+/* Textarea & Inputs */
 .field textarea {
   display: block;
   width: 100%;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
   font-size: 15px;
   font-family: inherit;
   line-height: 1.6;
   resize: vertical;
-  min-height: 180px;
-  transition: all 0.3s ease;
-  background: rgba(0, 0, 0, 0.2);
+  min-height: 160px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(15, 23, 42, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: var(--text-main);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 .field textarea:focus {
   outline: none;
   border-color: var(--primary);
-  background: rgba(0, 0, 0, 0.4);
-  box-shadow: 0 0 0 4px var(--primary-light), 0 0 20px rgba(139, 92, 246, 0.15);
+  background: rgba(15, 23, 42, 0.55);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15), 0 8px 30px rgba(139, 92, 246, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Submit button */
@@ -84,15 +87,17 @@
         </div>
     </div>
 
-    <div class="text-center mb-10">
-      <h1 class="page-title">Analyze your resume</h1>
-      <p class="text-lg text-gray-400 font-light">Upload a PDF or DOCX and paste a job description — get an AI match score in seconds.</p>
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <h1 class="page-title leading-tight md:text-5xl font-black">Optimize Your Resume for ATS</h1>
+      <p class="text-base md:text-lg text-gray-400 font-light mt-2 leading-relaxed">
+          Upload your resume and the target job description to receive a premium AI-powered alignment score, keyword analysis, and tailored optimization recommendations.
+      </p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-[1440px] mx-auto px-4">
+    <div class="{% if recent_scans|length >= 2 %}grid grid-cols-1 lg:grid-cols-3 gap-8{% else %}max-w-3xl mx-auto{% endif %} max-w-[1440px] mx-auto px-4">
       
       <!-- Upload Form Column -->
-      <div class="lg:col-span-2">
+      <div class="{% if recent_scans|length >= 2 %}lg:col-span-2{% endif %}">
         <div class="premium-card">
 
       {% if error %}
@@ -105,31 +110,36 @@
           {% csrf_token %}
           
           <!-- Tabs for Resume Input -->
-          <div class="space-y-3">
+          <div class="space-y-4">
               <div class="flex items-center justify-between mb-2">
-                  <label class="block text-sm font-semibold text-white">
-                      Resume Input
-                  </label>
-                  <div class="flex bg-gray-800 rounded-lg p-1">
-                      <button type="button" id="tab-upload" class="px-4 py-1 text-sm rounded-md bg-brand text-white font-medium transition-all">Upload File</button>
-                      <button type="button" id="tab-camera" class="px-4 py-1 text-sm rounded-md text-gray-400 hover:text-white font-medium transition-all">Scan Photo</button>
-                      <button type="button" id="tab-paste" class="px-4 py-1 text-sm rounded-md text-gray-400 hover:text-white font-medium transition-all">Paste Text</button>
+                  <div class="flex items-center space-x-3">
+                      <span class="flex items-center justify-center w-6 h-6 rounded-full bg-brand/20 text-brand text-xs font-bold border border-brand/30">1</span>
+                      <label class="block text-sm font-semibold text-white tracking-wide">
+                          Step 1: Input Your Resume
+                      </label>
+                  </div>
+                  <div class="flex bg-slate-900/80 backdrop-blur border border-white/5 rounded-xl p-1 shadow-inner shadow-black/40">
+                      <button type="button" id="tab-upload" class="px-4 py-1.5 text-xs rounded-lg bg-brand text-white font-semibold transition-all shadow-md shadow-brand/20">Upload File</button>
+                      <button type="button" id="tab-camera" class="px-4 py-1.5 text-xs rounded-lg text-gray-400 hover:text-white font-semibold transition-all">Scan Photo</button>
+                      <button type="button" id="tab-paste" class="px-4 py-1.5 text-xs rounded-lg text-gray-400 hover:text-white font-semibold transition-all">Paste Text</button>
                   </div>
               </div>
               
               <!-- Drag & Drop Zone -->
-              <div id="upload-section" class="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-600 bg-black/20 hover:border-brand hover:bg-brand-light/10 rounded-xl cursor-pointer transition-all duration-300">
+              <div id="upload-section" class="relative flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-700/60 bg-slate-950/20 hover:border-brand/60 hover:bg-brand-light/5 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] rounded-2xl cursor-pointer transition-all duration-300">
                    <div class="flex flex-col items-center justify-center pt-5 pb-6 pointer-events-none">
-                       <svg class="w-10 h-10 mb-3 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                       </svg>
-                       <p id="upload-prompt" class="text-base text-gray-300 font-medium">
-                           <span class="font-bold text-brand">Click to upload</span> or drag and drop<br>
-                           <span class="text-sm font-normal text-gray-500">(PDF or DOCX, max 2 MB)</span>
+                       <div class="p-4 rounded-full bg-brand/10 border border-brand/20 mb-4 transition-all duration-300 group-hover:scale-110 group-hover:bg-brand/20">
+                           <svg class="w-8 h-8 text-brand animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                           </svg>
+                       </div>
+                       <p id="upload-prompt" class="text-sm text-gray-300 font-medium text-center">
+                           <span class="font-bold text-brand hover:underline">Click to browse</span> or drag & drop resume file<br>
+                           <span class="text-xs font-normal text-gray-500 mt-1 block">Supports PDF, DOCX (Max 2MB)</span>
                        </p>
                        <div id="file-display" class="hidden flex items-center space-x-2 text-brand">
-                           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                           <p id="file-name-text" class="text-lg font-bold"></p>
+                           <svg class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                           <p id="file-name-text" class="text-base font-bold"></p>
                        </div>
                    </div>
                    <!-- Hidden file input -->
@@ -142,19 +152,21 @@
               </div>
 
               <!-- Camera Section -->
-              <div id="camera-section" class="hidden relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-600 bg-black/20 hover:border-brand hover:bg-brand-light/10 rounded-xl cursor-pointer transition-all duration-300">
+              <div id="camera-section" class="hidden relative flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-700/60 bg-slate-950/20 hover:border-brand/60 hover:bg-brand-light/5 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] rounded-2xl cursor-pointer transition-all duration-300">
                    <div class="flex flex-col items-center justify-center pt-5 pb-6 pointer-events-none">
-                       <svg class="w-10 h-10 mb-3 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                       </svg>
-                       <p id="camera-prompt" class="text-base text-gray-300 font-medium text-center">
-                           <span class="font-bold text-brand">Tap to Open Camera</span><br>
-                           <span class="text-sm font-normal text-gray-500">(Take a clear photo of your resume)</span>
+                       <div class="p-4 rounded-full bg-brand/10 border border-brand/20 mb-4 transition-all duration-300 group-hover:scale-110">
+                           <svg class="w-8 h-8 text-brand animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                           </svg>
+                       </div>
+                       <p id="camera-prompt" class="text-sm text-gray-300 font-medium text-center">
+                           <span class="font-bold text-brand">Tap to Open Camera</span> or scan document photo<br>
+                           <span class="text-xs font-normal text-gray-500 mt-1 block">Capture a clear, well-lit snapshot</span>
                        </p>
                        <div id="camera-display" class="hidden flex items-center space-x-2 text-brand">
-                           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                           <p id="camera-name-text" class="text-lg font-bold">Photo Captured</p>
+                           <svg class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                           <p id="camera-name-text" class="text-base font-bold">Photo Captured Ready</p>
                        </div>
                    </div>
                    <!-- Hidden camera input -->
@@ -165,10 +177,14 @@
           </div>
 
           <!-- JD Textarea -->
-          <div class="space-y-3 field">
-              <label for="job_description" class="block text-sm font-semibold text-white">
-                  Job description <span class="text-gray-400 font-normal ml-2">(paste the full job posting)</span>
-              </label>
+          <div class="space-y-4 field">
+              <div class="flex items-center space-x-3">
+                  <span class="flex items-center justify-center w-6 h-6 rounded-full bg-brand/20 text-brand text-xs font-bold border border-brand/30">2</span>
+                  <label for="job_description" class="block text-sm font-semibold text-white tracking-wide">
+                      Step 2: Target Job Description
+                  </label>
+              </div>
+              <p class="text-xs text-gray-400 -mt-2">Paste the target job description to match against your resume skills and keywords.</p>
               <textarea
                   name="job_description"
                   id="job_description"
@@ -188,6 +204,7 @@
         </div>
       </div>
       
+      {% if recent_scans|length >= 2 %}
       <!-- Score History Sidebar -->
       <div class="lg:col-span-1">
         <div class="premium-card h-full">
@@ -196,27 +213,21 @@
                 Score Trend
             </h3>
             
-            {% if recent_scans|length >= 2 %}
-                <div class="relative h-64 w-full">
-                    <canvas id="scoreTrendChart"></canvas>
-                </div>
-                
-                <!-- Pass data to JS safely -->
-                <script type="application/json" id="score-trend-data">
-                    [
-                        {% for scan in recent_scans %}
-                            {"score": {{ scan.match_score }}, "date": "{{ scan.created_at|date:'M d' }}"}{% if not forloop.last %},{% endif %}
-                        {% endfor %}
-                    ]
-                </script>
-            {% else %}
-                <div class="flex flex-col items-center justify-center h-48 text-center bg-gray-800/30 rounded-xl border border-dashed border-gray-700/50">
-                    <svg class="w-10 h-10 text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    <p class="text-sm text-gray-400">Complete at least 2 scans to<br>see your improvement trend.</p>
-                </div>
-            {% endif %}
+            <div class="relative h-64 w-full">
+                <canvas id="scoreTrendChart"></canvas>
+            </div>
+            
+            <!-- Pass data to JS safely -->
+            <script type="application/json" id="score-trend-data">
+                [
+                    {% for scan in recent_scans %}
+                        {"score": {{ scan.match_score }}, "date": "{{ scan.created_at|date:'M d' }}"}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            </script>
         </div>
       </div>
+      {% endif %}
       
     </div>
 </div>
@@ -252,20 +263,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle drag and drop
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
-        dropZone.classList.add('border-brand', 'bg-brand-light/30', 'scale-[1.02]', 'shadow-[0_0_20px_rgba(139,92,246,0.3)]');
-        dropZone.classList.remove('border-gray-600', 'bg-black/20');
+        dropZone.classList.add('border-brand', 'bg-brand-light/20', 'scale-[1.01]', 'shadow-[0_0_30px_rgba(139,92,246,0.25)]');
+        dropZone.classList.remove('border-gray-700/60', 'bg-slate-950/20');
     });
 
     dropZone.addEventListener('dragleave', (e) => {
         e.preventDefault();
-        dropZone.classList.remove('border-brand', 'bg-brand-light/30', 'scale-[1.02]', 'shadow-[0_0_20px_rgba(139,92,246,0.3)]');
-        dropZone.classList.add('border-gray-600', 'bg-black/20');
+        dropZone.classList.remove('border-brand', 'bg-brand-light/20', 'scale-[1.01]', 'shadow-[0_0_30px_rgba(139,92,246,0.25)]');
+        dropZone.classList.add('border-gray-700/60', 'bg-slate-950/20');
     });
 
     dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
-        dropZone.classList.remove('border-brand', 'bg-brand-light/30', 'scale-[1.02]', 'shadow-[0_0_20px_rgba(139,92,246,0.3)]');
-        dropZone.classList.add('border-gray-600', 'bg-black/20');
+        dropZone.classList.remove('border-brand', 'bg-brand-light/20', 'scale-[1.01]', 'shadow-[0_0_30px_rgba(139,92,246,0.25)]');
+        dropZone.classList.add('border-gray-700/60', 'bg-slate-950/20');
         
         if (e.dataTransfer.files.length > 0) {
             fileInput.files = e.dataTransfer.files;
@@ -312,32 +323,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function resetTabs() {
         [tabUpload, tabPaste, tabCamera].forEach(t => {
-            t.classList.replace('text-white', 'text-gray-400');
-            t.classList.replace('bg-brand', 'hover:text-white');
+            t.className = 'px-4 py-1.5 text-xs rounded-lg text-gray-400 hover:text-white font-semibold transition-all';
         });
         [uploadSection, pasteSection, cameraSection].forEach(s => s.classList.add('hidden'));
     }
 
     tabUpload.addEventListener('click', () => {
         resetTabs();
-        tabUpload.classList.replace('text-gray-400', 'text-white');
-        tabUpload.classList.replace('hover:text-white', 'bg-brand');
+        tabUpload.className = 'px-4 py-1.5 text-xs rounded-lg bg-brand text-white font-semibold transition-all shadow-md shadow-brand/20';
         uploadSection.classList.remove('hidden');
         resumeInputType.value = 'file';
     });
 
     tabCamera.addEventListener('click', () => {
         resetTabs();
-        tabCamera.classList.replace('text-gray-400', 'text-white');
-        tabCamera.classList.replace('hover:text-white', 'bg-brand');
+        tabCamera.className = 'px-4 py-1.5 text-xs rounded-lg bg-brand text-white font-semibold transition-all shadow-md shadow-brand/20';
         cameraSection.classList.remove('hidden');
         resumeInputType.value = 'image';
     });
 
     tabPaste.addEventListener('click', () => {
         resetTabs();
-        tabPaste.classList.replace('text-gray-400', 'text-white');
-        tabPaste.classList.replace('hover:text-white', 'bg-brand');
+        tabPaste.className = 'px-4 py-1.5 text-xs rounded-lg bg-brand text-white font-semibold transition-all shadow-md shadow-brand/20';
         pasteSection.classList.remove('hidden');
         resumeInputType.value = 'text';
     });
