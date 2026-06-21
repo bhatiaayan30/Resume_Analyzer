@@ -28,10 +28,13 @@ else:
     SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-this-before-deploying")
     ENCRYPTION_KEY = config("ENCRYPTION_KEY", default="m4XLU7wYoDxNunv7YahZPCmja_ryje0JiOYL5LBK1s0=")
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=Csv())
+ALLOWED_HOSTS.append(".vercel.app")
 
 SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=False, cast=bool)
 SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=False, cast=bool)
 CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=False, cast=bool)
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="https://*.vercel.app", cast=Csv())
+
 
 
 # ── Applications ───────────────────────────────────────────────
