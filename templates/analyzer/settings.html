@@ -24,7 +24,72 @@
         {% endif %}
 
         <!-- Two-column Sidebar Layout using Alpine.js -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8" x-data="{ activeTab: 'personal', isEditing: false }">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8" x-data="{ 
+            activeTab: 'personal', 
+            isEditing: false,
+            otpModalOpen: false,
+            otpPurpose: '',
+            otpCode: '',
+            otpError: '',
+            otpSuccess: '',
+            isLoading: false,
+            
+            async requestOTP(purpose) {
+                this.otpPurpose = purpose;
+                this.otpError = '';
+                this.otpSuccess = '';
+                this.otpCode = '';
+                this.isLoading = true;
+                
+                try {
+                    const res = await fetch('{% url \'request_otp\' %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({ purpose: purpose })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        this.otpModalOpen = true;
+                        this.otpSuccess = data.message;
+                    } else {
+                        alert(data.message);
+                    }
+                } catch (e) {
+                    alert('An error occurred.');
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+            
+            async verifyOTP() {
+                this.isLoading = true;
+                this.otpError = '';
+                try {
+                    const res = await fetch('{% url \'verify_otp\' %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({ purpose: this.otpPurpose, code: this.otpCode })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        this.otpModalOpen = false;
+                        window.location.reload(); 
+                    } else {
+                        this.otpError = data.message;
+                    }
+                } catch (e) {
+                    this.otpError = 'Verification failed. Try again.';
+                } finally {
+                    this.isLoading = false;
+                }
+            }
+        }">
             
             <!-- Left Sidebar Navigation -->
             <div class="md:col-span-1 space-y-6">
@@ -112,8 +177,15 @@
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-400 mb-2">Email Address</label>
-                            <div x-show="!isEditing" class="w-full bg-black/20 border border-gray-700/50 rounded-lg p-3.5 text-gray-200">
-                                {{ user.email|default:"Not provided" }}
+                            <div class="flex items-center gap-4" x-show="!isEditing">
+                                <div class="w-full bg-black/20 border border-gray-700/50 rounded-lg p-3.5 text-gray-200">
+                                    {{ user.email|default:"Not provided" }}
+                                </div>
+                                {% if user.email and not user.profile.email_verified %}
+                                    <button type="button" @click="requestOTP('email')" :disabled="isLoading" class="whitespace-nowrap px-3 py-1.5 bg-brand/20 hover:bg-brand/30 text-brand-light rounded border border-brand/30 text-xs font-bold transition-colors">Verify Email</button>
+                                {% elif user.profile.email_verified %}
+                                    <span class="whitespace-nowrap text-green-400 text-xs font-bold flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Verified</span>
+                                {% endif %}
                             </div>
                             <input x-show="isEditing" type="email" name="email" value="{{ user.email }}"
                                    class="w-full bg-black/40 border border-gray-700 rounded-lg p-3.5 text-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all" style="display:none;">
@@ -121,8 +193,15 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-400 mb-2">Phone Number</label>
-                            <div x-show="!isEditing" class="w-full bg-black/20 border border-gray-700/50 rounded-lg p-3.5 text-gray-200">
-                                {{ profile.phone_number|default:"Not provided" }}
+                            <div class="flex items-center gap-4" x-show="!isEditing">
+                                <div class="w-full bg-black/20 border border-gray-700/50 rounded-lg p-3.5 text-gray-200">
+                                    {{ profile.phone_number|default:"Not provided" }}
+                                </div>
+                                {% if profile.phone_number and not profile.phone_verified %}
+                                    <button type="button" @click="requestOTP('phone')" :disabled="isLoading" class="whitespace-nowrap px-3 py-1.5 bg-brand/20 hover:bg-brand/30 text-brand-light rounded border border-brand/30 text-xs font-bold transition-colors">Verify Phone</button>
+                                {% elif profile.phone_verified %}
+                                    <span class="whitespace-nowrap text-green-400 text-xs font-bold flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Verified</span>
+                                {% endif %}
                             </div>
                             <input x-show="isEditing" type="text" name="phone_number" value="{{ profile.phone_number|default:'' }}"
                                    placeholder="Add your phone number"
@@ -263,6 +342,39 @@
                     </button>
                 </div>
 
+            </div>
+
+            <!-- OTP Verification Modal -->
+            <div x-show="otpModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display:none;">
+                <div class="glass-panel w-full max-w-md p-6 sm:p-8 rounded-2xl relative shadow-2xl animate-fade-in-up" @click.away="otpModalOpen = false">
+                    <!-- Close button -->
+                    <button @click="otpModalOpen = false" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                    
+                    <h3 class="text-xl font-bold text-white mb-2">Verify <span x-text="otpPurpose === 'email' ? 'Email Address' : 'Phone Number'"></span></h3>
+                    <p class="text-sm text-gray-400 mb-6" x-text="otpSuccess || 'Enter the 6-digit code sent to you.'"></p>
+                    
+                    <div x-show="otpError" class="mb-4 text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20" x-text="otpError"></div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Verification Code</label>
+                            <input type="text" x-model="otpCode" placeholder="123456" maxlength="6"
+                                   class="w-full bg-black/40 border border-gray-700 rounded-lg p-3.5 text-white text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all"
+                                   @keyup.enter="verifyOTP()">
+                        </div>
+                        
+                        <button type="button" @click="verifyOTP()" :disabled="isLoading || otpCode.length < 6"
+                                class="w-full py-3.5 bg-brand hover:bg-brand-hover rounded-xl text-white font-bold transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)] disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span x-show="!isLoading">Verify Code</span>
+                            <span x-show="isLoading" class="flex items-center justify-center gap-2">
+                                <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                Verifying...
+                            </span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 

@@ -23,6 +23,8 @@ class UserProfile(models.Model):
     razorpay_subscription_id = models.CharField(max_length=255, blank=True, null=True)
     has_used_free_trial = models.BooleanField(default=False)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
+    email_verified = models.BooleanField(default=False)
+    phone_verified = models.BooleanField(default=False)
 
     def is_active_premium(self):
         if not self.is_premium:
@@ -133,3 +135,18 @@ class Coupon(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.discount_percent}%"
+
+class OTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=10) # 'email' or 'phone'
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    def is_valid(self):
+        from django.utils import timezone
+        return not self.is_used and timezone.now() < self.expires_at
+
+    def __str__(self):
+        return f"{self.purpose} OTP for {self.user.username}"

@@ -18,8 +18,8 @@ from django.views.decorators.csrf import csrf_exempt
 import razorpay
 from django.conf import settings
 
-from .models import JobDescription, Persona, ResumeAnalysis, ResumeVersion, UserProfile, Coupon
-from .utils import analyze_with_ai, extract_text, generate_cover_letter
+from .models import JobDescription, Persona, ResumeAnalysis, ResumeVersion, UserProfile, Coupon, OTP
+from .utils import analyze_with_ai, extract_text, generate_cover_letter, generate_otp, send_email_otp, send_sms_otp
 from .tasks import process_resume_analysis
 
 razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -869,3 +869,82 @@ def market_insights(request):
     context["categories"] = CATEGORIES
 
     return render(request, "analyzer/insights.html", context)
+
+@login_required
+@require_http_methods(["POST"])
+def request_otp(request):
+    """Generate and send OTP for email or phone."""
+    import json
+    from datetime import timedelta
+    from django.utils import timezone
+    try:
+        data = json.loads(request.body)
+        purpose = data.get('purpose')
+        if purpose not in ['email', 'phone']:
+            return JsonResponse({"status": "error", "message": "Invalid purpose"}, status=400)
+            
+        if purpose == 'phone':
+            phone_number = data.get('phone_number')
+            if not phone_number:
+                return JsonResponse({"status": "error", "message": "Phone number required"}, status=400)
+            request.user.profile.phone_number = phone_number
+            request.user.profile.save()
+            
+        # Invalidate old OTPs
+        OTP.objects.filter(user=request.user, purpose=purpose, is_used=False).update(is_used=True)
+        
+        # Generate new OTP
+        code = generate_otp()
+        expires_at = timezone.now() + timedelta(minutes=10)
+        OTP.objects.create(user=request.user, code=code, purpose=purpose, expires_at=expires_at)
+        
+        # Send OTP
+        if purpose == 'email':
+            send_email_otp(request.user, code)
+        else:
+            send_sms_otp(request.user, code, request.user.profile.phone_number)
+            
+        return JsonResponse({"status": "success", "message": f"OTP sent to {purpose}"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def verify_otp(request):
+    """Verify the submitted OTP code."""
+    import json
+    from django.utils import timezone
+    try:
+        data = json.loads(request.body)
+        purpose = data.get('purpose')
+        code = data.get('code')
+        
+        if purpose not in ['email', 'phone'] or not code:
+            return JsonResponse({"status": "error", "message": "Invalid request parameters"}, status=400)
+            
+        otp_obj = OTP.objects.filter(
+            user=request.user, 
+            purpose=purpose, 
+            code=code, 
+            is_used=False,
+            expires_at__gt=timezone.now()
+        ).first()
+        
+        if not otp_obj:
+            return JsonResponse({"status": "error", "message": "Invalid or expired OTP"}, status=400)
+            
+        # Mark as used
+        otp_obj.is_used = True
+        otp_obj.save()
+        
+        # Update user profile
+        if purpose == 'email':
+            request.user.profile.email_verified = True
+        elif purpose == 'phone':
+            request.user.profile.phone_verified = True
+        request.user.profile.save()
+        
+        return JsonResponse({"status": "success", "message": f"{purpose.capitalize()} verified successfully!"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)

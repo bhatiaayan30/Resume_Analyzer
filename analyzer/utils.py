@@ -272,3 +272,27 @@ def generate_cover_letter(resume_text: str, job_desc: str) -> str:
     )
 
     return response.choices[0].message.content.strip()
+
+def generate_otp() -> str:
+    """Generate a 6-digit numeric OTP."""
+    import random
+    return str(random.randint(100000, 999999))
+
+def send_email_otp(user, otp_code: str):
+    """Send OTP to user's email."""
+    from django.core.mail import send_mail
+    from django.conf import settings
+    subject = "Your Resume Analyzer Verification Code"
+    message = f"Hello {user.username},\n\nYour verification code is: {otp_code}\n\nThis code is valid for 10 minutes."
+    # Use EMAIL_HOST_USER if configured, else default from address
+    from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@resumeanalyzer.com')
+    if not from_email:
+        from_email = 'noreply@resumeanalyzer.com'
+    send_mail(subject, message, from_email, [user.email], fail_silently=False)
+
+def send_sms_otp(user, otp_code: str, phone_number: str):
+    """Send OTP via SMS (console placeholder for now)."""
+    # Placeholder: print to console
+    print(f"--- SMS OTP for {user.username} ({phone_number}) ---")
+    print(f"Your verification code is: {otp_code}")
+    print(f"--------------------------------------------------")
