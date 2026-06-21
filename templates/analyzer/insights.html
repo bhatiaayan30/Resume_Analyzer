@@ -8,14 +8,27 @@
 
 {% block content %}
 <div class="min-h-screen pt-24 pb-12">
-    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center">
-        <h1 class="text-4xl font-extrabold mb-4 gradient-text-title">Global Market Insights</h1>
-        <p class="text-lg text-gray-400">Aggregated anonymized analytics from across our platform.</p>
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="text-left">
+            <h1 class="text-4xl font-extrabold mb-2 gradient-text-title">Global Market Insights</h1>
+            <p class="text-lg text-gray-400">Aggregated anonymized analytics from across our platform.</p>
+        </div>
+        <div>
+            <form method="GET" action="." class="inline-block relative">
+                <label for="category-select" class="sr-only">Choose Industry</label>
+                <select name="category" id="category-select" onchange="this.form.submit()" class="bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent cursor-pointer font-semibold shadow-lg">
+                    <option value="All" {% if selected_category == "All" %}selected{% endif %}>All Industries</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
     </div>
 
     {% if error %}
     <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <div class="bg-red-500/20 border border-red-500/50 text-red-200 p-4 rounded-lg text-center">
+        <div class="bg-red-500/20 border border-red-500/50 text-red-200 p-4 rounded-lg text-center font-semibold">
             {{ error }}
         </div>
     </div>

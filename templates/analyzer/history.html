@@ -3,6 +3,7 @@
 {% block title %}Analysis History{% endblock %}
 
 {% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 /* Keep the neon gradient title for branding */
 .page-title { 
   font-size: 42px; 
@@ -40,6 +41,21 @@
   </div>
 
   {% if analyses %}
+    {% if has_chart_data %}
+    <!-- Score Evolution Chart -->
+    <div class="glass-card p-6 rounded-2xl border-brand/20 mb-10 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-brand/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+            <svg class="w-5 h-5 text-brand-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+            Your Score Progress
+        </h3>
+        <p class="text-gray-400 text-sm mb-6">Track how your match score evolves across successive uploads.</p>
+        <div class="h-[220px] w-full relative">
+            <canvas id="scoreEvolutionChart"></canvas>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Tailwind Grid Layout -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {% for item in analyses %}
@@ -130,4 +146,72 @@
     </div>
   {% endif %}
 </div>
+
+{% if has_chart_data %}
+{# Use json_script to safely embed dates and scores #}
+{{ chart_dates_json|json_script:"chart-dates-data" }}
+{{ chart_scores_json|json_script:"chart-scores-data" }}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const isLight = document.documentElement.classList.contains('light');
+    const textColor = isLight ? '#475569' : '#94a3b8';
+    const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+
+    const dates = JSON.parse(document.getElementById('chart-dates-data').textContent);
+    const scores = JSON.parse(document.getElementById('chart-scores-data').textContent);
+
+    new Chart(document.getElementById('scoreEvolutionChart'), {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Match Score',
+                data: scores,
+                borderColor: '#a78bfa',
+                backgroundColor: 'rgba(167, 139, 250, 0.15)',
+                borderWidth: 3,
+                tension: 0.35,
+                fill: true,
+                pointBackgroundColor: '#8b5cf6',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1f2937',
+                    titleColor: '#ffffff',
+                    bodyColor: '#e5e7eb',
+                    borderColor: 'rgba(167, 139, 250, 0.3)',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return 'Score: ' + context.raw + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: gridColor, drawBorder: false },
+                    ticks: { color: textColor }
+                },
+                y: {
+                    grid: { color: gridColor, drawBorder: false },
+                    ticks: { color: textColor, stepSize: 20 },
+                    min: 0,
+                    max: 100
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
 {% endblock %}

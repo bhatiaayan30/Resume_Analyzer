@@ -331,11 +331,25 @@ def get_premium_permissions(user, analysis_id):
 def history(request):
     """
     Renders the history of past analyses for the logged-in user.
+    Includes chronological data for the user's progress tracking line chart.
     """
-    analyses = ResumeAnalysis.objects.filter(user=request.user).order_by(
-        "-created_at"
-    )
-    return render(request, "analyzer/history.html", {"analyses": analyses})
+    analyses = ResumeAnalysis.objects.filter(user=request.user).order_by("-created_at")
+    
+    # Chronological completed scans for the evolution chart
+    chart_analyses = ResumeAnalysis.objects.filter(user=request.user, status='completed').order_by('created_at')
+    
+    chart_dates = [a.created_at.strftime('%m/%d') for a in chart_analyses]
+    chart_scores = [a.match_score for a in chart_analyses]
+    
+    import json
+    context = {
+        "analyses": analyses,
+        "chart_dates_json": json.dumps(chart_dates),
+        "chart_scores_json": json.dumps(chart_scores),
+        "has_chart_data": len(chart_scores) >= 2
+    }
+    
+    return render(request, "analyzer/history.html", context)
 
 
 @login_required
@@ -773,53 +787,87 @@ def market_insights(request):
     """
     Global Market Trends Dashboard (Premium Feature).
     Aggregates anonymized skill data across all user scans.
+    Supports filtering by AI-classified job category.
     """
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    if not (profile.is_premium and profile.subscription_tier >= 1):
+    if not (profile.is_active_premium() and profile.subscription_tier >= 1):
         return redirect('pricing')
 
     from django.core.cache import cache
     
+    CATEGORIES = [
+        "Software Engineering",
+        "Data & Analytics",
+        "Product Management",
+        "Sales & Marketing",
+        "Design & UX",
+        "Finance & Business",
+        "Healthcare",
+        "Other"
+    ]
+    
+    category = request.GET.get('category', '').strip()
+    selected_category = category if category in CATEGORIES else "All"
+    
     # Try cache first to avoid Memory DoS
-    cache_key = "market_insights_dashboard"
+    cache_key = f"market_insights_dashboard_{selected_category.replace(' ', '_')}"
     context = cache.get(cache_key)
     
     if not context:
-        # Aggregate data using iterator and values to save memory
-        analyses = ResumeAnalysis.objects.filter(status='completed').values('match_score', 'matched_skills', 'missing_skills')
+        analyses = ResumeAnalysis.objects.filter(status='completed')
+        if selected_category != "All":
+            analyses = analyses.filter(category=selected_category)
+            
+        analyses = analyses.values('match_score', 'matched_skills', 'missing_skills')
         total_scans = analyses.count()
         
         if total_scans == 0:
-            return render(request, "analyzer/insights.html", {"error": "Not enough data yet."})
+            context = {
+                "total_scans": 0,
+                "avg_score": 0,
+                "top_matched_labels": "[]",
+                "top_matched_data": "[]",
+                "top_missing_labels": "[]",
+                "top_missing_data": "[]",
+                "selected_category": selected_category,
+                "categories": CATEGORIES,
+                "error": f"Not enough data yet for category '{selected_category}'." if selected_category != "All" else "Not enough data yet."
+            }
+        else:
+            total_score = 0
+            matched_counter = Counter()
+            missing_counter = Counter()
 
-        total_score = 0
-        matched_counter = Counter()
-        missing_counter = Counter()
+            for a in analyses.iterator():
+                total_score += a['match_score']
+                for ms in (a['matched_skills'] or []):
+                    skill_name = ms.get('skill', ms) if isinstance(ms, dict) else ms
+                    matched_counter[str(skill_name).title()] += 1
+                    
+                for ms in (a['missing_skills'] or []):
+                    skill_name = ms.get('skill', ms) if isinstance(ms, dict) else ms
+                    missing_counter[str(skill_name).title()] += 1
 
-        for a in analyses.iterator():
-            total_score += a['match_score']
-            for ms in (a['matched_skills'] or []):
-                skill_name = ms.get('skill', ms) if isinstance(ms, dict) else ms
-                matched_counter[str(skill_name).title()] += 1
-                
-            for ms in (a['missing_skills'] or []):
-                skill_name = ms.get('skill', ms) if isinstance(ms, dict) else ms
-                missing_counter[str(skill_name).title()] += 1
+            avg_score = total_score / total_scans
+            top_matched = matched_counter.most_common(10)
+            top_missing = missing_counter.most_common(10)
 
-        avg_score = total_score / total_scans
-        top_matched = matched_counter.most_common(10)
-        top_missing = missing_counter.most_common(10)
+            context = {
+                "total_scans": total_scans,
+                "avg_score": round(avg_score, 1),
+                "top_matched_labels": json.dumps([x[0] for x in top_matched]),
+                "top_matched_data": json.dumps([x[1] for x in top_matched]),
+                "top_missing_labels": json.dumps([x[0] for x in top_missing]),
+                "top_missing_data": json.dumps([x[1] for x in top_missing]),
+                "selected_category": selected_category,
+                "categories": CATEGORIES,
+            }
+            
+            # Cache for 1 hour (3600 seconds)
+            cache.set(cache_key, context, 3600)
 
-        context = {
-            "total_scans": total_scans,
-            "avg_score": round(avg_score, 1),
-            "top_matched_labels": json.dumps([x[0] for x in top_matched]),
-            "top_matched_data": json.dumps([x[1] for x in top_matched]),
-            "top_missing_labels": json.dumps([x[0] for x in top_missing]),
-            "top_missing_data": json.dumps([x[1] for x in top_missing]),
-        }
-        
-        # Cache for 1 hour (3600 seconds)
-        cache.set(cache_key, context, 3600)
+    # Dynamic items (always set or overridden to make sure template works correctly)
+    context["selected_category"] = selected_category
+    context["categories"] = CATEGORIES
 
     return render(request, "analyzer/insights.html", context)

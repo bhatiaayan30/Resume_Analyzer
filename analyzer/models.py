@@ -82,6 +82,7 @@ class ResumeAnalysis(models.Model):
     slug = models.UUIDField(default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     filename = models.CharField(max_length=255)
+    category = models.CharField(max_length=100, default="Other")
     
     # Async processing status
     status = models.CharField(max_length=20, default='pending') # pending, processing, completed, error

@@ -2,6 +2,7 @@ from typing import Dict, Any
 
 ANALYSIS_JSON_SCHEMA = """
 {
+    "job_category": "Software Engineering | Data & Analytics | Product Management | Sales & Marketing | Design & UX | Finance & Business | Healthcare | Other",
     "match_score": <integer 0-100, calculate a weighted score based on skills, experience overlap, and formatting>,
     "matched_skills": [{"skill": "string", "category": "hard|soft", "matched": true}],
     "missing_skills": [{"skill": "string", "category": "hard|soft", "matched": false}],
