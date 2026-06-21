@@ -14,9 +14,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # ── Security ───────────────────────────────────────────────────
-SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-this-before-deploying")
-ENCRYPTION_KEY = config("ENCRYPTION_KEY", default="m4XLU7wYoDxNunv7YahZPCmja_ryje0JiOYL5LBK1s0=")
-DEBUG = config("DEBUG", default=True, cast=bool)
+from django.core.exceptions import ImproperlyConfigured
+DEBUG = config("DEBUG", default=False, cast=bool)
+
+# Require keys in production
+if not DEBUG:
+    SECRET_KEY = config("SECRET_KEY")
+    ENCRYPTION_KEY = config("ENCRYPTION_KEY")
+    if not SECRET_KEY or not ENCRYPTION_KEY:
+        raise ImproperlyConfigured("SECRET_KEY and ENCRYPTION_KEY must be set in production")
+else:
+    SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-this-before-deploying")
+    ENCRYPTION_KEY = config("ENCRYPTION_KEY", default="m4XLU7wYoDxNunv7YahZPCmja_ryje0JiOYL5LBK1s0=")
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=Csv())
 
 SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=False, cast=bool)

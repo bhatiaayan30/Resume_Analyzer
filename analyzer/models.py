@@ -8,6 +8,7 @@ once the basic flow is working.
 
 from django.contrib.auth.models import User
 from django.db import models
+import uuid
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .fields import EncryptedTextField
@@ -71,6 +72,7 @@ class ResumeAnalysis(models.Model):
     """
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    slug = models.UUIDField(default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     filename = models.CharField(max_length=255)
     

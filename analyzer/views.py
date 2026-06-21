@@ -54,12 +54,25 @@ def analyze(request):
 
     # ── 0. Freemium Limits ─────────────────────────────────────
     if not request.user.is_authenticated:
-        scan_count = request.session.get('scan_count', 0)
+        from django.core.cache import cache
+        
+        # Get client IP
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+            
+        cache_key = f"guest_scan_{ip}"
+        scan_count = cache.get(cache_key, request.session.get('scan_count', 0))
+        
         if scan_count >= 1:
             if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json':
                 return JsonResponse({"status": "limit_reached", "reason": "unauthenticated"}, status=403)
             return redirect('account_login')
+            
         request.session['scan_count'] = scan_count + 1
+        cache.set(cache_key, scan_count + 1, timeout=86400 * 30) # 30 days
     else:
         profile, _ = UserProfile.objects.get_or_create(user=request.user)
         tier = profile.subscription_tier
@@ -166,15 +179,15 @@ def analyze(request):
     process_resume_analysis(analysis_record.id)
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json':
-        return JsonResponse({"status": "success", "analysis_id": analysis_record.id})
+        return JsonResponse({"status": "success", "analysis_id": str(analysis_record.slug)})
     else:
         # Fallback for non-JS
-        return redirect('analysis_results', analysis_id=analysis_record.id)
+        return redirect('analysis_results', analysis_id=str(analysis_record.slug))
 
 
 def analysis_status(request, analysis_id):
     """API endpoint to poll the status of an async analysis."""
-    record = get_object_or_404(ResumeAnalysis, id=analysis_id)
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
     if record.user and request.user != record.user:
         return JsonResponse({"status": "error", "message": "Unauthorized"}, status=403)
     return JsonResponse({"status": record.status})
@@ -184,7 +197,7 @@ from .ats_knowledge import ATS_FLAG_EXPLANATIONS
 
 def analysis_results(request, analysis_id):
     """Serve the results page for a completed analysis."""
-    record = get_object_or_404(ResumeAnalysis, id=analysis_id)
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
     if record.user and request.user != record.user:
         return redirect('index')
     
@@ -269,7 +282,7 @@ def get_premium_permissions(user, analysis_id):
     """
     Returns a dictionary of permissions for the given user and analysis.
     """
-    record = get_object_or_404(ResumeAnalysis, id=analysis_id)
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
     perms = {
         "can_cover_letter": False,
         "can_interview": False,
@@ -331,7 +344,7 @@ def delete_analysis(request, analysis_id):
     """
     Deletes an analysis record for the logged-in user.
     """
-    record = get_object_or_404(ResumeAnalysis, id=analysis_id, user=request.user)
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id, user=request.user)
     record.delete()
     return redirect('history')
 
@@ -641,13 +654,12 @@ def razorpay_webhook(request):
                 profile.current_period_start = now
                 profile.save()
                 
-                # Update coupon usage
+                # Update coupon usage atomically
                 if coupon_code:
                     try:
-                        c = Coupon.objects.get(code__iexact=coupon_code)
-                        c.uses += 1
-                        c.save()
-                    except Coupon.DoesNotExist:
+                        from django.db.models import F
+                        Coupon.objects.filter(code__iexact=coupon_code).update(uses=F('uses') + 1)
+                    except Exception:
                         pass
             except User.DoesNotExist:
                 pass
@@ -726,6 +738,9 @@ def claim_free_trial(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     if profile.has_used_free_trial:
         return JsonResponse({"error": "You have already used your free trial."}, status=400)
+        
+    if profile.is_premium and profile.current_period_end and profile.current_period_end > timezone.now():
+        return JsonResponse({"error": "You already have an active premium subscription."}, status=400)
     
     # Activate 24h Unlimited Trial
     profile.is_premium = True
