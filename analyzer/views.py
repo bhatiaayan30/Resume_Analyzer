@@ -422,48 +422,39 @@ def export_report_pdf(request, analysis_id):
     if record.status != 'completed':
         return HttpResponse("Report not ready yet.", status=400)
 
+    from django.template.loader import render_to_string
     import io
-    from reportlab.lib.pagesizes import letter
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, ListFlowable, ListItem
+    from xhtml2pdf import pisa
 
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(
-        buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18
-    )
-    styles = getSampleStyleSheet()
-    Story = []
-
-    title_style = styles["Heading1"]
-    h2_style = styles["Heading2"]
-    normal_style = styles["Normal"]
-
-    Story.append(Paragraph(f"Resume Match Report", title_style))
-    Story.append(Spacer(1, 12))
-    
-    Story.append(Paragraph(f"Match Score: {record.match_score}/100", h2_style))
-    Story.append(Spacer(1, 12))
-
-    Story.append(Paragraph("Matched Skills:", h2_style))
+    # Prepare context for the template
     matched_skills = record.matched_skills if record.matched_skills else []
-    for skill in matched_skills:
-        s_name = skill.get('skill', '') if isinstance(skill, dict) else skill
-        Story.append(Paragraph(f"• {s_name}", normal_style))
-    Story.append(Spacer(1, 12))
-
-    Story.append(Paragraph("Missing Skills:", h2_style))
     missing_skills = record.missing_skills if record.missing_skills else []
-    for skill in missing_skills:
-        s_name = skill.get('skill', '') if isinstance(skill, dict) else skill
-        Story.append(Paragraph(f"• {s_name}", normal_style))
-    Story.append(Spacer(1, 12))
+    
+    # Normalize skill dicts/strings
+    matched = [{"skill": s.get('skill', '') if isinstance(s, dict) else s} for s in matched_skills]
+    missing = [{"skill": s.get('skill', '') if isinstance(s, dict) else s} for s in missing_skills]
 
-    doc.build(Story)
+    context = {
+        "analysis": record,
+        "matched_skills": matched,
+        "missing_skills": missing,
+    }
+
+    # Render HTML
+    html_string = render_to_string("analyzer/report_pdf.html", context)
+
+    # Generate PDF
+    buffer = io.BytesIO()
+    pisa_status = pisa.CreatePDF(html_string, dest=buffer)
+
+    if pisa_status.err:
+        return HttpResponse("We had some errors <pre>" + html_string + "</pre>")
+
     buffer.seek(0)
-
     response = HttpResponse(buffer, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="Match_Report_{record.id}.pdf"'
     return response
+
 
 
 # ── Razorpay Payments ────────────────────────────────────────────
