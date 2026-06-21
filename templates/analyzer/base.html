@@ -317,53 +317,19 @@
                 {% endif %}
             {% endif %}
         </div>
-        <div class="relative ml-4" x-data="{ open: false }" @click.away="open = false">
-            <button @click="open = !open" class="p-2 rounded-full hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-gray-900 border border-transparent hover:border-gray-700">
-                <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
-            </button>
-            <div x-show="open" x-transition.opacity style="display: none;" class="absolute right-0 mt-2 w-56 bg-[#1e1e24] border border-gray-700/50 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-50 overflow-hidden py-1">
-                <a href="{% url 'index' %}" class="block px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3">
-                    <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                    New Analysis
-                </a>
-                <a href="{% url 'history' %}" class="block px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3">
-                    <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Dashboard / History
-                </a>
-                
-                <div class="h-px bg-gray-700/50 my-1"></div>
-                
-                {% if user.profile.is_premium %}
-                    <a href="{% url 'market_insights' %}" class="block px-4 py-2.5 text-sm text-green-400 hover:bg-white/5 transition-colors flex items-center gap-3 font-semibold">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                        Market Insights
-                    </a>
-                    <a href="{% url 'pricing' %}" class="block px-4 py-2.5 text-sm text-brand hover:bg-white/5 transition-colors flex items-center gap-3 font-semibold">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        Manage Subscription
-                    </a>
-                {% else %}
-                    <a href="{% url 'market_insights' %}" class="block px-4 py-2.5 text-sm text-green-400/50 hover:bg-white/5 transition-colors flex items-center gap-3 font-semibold" title="Premium Feature">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                        Market Insights <span class="text-[10px] bg-pink-500/20 text-pink-400 px-1.5 rounded ml-auto border border-pink-500/30">PRO</span>
-                    </a>
-                    <a href="{% url 'pricing' %}" class="block px-4 py-2.5 text-sm text-brand-hover hover:bg-white/5 transition-colors flex items-center gap-3 font-bold" style="text-shadow: 0 0 10px rgba(139, 92, 246, 0.3);">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        Upgrade to Premium
-                    </a>
-                {% endif %}
-
-                <div class="h-px bg-gray-700/50 my-1"></div>
-
-                <form action="{% url 'logout' %}" method="post" class="m-0">
-                    {% csrf_token %}
-                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-3">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        Log out
-                    </button>
-                </form>
-            </div>
-        </div>
+        <a href="{% url 'index' %}">Upload</a>
+        <a href="{% url 'history' %}">History</a>
+        {% if user.profile.is_premium %}
+            <a href="{% url 'market_insights' %}" class="text-green-400 font-bold" style="text-shadow: 0 0 5px rgba(74,222,128,0.5);">Insights</a>
+            <a href="{% url 'pricing' %}" class="text-brand-hover">View Subscription</a>
+        {% else %}
+            <a href="{% url 'market_insights' %}" class="text-gray-500 hover:text-gray-300 transition-colors" title="Premium Feature">Insights <span class="text-[10px] bg-pink-500/20 text-pink-400 px-1 py-0.5 rounded border border-pink-500/30">PRO</span></a>
+            <a href="{% url 'pricing' %}" class="text-brand font-bold" style="text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);">Upgrade to Premium</a>
+        {% endif %}
+        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" style="background:none;border:none;color:var(--text-muted);font-size:15px;font-weight:600;padding:8px 16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--text-muted)'">Log out</button>
+        </form>
       {% else %}
         <a href="{% url 'login' %}">Log in</a>
         <a href="{% url 'signup' %}" style="background: var(--primary-light); color: var(--primary);">Sign up</a>
