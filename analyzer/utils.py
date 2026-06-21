@@ -282,13 +282,32 @@ def send_email_otp(user, otp_code: str):
     """Send OTP to user's email."""
     from django.core.mail import send_mail
     from django.conf import settings
-    subject = "Your Resume Analyzer Verification Code"
-    message = f"Hello {user.username},\n\nYour verification code is: {otp_code}\n\nThis code is valid for 10 minutes."
+    from django.template.loader import render_to_string
+    from django.utils.html import strip_tags
+
+    subject = "Your AI Resume Analyzer Verification Code"
+    context = {
+        'username': user.username,
+        'otp_code': otp_code,
+        'valid_minutes': 10,
+    }
+    
+    html_message = render_to_string('analyzer/emails/otp_email.html', context)
+    plain_message = strip_tags(html_message)
+    
     # Use EMAIL_HOST_USER if configured, else default from address
     from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@resumeanalyzer.com')
     if not from_email:
         from_email = 'noreply@resumeanalyzer.com'
-    send_mail(subject, message, from_email, [user.email], fail_silently=False)
+    
+    send_mail(
+        subject,
+        plain_message,
+        from_email,
+        [user.email],
+        html_message=html_message,
+        fail_silently=False
+    )
 
 def send_sms_otp(user, otp_code: str, phone_number: str):
     """Send OTP via SMS (console placeholder for now)."""
