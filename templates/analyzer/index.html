@@ -503,7 +503,11 @@ if (trendDataEl) {
     const trendData = JSON.parse(trendDataEl.textContent);
     const ctx = document.getElementById('scoreTrendChart').getContext('2d');
     
-    Chart.defaults.color = '#94a3b8';
+    const isLight = document.documentElement.classList.contains('light');
+    const textColor = isLight ? '#475569' : '#94a3b8';
+    const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+
+    Chart.defaults.color = textColor;
     Chart.defaults.font.family = "'Outfit', sans-serif";
 
     new Chart(ctx, {
@@ -536,7 +540,7 @@ if (trendDataEl) {
                 }
             },
             scales: {
-                y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } },
+                y: { min: 0, max: 100, grid: { color: gridColor } },
                 x: { grid: { display: false } }
             }
         }

@@ -50,7 +50,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
                 <div>
-                    <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Analysis Results</h1>
+                    <h1 class="text-3xl md:text-4xl font-extrabold gradient-text-title">Analysis Results</h1>
                     <p class="text-sm text-brand font-medium mt-1">Analyzing <span class="text-gray-300 font-mono">{{ filename }}</span></p>
                 </div>
             </div>
@@ -650,8 +650,9 @@
         
         const ctx = document.getElementById('skillsChart').getContext('2d');
         
-        // Dark theme for Chart.js
-        Chart.defaults.color = '#94a3b8';
+        // Theme-aware configuration for Chart.js
+        const isLight = document.documentElement.classList.contains('light');
+        Chart.defaults.color = isLight ? '#475569' : '#94a3b8';
         Chart.defaults.font.family = "'Outfit', sans-serif";
 
         new Chart(ctx, {
