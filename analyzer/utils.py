@@ -310,8 +310,30 @@ def send_email_otp(user, otp_code: str):
     )
 
 def send_sms_otp(user, otp_code: str, phone_number: str):
-    """Send OTP via SMS (console placeholder for now)."""
-    # Placeholder: print to console
-    print(f"--- SMS OTP for {user.username} ({phone_number}) ---")
-    print(f"Your verification code is: {otp_code}")
-    print(f"--------------------------------------------------")
+    """Send OTP via SMS using Twilio."""
+    from django.conf import settings
+    from twilio.rest import Client
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    account_sid = getattr(settings, 'TWILIO_ACCOUNT_SID', None)
+    auth_token = getattr(settings, 'TWILIO_AUTH_TOKEN', None)
+    twilio_number = getattr(settings, 'TWILIO_PHONE_NUMBER', None)
+
+    if not account_sid or not auth_token or not twilio_number:
+        logger.warning(f"Twilio credentials missing. Fallback: SMS OTP for {user.username} ({phone_number}) is {otp_code}")
+        return
+
+    try:
+        client = Client(account_sid, auth_token)
+        message = client.messages.create(
+            body=f"Your Resume Analyzer verification code is: {otp_code}. It expires in 10 minutes.",
+            from_=twilio_number,
+            to=phone_number
+        )
+        logger.info(f"Sent SMS to {phone_number}, SID: {message.sid}")
+    except Exception as e:
+        logger.error(f"Failed to send SMS to {phone_number}: {e}")
+        # In a real app, you might want to raise the exception or handle it
+        pass

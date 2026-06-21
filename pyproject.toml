@@ -27,6 +27,7 @@ dependencies = [
     "tenacity==9.1.4",
     "django-environ==0.13.0",
     "razorpay>=2.0.1",
+    "twilio>=8.0.0",
 ]
 
 [tool.pytest.ini_options]
