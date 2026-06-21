@@ -36,7 +36,7 @@ def build_analysis_prompt(resume_text: str, job_desc: str) -> str:
     Identify:
     - Overused words, passive voice, and weak verbs in the Experience section.
     - Lack of quantification (metrics, numbers) in achievements.
-    - Generate EXACTLY 15 highly tailored interview questions covering technical skills, behavioral situations, and experience gaps. Provide detailed, comprehensive answers for each question detailing key points the candidate must cover.
+    - Generate EXACTLY 15 highly tailored interview questions covering technical skills, behavioral situations, experience gaps, and deep-dive questions about specific projects listed in the resume. Avoid generic interview questions. Provide detailed, comprehensive answers for each question detailing key points the candidate must cover.
     - Extract skills and strictly categorize them as "hard" (technical, tools, specific knowledge) or "soft" (interpersonal, leadership, traits).
     
     Return ONLY a JSON object exactly matching this schema:
