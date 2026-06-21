@@ -50,3 +50,35 @@ def test_payment_failed_view(factory):
     assert b"ord_123" in response.content
     assert b"pay_456" in response.content
 
+
+@pytest.mark.django_db
+def test_free_tier_monthly_limit(factory):
+    """A basic free user (tier 0) is allowed 2 scans/month and blocked on the 3rd."""
+    from analyzer.views import analyze
+    from analyzer.models import ResumeAnalysis
+    user = User.objects.create_user(username="freeuser", password="password")
+    
+    # Create 2 scans in the last 30 days
+    ResumeAnalysis.objects.create(user=user, filename="res1.pdf", status="completed", match_score=70)
+    ResumeAnalysis.objects.create(user=user, filename="res2.pdf", status="completed", match_score=75)
+    
+    # Request a 3rd scan
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    pdf_file = SimpleUploadedFile("resume.pdf", b"%PDF-1.4 test resume data here")
+    
+    request = factory.post(reverse("analyze"), {
+        "resume_input_type": "file",
+        "resume": pdf_file,
+        "job_description": "We need a Software Engineer with Python skills.",
+    })
+    request.user = user
+    request.session = {}
+    request.META['HTTP_X_REQUESTED_WITH'] = 'XMLHttpRequest'
+    
+    response = analyze(request)
+    assert response.status_code == 403
+    import json
+    data = json.loads(response.content)
+    assert data["status"] == "limit_reached"
+
+

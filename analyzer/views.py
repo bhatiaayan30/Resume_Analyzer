@@ -90,7 +90,9 @@ def analyze(request):
         if profile.current_period_start:
             used_scans = ResumeAnalysis.objects.filter(user=request.user, created_at__gte=profile.current_period_start).count()
         else:
-            used_scans = ResumeAnalysis.objects.filter(user=request.user).count()
+            from django.utils import timezone
+            thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
+            used_scans = ResumeAnalysis.objects.filter(user=request.user, created_at__gte=thirty_days_ago).count()
 
         if used_scans >= limit:
             if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json':

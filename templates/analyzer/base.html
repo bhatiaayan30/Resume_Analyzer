@@ -270,10 +270,32 @@
     html.light .bg-gray-900, html.light .bg-gray-800 { background-color: #ffffff !important; }
     html.light .bg-[#1e1e24] { background-color: rgba(255, 255, 255, 0.8) !important; border-color: rgba(255,255,255,0.9) !important; }
     html.light .bg-[#2a2a35] { background-color: #f8fafc !important; color: #0f172a !important; }
-    html.light .bg-gray-900\/50, html.light .bg-gray-800\/50 { background-color: rgba(255, 255, 255, 0.6) !important; }
+    html.light .bg-gray-900\/50, html.light .bg-gray-800\/50,
+    html.light .bg-gray-900\/40, html.light .bg-gray-800\/40,
+    html.light .bg-gray-900\/20, html.light .bg-gray-800\/20,
+    html.light .bg-gray-900\/10, html.light .bg-gray-800\/10 {
+        background-color: rgba(255, 255, 255, 0.6) !important;
+    }
     
     html.light .border-gray-700, html.light .border-gray-600 { border-color: rgba(0, 0, 0, 0.05) !important; }
     html.light .border-gray-700\/50 { border-color: rgba(0, 0, 0, 0.03) !important; }
+
+    html.light input[type="text"], 
+    html.light input[type="password"], 
+    html.light input[type="email"], 
+    html.light textarea,
+    html.light select {
+        color: #0f172a !important;
+        background-color: rgba(0, 0, 0, 0.05) !important;
+        border-color: rgba(0, 0, 0, 0.1) !important;
+    }
+    html.light input[type="text"]::placeholder, 
+    html.light input[type="password"]::placeholder, 
+    html.light input[type="email"]::placeholder, 
+    html.light textarea::placeholder {
+        color: #64748b !important;
+    }
+
 
     .logo {
       background: linear-gradient(to right, var(--logo-grad-1), var(--logo-grad-2));
