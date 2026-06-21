@@ -122,5 +122,18 @@ def test_verify_otp_email(factory):
     assert user.profile.email_verified is True
 
 
+@pytest.mark.django_db
+def test_contact_view(factory):
+    """Contact support page should return 200 and contain support email and phone info."""
+    from analyzer.views import contact_view
+    request = factory.get(reverse("contact"))
+    request.user = AnonymousUser()
+    response = contact_view(request)
+    assert response.status_code == 200
+    assert b"support@resume-analyzer.com" in response.content
+    assert b"+1 (800) 555-0199" in response.content
+
+
+
 
 

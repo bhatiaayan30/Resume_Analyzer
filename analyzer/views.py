@@ -972,3 +972,9 @@ def payment_failed(request):
         "payment_id": payment_id,
     })
 
+
+def contact_view(request):
+    """Render the Contact Us support page."""
+    return render(request, "analyzer/contact.html")
+
+

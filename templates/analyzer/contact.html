@@ -1,0 +1,172 @@
+{% extends "analyzer/base.html" %}
+
+{% block title %}Contact Support - AI Resume Analyzer{% endblock %}
+
+{% block extra_css %}
+<style>
+.contact-title {
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: -1.5px;
+  background: linear-gradient(135deg, var(--title-grad-1), var(--title-grad-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px var(--title-shadow);
+}
+.contact-card {
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
+}
+.contact-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto px-4 md:px-8 py-6 flex flex-col items-center">
+    
+    <!-- Page Header -->
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <h1 class="contact-title leading-tight md:text-5xl font-black">Get in Touch</h1>
+      <p class="text-base md:text-lg text-gray-400 font-light mt-2 leading-relaxed">
+          Have questions about the AI Resume Analyzer, billing issues, or technical difficulties? Our support team is here to assist you.
+      </p>
+    </div>
+
+    <!-- Contact Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl mb-12">
+        
+        <!-- Email Card -->
+        <div class="contact-card relative overflow-hidden flex flex-col justify-between h-full">
+            <div class="absolute top-0 right-0 -mt-6 -mr-6 w-24 h-24 bg-brand/10 rounded-full blur-xl pointer-events-none"></div>
+            
+            <div>
+                <!-- Icon Header -->
+                <div class="w-12 h-12 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-6 text-brand">
+                    <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                
+                <h3 class="text-xl font-bold text-white mb-2">Email Support</h3>
+                <p class="text-sm text-gray-400 mb-6 leading-relaxed">
+                    For account inquiries, subscription help, payment troubleshooting, or general questions, email our dedicated help desk.
+                </p>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/5 pt-4">
+                    <span>Response Time SLA</span>
+                    <span class="px-2.5 py-0.5 rounded-full bg-green-500/10 text-green-400 font-semibold border border-green-500/20">Under 24 Hours</span>
+                </div>
+                
+                <a href="mailto:support@resume-analyzer.com" class="w-full py-3 bg-brand text-white hover:bg-brand-hover rounded-xl font-bold transition-all text-center flex items-center justify-center gap-2 shadow-lg shadow-brand/15">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    support@resume-analyzer.com
+                </a>
+            </div>
+        </div>
+
+        <!-- Phone Card -->
+        <div class="contact-card relative overflow-hidden flex flex-col justify-between h-full">
+            <div class="absolute top-0 right-0 -mt-6 -mr-6 w-24 h-24 bg-pink-500/10 rounded-full blur-xl pointer-events-none"></div>
+            
+            <div>
+                <!-- Icon Header -->
+                <div class="w-12 h-12 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center mb-6 text-pink-400">
+                    <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                </div>
+                
+                <h3 class="text-xl font-bold text-white mb-2">Phone Hotline</h3>
+                <p class="text-sm text-gray-400 mb-6 leading-relaxed">
+                    Need immediate billing support or have business inquiries? Call our toll-free support line to speak directly with an agent.
+                </p>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/5 pt-4">
+                    <span>Availability Hours</span>
+                    <span class="font-medium text-gray-300">Mon-Fri, 9am - 5pm EST</span>
+                </div>
+                
+                <a href="tel:+18005550199" class="w-full py-3 bg-transparent hover:bg-white/5 border border-white/10 text-gray-300 hover:text-white rounded-xl font-bold transition-all text-center flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    +1 (800) 555-0199
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Contact Form (Alpine.js powered interactive mockup) -->
+    <div class="w-full max-w-4xl contact-card relative" x-data="{ name: '', email: '', subject: 'support', message: '', sent: false, loading: false }">
+        <div x-show="!sent">
+            <h3 class="text-xl font-bold text-white mb-2">Send a Message Directly</h3>
+            <p class="text-sm text-gray-400 mb-8">Fill out the quick form below and we will route your inquiry to the right support channel immediately.</p>
+            
+            <form @submit.prevent="loading = true; setTimeout(() => { sent = true; loading = false; message = ''; }, 1000)" class="space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Your Name</label>
+                        <input type="text" x-model="name" required placeholder="e.g. John Doe" class="w-full px-4 py-3 bg-gray-900/40 border border-white/5 rounded-xl text-sm focus:outline-none focus:border-brand">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Email Address</label>
+                        <input type="email" x-model="email" required placeholder="e.g. john@example.com" class="w-full px-4 py-3 bg-gray-900/40 border border-white/5 rounded-xl text-sm focus:outline-none focus:border-brand">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Subject / Inquiry Type</label>
+                    <select x-model="subject" class="w-full px-4 py-3 bg-gray-900/40 border border-white/5 rounded-xl text-sm focus:outline-none focus:border-brand">
+                        <option value="support">Technical Support</option>
+                        <option value="billing">Billing & Subscriptions</option>
+                        <option value="enterprise">Enterprise Partnerships</option>
+                        <option value="feedback">General Feedback</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Message Description</label>
+                    <textarea x-model="message" required placeholder="Describe your issue or inquiry in detail..." class="w-full h-32 px-4 py-3 bg-gray-900/40 border border-white/5 rounded-xl text-sm focus:outline-none focus:border-brand resize-none"></textarea>
+                </div>
+
+                <button type="submit" :disabled="loading" class="submit-btn flex justify-center items-center gap-2">
+                    <template x-if="loading">
+                        <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </template>
+                    <span x-text="loading ? 'Sending message...' : 'Send Inquiry Message'"></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Success Screen -->
+        <div x-show="sent" style="display: none;" class="text-center py-12 flex flex-col items-center">
+            <div class="w-16 h-16 bg-green-500/10 border border-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-6">
+                <svg class="w-8 h-8 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h4 class="text-2xl font-bold text-white mb-2">Message Sent Successfully!</h4>
+            <p class="text-gray-400 text-sm max-w-sm mb-8" x-text="'Thank you, ' + name + '! We have received your inquiry regarding ' + subject + ' and will email you back at ' + email + ' shortly.'"></p>
+            <button @click="sent = false; name = ''; email = '';" class="px-6 py-2.5 bg-brand text-white hover:bg-brand-hover rounded-lg font-bold transition-all text-xs">
+                Send Another Message
+            </button>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -35,5 +35,6 @@ urlpatterns = [
     path("api/request-otp/", views.request_otp, name="request_otp"),
     path("api/verify-otp/", views.verify_otp, name="verify_otp"),
     path("payment-failed/", views.payment_failed, name="payment_failed"),
+    path("contact/", views.contact_view, name="contact"),
 ]
 
