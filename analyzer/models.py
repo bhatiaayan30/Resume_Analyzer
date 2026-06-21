@@ -23,6 +23,14 @@ class UserProfile(models.Model):
     razorpay_subscription_id = models.CharField(max_length=255, blank=True, null=True)
     has_used_free_trial = models.BooleanField(default=False)
 
+    def is_active_premium(self):
+        if not self.is_premium:
+            return False
+        from django.utils import timezone
+        if self.current_period_end and self.current_period_end < timezone.now():
+            return False
+        return True
+
     def __str__(self):
         return f"{self.user.username} Profile"
 
@@ -33,8 +41,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    profile, _ = UserProfile.objects.get_or_create(user=instance)
-    profile.save()
+    UserProfile.objects.get_or_create(user=instance)
 
 
 

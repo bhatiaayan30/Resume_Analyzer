@@ -69,6 +69,11 @@
 </div>
 
 {% if not error %}
+{# Use json_script to safely embed data — prevents XSS from user-supplied skill names #}
+{{ top_missing_labels|json_script:"top_missing_labels_data" }}
+{{ top_missing_data|json_script:"top_missing_data_data" }}
+{{ top_matched_labels|json_script:"top_matched_labels_data" }}
+{{ top_matched_data|json_script:"top_matched_data_data" }}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const isLight = document.documentElement.classList.contains('light');
@@ -78,11 +83,11 @@ document.addEventListener("DOMContentLoaded", function() {
     Chart.defaults.color = textColor;
     Chart.defaults.font.family = "'Inter', sans-serif";
     
-    const missingLabels = JSON.parse('{{ top_missing_labels|safe }}');
-    const missingData = JSON.parse('{{ top_missing_data|safe }}');
+    const missingLabels = JSON.parse(document.getElementById('top_missing_labels_data').textContent);
+    const missingData = JSON.parse(document.getElementById('top_missing_data_data').textContent);
     
-    const matchedLabels = JSON.parse('{{ top_matched_labels|safe }}');
-    const matchedData = JSON.parse('{{ top_matched_data|safe }}');
+    const matchedLabels = JSON.parse(document.getElementById('top_matched_labels_data').textContent);
+    const matchedData = JSON.parse(document.getElementById('top_matched_data_data').textContent);
 
     new Chart(document.getElementById('missingSkillsChart'), {
         type: 'bar',

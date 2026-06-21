@@ -176,7 +176,7 @@ def analyze(request):
     )
 
     # ── 6. Process Synchronously for Vercel ─────────────────────
-    process_resume_analysis(analysis_record.id)
+    process_resume_analysis(str(analysis_record.slug))
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json':
         return JsonResponse({"status": "success", "analysis_id": str(analysis_record.slug)})
@@ -670,6 +670,19 @@ def razorpay_webhook(request):
 
 def verify_coupon(request):
     """Returns coupon validity and discount percentage."""
+    client_ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
+    if client_ip:
+        client_ip = client_ip.split(',')[0].strip()
+    
+    from django.core.cache import cache
+    cache_key = f"coupon_rl_{client_ip}"
+    attempts = cache.get(cache_key, 0)
+    
+    if attempts > 20:
+        return JsonResponse({"valid": False, "error": "Too many attempts. Please try again later."})
+        
+    cache.set(cache_key, attempts + 1, 300) # 5 min timeout
+
     code = request.GET.get('code', '').strip()
     if not code:
         return JsonResponse({"valid": False, "error": "No code provided"})
@@ -679,9 +692,9 @@ def verify_coupon(request):
         if coupon.is_valid():
             return JsonResponse({"valid": True, "discount": coupon.discount_percent})
         else:
-            return JsonResponse({"valid": False, "error": "Coupon is invalid or expired."})
+            return JsonResponse({"valid": False, "error": "Coupon expired or usage limit reached"})
     except Coupon.DoesNotExist:
-        return JsonResponse({"valid": False, "error": "Coupon not found."})
+        return JsonResponse({"valid": False, "error": "Invalid coupon code"})
 
 # ── Public API ───────────────────────────────────────────────────
 
@@ -765,37 +778,48 @@ def market_insights(request):
     if not (profile.is_premium and profile.subscription_tier >= 1):
         return redirect('pricing')
 
-    # Aggregate data
-    analyses = ResumeAnalysis.objects.filter(status='completed')
-    total_scans = analyses.count()
+    from django.core.cache import cache
     
-    if total_scans == 0:
-        return render(request, "analyzer/insights.html", {"error": "Not enough data yet."})
+    # Try cache first to avoid Memory DoS
+    cache_key = "market_insights_dashboard"
+    context = cache.get(cache_key)
+    
+    if not context:
+        # Aggregate data using iterator and values to save memory
+        analyses = ResumeAnalysis.objects.filter(status='completed').values('match_score', 'matched_skills', 'missing_skills')
+        total_scans = analyses.count()
+        
+        if total_scans == 0:
+            return render(request, "analyzer/insights.html", {"error": "Not enough data yet."})
 
-    avg_score = sum(a.match_score for a in analyses) / total_scans
+        total_score = 0
+        matched_counter = Counter()
+        missing_counter = Counter()
 
-    matched_counter = Counter()
-    missing_counter = Counter()
+        for a in analyses.iterator():
+            total_score += a['match_score']
+            for ms in (a['matched_skills'] or []):
+                skill_name = ms.get('skill', ms) if isinstance(ms, dict) else ms
+                matched_counter[str(skill_name).title()] += 1
+                
+            for ms in (a['missing_skills'] or []):
+                skill_name = ms.get('skill', ms) if isinstance(ms, dict) else ms
+                missing_counter[str(skill_name).title()] += 1
 
-    for a in analyses:
-        for ms in (a.matched_skills or []):
-            skill_name = ms.get('skill', ms) if isinstance(ms, dict) else ms
-            matched_counter[str(skill_name).title()] += 1
-            
-        for ms in (a.missing_skills or []):
-            skill_name = ms.get('skill', ms) if isinstance(ms, dict) else ms
-            missing_counter[str(skill_name).title()] += 1
+        avg_score = total_score / total_scans
+        top_matched = matched_counter.most_common(10)
+        top_missing = missing_counter.most_common(10)
 
-    top_matched = matched_counter.most_common(10)
-    top_missing = missing_counter.most_common(10)
-
-    context = {
-        "total_scans": total_scans,
-        "avg_score": round(avg_score, 1),
-        "top_matched_labels": json.dumps([x[0] for x in top_matched]),
-        "top_matched_data": json.dumps([x[1] for x in top_matched]),
-        "top_missing_labels": json.dumps([x[0] for x in top_missing]),
-        "top_missing_data": json.dumps([x[1] for x in top_missing]),
-    }
+        context = {
+            "total_scans": total_scans,
+            "avg_score": round(avg_score, 1),
+            "top_matched_labels": json.dumps([x[0] for x in top_matched]),
+            "top_matched_data": json.dumps([x[1] for x in top_matched]),
+            "top_missing_labels": json.dumps([x[0] for x in top_missing]),
+            "top_missing_data": json.dumps([x[1] for x in top_missing]),
+        }
+        
+        # Cache for 1 hour (3600 seconds)
+        cache.set(cache_key, context, 3600)
 
     return render(request, "analyzer/insights.html", context)

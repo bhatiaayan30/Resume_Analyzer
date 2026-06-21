@@ -3,12 +3,12 @@ import traceback
 from .models import ResumeAnalysis
 from .utils import analyze_with_ai
 
-def process_resume_analysis(analysis_id: int):
+def process_resume_analysis(analysis_slug: str):
     """
     Background task to process a resume.
     """
     try:
-        analysis_record = ResumeAnalysis.objects.get(id=analysis_id)
+        analysis_record = ResumeAnalysis.objects.get(slug=analysis_slug)
         analysis_record.status = 'processing'
         analysis_record.save()
 
