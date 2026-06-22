@@ -43,7 +43,8 @@ RESUME_STRUCTURE_SCHEMA = """
     "education": [
         {
             "degree": "string",
-            "institution": "string",
+            "institution": "string (name of school/university)",
+            "school": "string (name of school/university, same as institution for compatibility)",
             "location": "string",
             "duration": "string"
         }
@@ -53,7 +54,23 @@ RESUME_STRUCTURE_SCHEMA = """
         "frameworks": ["string"],
         "tools": ["string"],
         "other": ["string"]
-    }
+    },
+    "projects": [
+        {
+            "name": "string",
+            "tech_stack": "string (comma-separated list of technologies used, e.g., Python, Django, React)",
+            "duration": "string",
+            "bullets": ["string bullet points detailing contributions and impact"]
+        }
+    ],
+    "certifications": [
+        {
+            "name": "string",
+            "issuer": "string",
+            "year": "string"
+        }
+    ],
+    "languages_spoken": ["string (e.g. English - Professional, Hindi - Native)"]
 }
 """
 
@@ -242,7 +259,7 @@ def build_resume_parser_prompt(resume_text: str) -> str:
     Raw Resume Text:
     {resume_text[:25000]}
     
-    Ensure you accurately parse all sections (Contact info, Summary, Work Experience, Education, and Skills). If certain sections are missing, leave them empty or omit. Normalize company names, roles, and durations. Ensure bullet points are separated into arrays.
+    Ensure you accurately parse all sections (Contact info, Summary, Work Experience, Education, Skills, Projects, Certifications, and Languages Spoken). If certain sections are missing, leave them empty or omit. Normalize company names, roles, and durations. Ensure bullet points are separated into arrays.
     
     Return ONLY a JSON object matching this exact schema:
     {RESUME_STRUCTURE_SCHEMA}

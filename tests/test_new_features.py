@@ -270,6 +270,18 @@ def test_suggest_bullet_rewrite_validation(mock_groq_class, factory, premium_use
 # ──────────────────────────────────────────────────────────────
 @pytest.mark.django_db
 def test_portfolio_preview_owner(factory, premium_user, analysis_record):
+    analysis_record.structured_resume = {
+        "name": "John Doe",
+        "contact": {"email": "john@example.com"},
+        "experience": [{"role": "Python Dev", "company": "Acme", "duration": "1 year", "bullets": ["Built Python apps"]}],
+        "education": [{"degree": "B.S.", "institution": "Acme Uni", "school": "Acme Uni", "duration": "4 years"}],
+        "skills": {"languages": ["Python"]},
+        "projects": [{"name": "My Project", "tech_stack": "Python, Django", "duration": "2 months", "bullets": ["Built something cool"]}],
+        "certifications": [{"name": "AWS Certified", "issuer": "AWS", "year": "2025"}],
+        "languages_spoken": ["English - Professional"]
+    }
+    analysis_record.save()
+
     # Free or premium owner should be able to view their preview
     url = reverse("portfolio_view", kwargs={"analysis_id": analysis_record.slug})
     request = factory.get(url)
@@ -279,6 +291,9 @@ def test_portfolio_preview_owner(factory, premium_user, analysis_record):
     assert response.status_code == 200
     assert b"Web Portfolio Preview" in response.content
     assert b"John Doe" in response.content
+    assert b"My Project" in response.content
+    assert b"AWS Certified" in response.content
+    assert b"English - Professional" in response.content
 
 @pytest.mark.django_db
 def test_portfolio_preview_public_premium(factory, premium_user, analysis_record):

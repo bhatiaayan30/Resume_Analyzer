@@ -488,19 +488,40 @@ def evaluate_interview_answer(question: str, answer: str, job_desc: str) -> dict
             max_tokens=500
         )
         
-        content = response.choices[0].message.content.strip()
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-        content = content.strip()
-        
-        return json.loads(content)
+        return robust_json_loads(response.choices[0].message.content)
     except Exception as exc:
         print(f"[utils.evaluate_interview_answer] Error: {exc}")
         return {"score": 70, "feedback": f"Your response is noted. Focus on detailing matching skills. Error: {exc}"}
+
+def robust_json_loads(text: str) -> Any:
+    """Helper to robustly extract and parse a JSON object or list from text."""
+    text_str = text.strip()
+    
+    # Try finding the outer-most JSON object bounds
+    start_idx = text_str.find('{')
+    end_idx = text_str.rfind('}')
+    
+    # If no object is found, try finding a JSON array
+    if start_idx == -1 or end_idx == -1:
+        start_idx = text_str.find('[')
+        end_idx = text_str.rfind(']')
+        
+    if start_idx != -1 and end_idx != -1:
+        json_candidate = text_str[start_idx:end_idx + 1]
+        try:
+            return json.loads(json_candidate)
+        except json.JSONDecodeError:
+            pass
+            
+    # Fall back to standard loads with fence cleaning
+    if text_str.startswith("```json"):
+        text_str = text_str[7:]
+    elif text_str.startswith("```"):
+        text_str = text_str[3:]
+    if text_str.endswith("```"):
+        text_str = text_str[:-3]
+    text_str = text_str.strip()
+    return json.loads(text_str)
 
 def parse_resume_to_json(resume_text: str) -> dict:
     """Converts plain text resume to structured JSON format."""
@@ -521,16 +542,7 @@ def parse_resume_to_json(resume_text: str) -> dict:
             max_tokens=2000
         )
         
-        content = response.choices[0].message.content.strip()
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-        content = content.strip()
-        
-        return json.loads(content)
+        return robust_json_loads(response.choices[0].message.content)
     except Exception as exc:
         print(f"[utils.parse_resume_to_json] Error: {exc}")
         # Build basic fallback object by splitting text
@@ -565,15 +577,7 @@ def get_ai_summary_suggestions(job_title: str, industry: str) -> list:
             temperature=0.7,
             max_tokens=600
         )
-        content = response.choices[0].message.content.strip()
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-        content = content.strip()
-        return json.loads(content)
+        return robust_json_loads(response.choices[0].message.content)
     except Exception as exc:
         print(f"[utils.get_ai_summary_suggestions] Error: {exc}")
         return [
@@ -637,16 +641,7 @@ def localize_resume_data(resume_json: dict, target_lang: str, target_market: str
             max_tokens=2000
         )
         
-        content = response.choices[0].message.content.strip()
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-        content = content.strip()
-        
-        return json.loads(content)
+        return robust_json_loads(response.choices[0].message.content)
     except Exception as exc:
         print(f"[utils.localize_resume_data] Error: {exc}")
         return resume_json

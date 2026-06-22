@@ -1456,15 +1456,19 @@ def export_portfolio_html(request, analysis_id):
     return response
 
 
-@login_required
 @require_http_methods(["POST"])
 def localize_resume_api(request, analysis_id):
     """API endpoint to translate and localize a resume to a target language and market."""
     record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
     
-    # Authenticated owner check
-    if record.user != request.user:
+    # Ownership safety check: allow guests to localize guest records
+    if record.user and record.user != request.user:
         return JsonResponse({"error": "Access denied: You are not the owner of this resume."}, status=403)
+
+    # Check permission (guests on their first scan get it, premium/pro users get it)
+    perms = get_premium_permissions(request.user, record)
+    if not perms["can_download_pdf"]:
+        return JsonResponse({"error": "Pro, Elite, or Unlimited subscription required to translate resumes."}, status=403)
 
     try:
         body = json.loads(request.body)

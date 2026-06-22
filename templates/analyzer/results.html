@@ -256,7 +256,7 @@ html.light .guest-lock-btn-secondary:hover {
             </button>
             <button onclick="switchTab('interview')" id="btn-interview" class="tab-btn text-gray-400 hover:text-white hover:bg-white/5 border-transparent px-4 py-2 text-sm font-semibold rounded-lg border transition-all flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                Mock Interview
+                Mock Interview Questions
             </button>
             <button onclick="switchTab('cover-letter')" id="btn-cover-letter" class="tab-btn bg-gradient-to-r from-brand to-indigo-500 text-white border-transparent hover:shadow-[0_0_15px_rgba(0,240,255,0.4)] px-4 py-2 text-sm font-semibold rounded-lg border transition-all flex items-center gap-2 relative overflow-hidden group">
                 <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
@@ -419,7 +419,7 @@ html.light .guest-lock-btn-secondary:hover {
                         <p class="text-xs text-gray-450">Visual mapping of keywords required by the Job Description. Color density represents occurrence frequency in the JD.</p>
                     </div>
                     
-                    {/* Legend */}
+                    <!-- Legend -->
                     <div class="flex flex-wrap items-center gap-4 text-[10px] text-gray-400 font-semibold bg-gray-900/20 px-3 py-1.5 rounded-lg border border-gray-700/50">
                         <div class="flex items-center gap-1.5">
                             <span class="w-3 h-3 bg-emerald-500 rounded border border-emerald-400/40"></span> Matched
@@ -636,9 +636,9 @@ html.light .guest-lock-btn-secondary:hover {
                     <div class="w-14 h-14 bg-brand/20 border border-brand/50 rounded-full flex items-center justify-center text-brand text-xl mb-4 shadow-[0_0_15px_rgba(139,92,246,0.2)] animate-pulse">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     </div>
-                    <h4 class="guest-lock-title">Unlock Mock Interview Simulator</h4>
+                    <h4 class="guest-lock-title">Unlock Mock Interview Questions & Simulator</h4>
                     <p class="guest-lock-desc">
-                        Chat message-by-message with an AI technical recruiter who asks tailored questions, scores your answers, and provides performance coaching.
+                        Unlock your static list of tailored interview questions and response points, plus a message-by-message chat simulator with an AI recruiter.
                     </p>
                     <div class="flex gap-3">
                         <a href="{% url 'signup' %}" class="px-5 py-2.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)]">Sign Up Free</a>
@@ -700,8 +700,8 @@ html.light .guest-lock-btn-secondary:hover {
                     <!-- Left Pane: Locked Simulator -->
                     <div class="premium-card text-center py-12 flex flex-col justify-center items-center border border-gray-700/50">
                         <svg class="w-16 h-16 text-pink-500/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                        <h4 class="text-white font-bold text-lg mb-2">Mock Interview Simulator</h4>
-                        <p class="text-gray-400 text-sm mb-6 max-w-sm">Upgrade to Pro, Elite, or Unlimited to chat message-by-message with an AI technical recruiter who coaches you.</p>
+                        <h4 class="text-white font-bold text-lg mb-2">Mock Interview Questions & Simulator</h4>
+                        <p class="text-gray-400 text-sm mb-6 max-w-sm">Upgrade to Pro, Elite, or Unlimited to chat with an AI technical recruiter or view personalized practice questions.</p>
                         <a href="{% url 'pricing' %}" class="inline-flex items-center gap-2 bg-pink-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-pink-500 transition-colors">
                             Upgrade to Pro
                         </a>
@@ -1256,7 +1256,8 @@ html.light .guest-lock-btn-secondary:hover {
         const [rewriteAppendedIdx, setRewriteAppendedIdx] = useState(null);
 
         useEffect(() => {
-            const initialCritiques = JSON.parse(document.getElementById('critiques-initial-data').textContent || '[]');
+            const critiquesEl = document.getElementById('critiques-initial-data');
+            const initialCritiques = (critiquesEl && critiquesEl.textContent.trim()) ? JSON.parse(critiquesEl.textContent) : [];
             setCritiques(initialCritiques);
         }, []);
 
@@ -1662,9 +1663,20 @@ html.light .guest-lock-btn-secondary:hover {
         const [copiedIdx, setCopiedIdx] = useState(null);
 
         useEffect(() => {
-            const matched = JSON.parse(document.getElementById('matched-skills-data').textContent || '[]');
-            const missing = JSON.parse(document.getElementById('missing-skills-data').textContent || '[]');
-            const jobDesc = JSON.parse(document.getElementById('job-desc-data')?.textContent || '""');
+            const safeJsonParse = (id, fallback) => {
+                try {
+                    const el = document.getElementById(id);
+                    if (!el || !el.textContent.trim()) return fallback;
+                    return JSON.parse(el.textContent);
+                } catch (e) {
+                    console.error("Error parsing JSON for ID " + id, e);
+                    return fallback;
+                }
+            };
+
+            const matched = safeJsonParse('matched-skills-data', []);
+            const missing = safeJsonParse('missing-skills-data', []);
+            const jobDesc = safeJsonParse('job-desc-data', "");
 
             const allKeywords = [
                 ...matched.map(s => ({ skill: typeof s === 'object' ? s.skill : s, category: typeof s === 'object' ? (s.category || 'hard') : 'hard', matched: true })),
@@ -2139,8 +2151,14 @@ html.light .guest-lock-btn-secondary:hover {
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const matched = JSON.parse(document.getElementById('matched-skills-data').textContent || '[]');
-        const missing = JSON.parse(document.getElementById('missing-skills-data').textContent || '[]');
+        const safeParseLocal = (id, fallback) => {
+            try {
+                const el = document.getElementById(id);
+                return el && el.textContent.trim() ? JSON.parse(el.textContent) : fallback;
+            } catch (e) { return fallback; }
+        };
+        const matched = safeParseLocal('matched-skills-data', []);
+        const missing = safeParseLocal('missing-skills-data', []);
         
         const ctx = document.getElementById('skillsChart').getContext('2d');
         
