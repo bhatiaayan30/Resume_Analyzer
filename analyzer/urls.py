@@ -8,6 +8,7 @@ urlpatterns = [
     path("analysis-status/<uuid:analysis_id>/", views.analysis_status, name="analysis_status"),
     path("results/<uuid:analysis_id>/", views.analysis_results, name="analysis_results"),
     path("history/", views.history, name="history"),
+    path("history/compare/", views.compare_versions_view, name="compare_versions"),
     path("history/delete/<uuid:analysis_id>/", views.delete_analysis, name="delete_analysis"),
     path("settings/", views.settings_view, name="settings"),
     path("signup/", views.signup_view, name="signup"),

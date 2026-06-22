@@ -16,6 +16,7 @@ from analyzer.views import (
     portfolio_view,
     export_portfolio_html,
     localize_resume_api,
+    compare_versions_view,
 )
 
 @pytest.fixture
@@ -420,5 +421,61 @@ def test_localized_portfolio_preview(factory, premium_user, analysis_record):
     assert response.status_code == 200
     assert b"Juan Perez" in response.content
     assert b"Desarrollador" in response.content
+
+
+# ──────────────────────────────────────────────────────────────
+# 9. Side-by-Side Version Comparison & Diff Tracker Tests
+# ──────────────────────────────────────────────────────────────
+@pytest.mark.django_db
+def test_compare_versions_view_selection(factory, premium_user, analysis_record):
+    url = reverse("compare_versions")
+    request = factory.get(url)
+    request.user = premium_user
+    
+    response = compare_versions_view(request)
+    assert response.status_code == 200
+    assert b"Select Resumes to Compare" in response.content
+
+@pytest.mark.django_db
+def test_compare_versions_view_diff(factory, premium_user, analysis_record):
+    # Create a second record to compare against
+    second_record = ResumeAnalysis.objects.create(
+        user=premium_user,
+        filename="resume_tailored.pdf",
+        resume_text="John Doe\nSenior Python Developer\nSkills: Python, Django, Cloud",
+        status="completed",
+        match_score=85
+    )
+    
+    url = reverse("compare_versions") + f"?left={analysis_record.slug}&right={second_record.slug}"
+    request = factory.get(url)
+    request.user = premium_user
+    
+    response = compare_versions_view(request)
+    assert response.status_code == 200
+    # Check that both texts and the score gap are passed
+    assert b"resume_tailored.pdf" in response.content
+    assert b"Senior Python Developer" in response.content
+    assert b"+25%" in response.content # 85% - 60% = +25%
+
+@pytest.mark.django_db
+def test_compare_versions_view_ownership_safety(factory, premium_user, analysis_record):
+    other_user = User.objects.create_user(username="otheruser", password="password")
+    other_record = ResumeAnalysis.objects.create(
+        user=other_user,
+        filename="other.pdf",
+        resume_text="Other user resume text.",
+        status="completed",
+        match_score=40
+    )
+    
+    # Trying to compare ours with someone else's should fail with 404
+    url = reverse("compare_versions") + f"?left={analysis_record.slug}&right={other_record.slug}"
+    request = factory.get(url)
+    request.user = premium_user
+    
+    from django.http import Http404
+    with pytest.raises(Http404):
+        compare_versions_view(request)
 
 

@@ -26,18 +26,24 @@
       <p class="text-gray-400">Review your previous resume alignment scores.</p>
     </div>
     
-    {% if analyses %}
-    <!-- Alpine.js Filter Input -->
-    <div class="relative w-full md:w-72">
-      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+      {% if analyses %}
+      <a href="{% url 'compare_versions' %}" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-[0_0_15px_rgba(99,102,241,0.2)] border border-indigo-500/50">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+          Compare Versions
+      </a>
+      <!-- Alpine.js Filter Input -->
+      <div class="relative w-full sm:w-72">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <input type="text" x-model="searchQuery" placeholder="Search by role or file..."
+               class="block w-full pl-10 pr-3 py-2 border border-white/10 rounded-xl leading-5 bg-black/40 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand sm:text-sm transition-all shadow-[0_0_15px_rgba(139,92,246,0.1)]">
       </div>
-      <input type="text" x-model="searchQuery" placeholder="Search by role or file..."
-             class="block w-full pl-10 pr-3 py-2 border border-white/10 rounded-xl leading-5 bg-black/40 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand sm:text-sm transition-all shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+      {% endif %}
     </div>
-    {% endif %}
   </div>
 
   {% if analyses %}

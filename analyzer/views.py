@@ -1498,3 +1498,43 @@ def localize_resume_api(request, analysis_id):
         "translated_resume": loc.translated_resume
     })
 
+
+@login_required
+def compare_versions_view(request):
+    """Renders side-by-side comparison of two resume analyses, showing line diffs and target alignments."""
+    # Fetch all completed analyses for this user to populate selectors
+    analyses = ResumeAnalysis.objects.filter(user=request.user, status='completed').order_by('-created_at')
+    
+    left_id = request.GET.get("left")
+    right_id = request.GET.get("right")
+    
+    left_analysis = None
+    right_analysis = None
+    left_diff = None
+    right_diff = None
+    score_gap = None
+    
+    if left_id and right_id:
+        left_analysis = get_object_or_404(ResumeAnalysis, slug=left_id, user=request.user)
+        right_analysis = get_object_or_404(ResumeAnalysis, slug=right_id, user=request.user)
+        
+        # Calculate score gap
+        score_gap = right_analysis.match_score - left_analysis.match_score
+        
+        # Generate aligned split diff HTML
+        from .diff_engine import generate_split_diff
+        left_diff, right_diff = generate_split_diff(left_analysis.resume_text, right_analysis.resume_text)
+        
+    context = {
+        "analyses": analyses,
+        "left_analysis": left_analysis,
+        "right_analysis": right_analysis,
+        "left_diff": left_diff,
+        "right_diff": right_diff,
+        "score_gap": score_gap,
+        "left_id": left_id,
+        "right_id": right_id,
+    }
+    return render(request, "analyzer/compare.html", context)
+
+
