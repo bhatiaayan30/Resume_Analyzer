@@ -133,7 +133,7 @@ def build_cover_letter_user_prompt(resume_text: str, job_desc: str, length: str 
     """
 
 def build_bullet_rewrite_prompt(bullet_point: str, job_description: str) -> str:
-    """Constructs the prompt for bullet point optimization."""
+    """Constructs the prompt for smart bullet point optimization with STAR/XYZ validation."""
     return f"""
     You are an elite resume editor and technical recruiter. Optimize the following resume bullet point to make it more impactful for a job role matching this description.
     
@@ -143,20 +143,44 @@ def build_bullet_rewrite_prompt(bullet_point: str, job_description: str) -> str:
     Original Bullet Point:
     "{bullet_point}"
     
-    Provide EXACTLY 3 high-impact, professionally rewritten versions of this bullet point.
-    Criteria:
-    1. Start with strong action verbs.
-    2. Quantify results and achievements wherever possible (e.g. increase performance by X%, reduce cost by Y, save Z hours, lead a team of N). If the original lacks metrics, invent realistic placeholders.
-    3. Seamlessly integrate relevant technical skills or keywords from the job description.
+    Analyze the original bullet point under the STAR (Situation, Task, Action, Result) and Google XYZ (Accomplished [X], Measured by [Y], by doing [Z]) frameworks.
+    Evaluate:
+    - Action Verb strength (identify the main verb, evaluate if it is weak/passive like "worked on", "assisted", "helped", or strong like "spearheaded", "engineered", "streamlined").
+    - Metrics / Quantification (check if there are numbers, percentages, or dollar amounts showing measurable results).
+    - STAR Components (Situation/Task, Action, Result).
+    - Google XYZ Components (What was Accomplished [X], How it was Measured [Y], What was done [Z]).
+    - Provide a critique (constructive feedback on what is missing or weak).
+    - Calculate an overall "Impact Score" between 0 and 100 based on structure and impact.
     
-    Return ONLY a JSON array containing exactly 3 string values representing the rewrites. Do not write any markdown code fences, prefix numbers, or extra text.
-    Example output format:
-    [
-        "Rewritten bullet 1",
-        "Rewritten bullet 2",
-        "Rewritten bullet 3"
-    ]
+    Then, provide EXACTLY 3 high-impact, professionally rewritten versions of this bullet point.
+    Criteria for rewrites:
+    1. Start with strong active verbs.
+    2. Quantify achievements (percentages, time saved, performance improvement, cost reduction) with realistic placeholders if the original lacks them.
+    3. Seamlessly integrate relevant technical skills/keywords from the job description.
+    
+    Return ONLY a JSON object with this exact schema. Do not write any markdown code fences, prefix numbers, or extra text.
+    {{
+        "validation": {{
+            "score": <integer 0-100>,
+            "action_verb": "<string representing detected main verb>",
+            "action_verb_strength": "Strong | Weak",
+            "has_metrics": <boolean>,
+            "critique": "<detailed critique of the original bullet point>",
+            "star_situation_task": "<critique/assessment of the Situation/Task component>",
+            "star_action": "<critique/assessment of the Action component>",
+            "star_result": "<critique/assessment of the Result component>",
+            "xyz_accomplished": "<Accomplished [X] component or critique>",
+            "xyz_measured": "<Measured by [Y] component or critique>",
+            "xyz_doing": "<by doing [Z] component or critique>"
+        }},
+        "suggestions": [
+            "<Rewritten bullet 1 focusing on Google XYZ format>",
+            "<Rewritten bullet 2 focusing on STAR format>",
+            "<Rewritten bullet 3 focusing on high-impact action verbs>"
+        ]
+    }}
     """
+
 
 def build_interview_question_prompt(resume_text: str, job_desc: str, chat_history: list) -> str:
     """Generates the next interview question based on resume, JD, and chat history."""
@@ -253,4 +277,30 @@ def build_experience_bullets_prompt(job_title: str, company_type: str) -> str:
     
     Return ONLY a JSON array containing exactly 5 string values. Do not include markdown code fences (like ```json), prefix numbers, or extra text. Output only the valid JSON array.
     """
+
+
+def build_localization_prompt(resume_json: dict, target_lang: str, target_market: str) -> str:
+    """Constructs the prompt to translate and localize the resume structure JSON."""
+    import json
+    return f"""
+    You are an expert AI Resume Translator and Market Localizer. Your task is to translate the following structured resume JSON into the target language and localize it to match the conventions of the target market.
+    
+    Target Language: {target_lang}
+    Target Market/Country: {target_market}
+    
+    Source Resume JSON:
+    {json.dumps(resume_json, indent=2)}
+    
+    Localization Guidelines:
+    1. **Translation**: Translate all user-visible text fields (such as summary, role names, company descriptions, education degrees, school names, bullet points, and skills categories) into {target_lang}. Keep contact details, standard personal names, and technical terms (e.g. Python, SQL, React) in their standard form as used in {target_market}.
+    2. **Market Adaptations**:
+       - Localize terminology according to professional conventions in {target_market} (e.g., in Germany, translate "Resume" context to 'Lebenslauf'; adapt other labels accordingly).
+       - Translate/adapt academic grades (e.g. US GPA to local equivalents in {target_market} like Germany's 1.0-4.0 system or UK First-Class/Upper Second honors if relevant, or explain it contextually).
+       - Format dates according to conventions in {target_market}.
+       - Adapt writing style to match the target market's cultural professional tone (e.g., highly formal, structured, and factual in Germany/Japan; achievement-oriented with strong action verbs in US/UK).
+    3. **Schema Integrity**: The output MUST be a valid JSON object matching the exact schema structure of the source resume. Do not add, remove, or modify any keys. Keep the exact same key names. Only translate and localize the string values.
+    
+    Return ONLY the localized resume as a valid JSON object matching the input schema. Do not write any markdown code fences (like ```json), prefix numbers, or extra text. Output only the raw valid JSON.
+    """
+
 

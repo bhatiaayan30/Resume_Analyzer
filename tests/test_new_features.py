@@ -13,6 +13,9 @@ from analyzer.views import (
     suggest_bullet_rewrite_api,
     recalculate_score_api,
     export_resume_pdf,
+    portfolio_view,
+    export_portfolio_html,
+    localize_resume_api,
 )
 
 @pytest.fixture
@@ -216,3 +219,206 @@ def test_export_resume_pdf_templates(factory, premium_user, analysis_record):
         assert response.status_code == 200
         assert response["Content-Type"] == "application/pdf"
         assert f"Optimized_Resume_{layout}.pdf" in response["Content-Disposition"]
+
+# ──────────────────────────────────────────────────────────────
+# 6. Smart Bullet Validation Output Test
+# ──────────────────────────────────────────────────────────────
+@pytest.mark.django_db
+@patch("analyzer.utils.Groq")
+def test_suggest_bullet_rewrite_validation(mock_groq_class, factory, premium_user, analysis_record):
+    mock_client = mock_groq_class.return_value
+    mock_response = MagicMock()
+    mock_response.choices[0].message.content = json.dumps({
+        "validation": {
+            "score": 85,
+            "action_verb": "Engineered",
+            "action_verb_strength": "Strong",
+            "has_metrics": True,
+            "critique": "Strong bullet point with metrics.",
+            "star_situation_task": "Situation clear",
+            "star_action": "Action clear",
+            "star_result": "Result clear",
+            "xyz_accomplished": "Accomplished X",
+            "xyz_measured": "Measured Y",
+            "xyz_doing": "By doing Z"
+        },
+        "suggestions": ["Rewrite A", "Rewrite B", "Rewrite C"]
+    })
+    mock_client.chat.completions.create.return_value = mock_response
+
+    url = reverse("suggest_bullet_rewrite_api", kwargs={"analysis_id": analysis_record.slug})
+    request = factory.post(
+        url,
+        json.dumps({"bullet_point": "Engineered Python systems increasing speed by 50%"}),
+        content_type="application/json"
+    )
+    request.user = premium_user
+
+    response = suggest_bullet_rewrite_api(request, analysis_id=analysis_record.slug)
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert "suggestions" in data
+    assert "validation" in data
+    assert data["validation"]["score"] == 85
+    assert data["validation"]["action_verb_strength"] == "Strong"
+    assert len(data["suggestions"]) == 3
+
+
+# ──────────────────────────────────────────────────────────────
+# 7. Personal Portfolio Web Generator Tests
+# ──────────────────────────────────────────────────────────────
+@pytest.mark.django_db
+def test_portfolio_preview_owner(factory, premium_user, analysis_record):
+    # Free or premium owner should be able to view their preview
+    url = reverse("portfolio_view", kwargs={"analysis_id": analysis_record.slug})
+    request = factory.get(url)
+    request.user = premium_user
+    
+    response = portfolio_view(request, analysis_id=analysis_record.slug)
+    assert response.status_code == 200
+    assert b"Web Portfolio Preview" in response.content
+    assert b"John Doe" in response.content
+
+@pytest.mark.django_db
+def test_portfolio_preview_public_premium(factory, premium_user, analysis_record):
+    # Public recruiter (unauthenticated) viewing a premium user's resume
+    url = reverse("portfolio_view", kwargs={"analysis_id": analysis_record.slug})
+    request = factory.get(url)
+    from django.contrib.auth.models import AnonymousUser
+    request.user = AnonymousUser()
+    
+    response = portfolio_view(request, analysis_id=analysis_record.slug)
+    assert response.status_code == 200
+    assert b"John Doe" in response.content
+    assert b"Premium Web Portfolio" not in response.content
+
+@pytest.mark.django_db
+def test_portfolio_preview_public_free_locked(factory):
+    # Public recruiter (unauthenticated) viewing a free user's second resume scan (which is locked)
+    free_user = User.objects.create_user(username="freeuser", password="password")
+    free_user.profile.is_premium = False
+    free_user.profile.subscription_tier = 0
+    free_user.profile.save()
+    
+    # First scan gets the one-time free pass
+    ResumeAnalysis.objects.create(
+        user=free_user,
+        filename="first_free_resume.pdf",
+        resume_text="Jane Doe\nFirst Scan",
+        status="completed",
+        match_score=40
+    )
+    
+    # Second scan is restricted
+    free_record = ResumeAnalysis.objects.create(
+        user=free_user,
+        filename="free_resume.pdf",
+        resume_text="Jane Doe\nPython Developer",
+        status="completed",
+        match_score=50
+    )
+    
+    url = reverse("portfolio_view", kwargs={"analysis_id": free_record.slug})
+    request = factory.get(url)
+    from django.contrib.auth.models import AnonymousUser
+    request.user = AnonymousUser()
+    
+    response = portfolio_view(request, analysis_id=free_record.slug)
+    assert response.status_code == 200
+    assert b"Premium Web Portfolio" in response.content # Lock screen active
+
+@pytest.mark.django_db
+def test_portfolio_export_html_success(factory, premium_user, analysis_record):
+    url = reverse("export_portfolio_html", kwargs={"analysis_id": analysis_record.slug})
+    request = factory.get(url)
+    request.user = premium_user
+    
+    response = export_portfolio_html(request, analysis_id=analysis_record.slug)
+    assert response.status_code == 200
+    assert response["Content-Type"] == "text/html"
+    assert "Portfolio_" in response["Content-Disposition"]
+    assert b"John Doe" in response.content
+
+
+# ──────────────────────────────────────────────────────────────
+# 8. AI Resume Translator & Market Localizer Tests
+# ──────────────────────────────────────────────────────────────
+@pytest.mark.django_db
+@patch("analyzer.views.localize_resume_data")
+def test_localize_resume_api(mock_localize, factory, premium_user, analysis_record):
+    mock_localize.return_value = {
+        "name": "Juan Perez",
+        "contact": {"email": "juan@example.com"},
+        "summary": "Desarrollador Python en Alemania.",
+        "experience": [{"role": "Desarrollador", "company": "Acme", "duration": "1 año", "bullets": ["Creado sistemas de Python"]}],
+        "education": [],
+        "skills": {"languages": ["Python"]}
+    }
+
+    url = reverse("localize_resume_api", kwargs={"analysis_id": analysis_record.slug})
+    request = factory.post(
+        url,
+        json.dumps({"language": "Spanish", "target_market": "Germany"}),
+        content_type="application/json"
+    )
+    request.user = premium_user
+
+    response = localize_resume_api(request, analysis_id=analysis_record.slug)
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["status"] == "success"
+    assert "localization_id" in data
+    assert data["translated_resume"]["name"] == "Juan Perez"
+    assert data["translated_resume"]["summary"] == "Desarrollador Python en Alemania."
+
+@pytest.mark.django_db
+def test_export_localized_pdf(factory, premium_user, analysis_record):
+    from analyzer.models import LocalizedResume
+    loc = LocalizedResume.objects.create(
+        analysis=analysis_record,
+        language="Spanish",
+        target_market="Germany",
+        translated_resume={
+            "name": "Juan Perez",
+            "contact": {"email": "juan@example.com"},
+            "experience": [{"role": "Desarrollador", "company": "Acme", "duration": "1 año", "bullets": ["Creado sistemas"]}],
+            "education": [],
+            "skills": {"languages": ["Python"]}
+        }
+    )
+
+    url = reverse("export_resume_pdf", kwargs={"analysis_id": analysis_record.slug}) + f"?template=minimal&localization_id={loc.slug}"
+    request = factory.get(url)
+    request.user = premium_user
+
+    response = export_resume_pdf(request, analysis_id=analysis_record.slug)
+    assert response.status_code == 200
+    assert response["Content-Type"] == "application/pdf"
+    assert "Optimized_Resume_minimal.pdf" in response["Content-Disposition"]
+
+@pytest.mark.django_db
+def test_localized_portfolio_preview(factory, premium_user, analysis_record):
+    from analyzer.models import LocalizedResume
+    loc = LocalizedResume.objects.create(
+        analysis=analysis_record,
+        language="Spanish",
+        target_market="Germany",
+        translated_resume={
+            "name": "Juan Perez",
+            "contact": {"email": "juan@example.com"},
+            "experience": [{"role": "Desarrollador", "company": "Acme", "duration": "1 año", "bullets": ["Creado sistemas"]}],
+            "education": [],
+            "skills": {"languages": ["Python"]}
+        }
+    )
+
+    url = reverse("portfolio_view", kwargs={"analysis_id": analysis_record.slug}) + f"?localization_id={loc.slug}"
+    request = factory.get(url)
+    request.user = premium_user
+
+    response = portfolio_view(request, analysis_id=analysis_record.slug)
+    assert response.status_code == 200
+    assert b"Juan Perez" in response.content
+    assert b"Desarrollador" in response.content
+
+

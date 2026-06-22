@@ -28,6 +28,7 @@ from analyzer.prompt_builder import (
     build_resume_parser_prompt,
     build_summary_suggestion_prompt,
     build_experience_bullets_prompt,
+    build_localization_prompt,
 )
 import re
 
@@ -344,23 +345,66 @@ def send_sms_otp(user, otp_code: str, phone_number: str):
         # In a real app, you might want to raise the exception or handle it
         pass
 
-def suggest_bullet_rewrites(bullet_point: str, job_desc: str) -> list:
-    """Gets 3 improved options for a resume bullet point from AI."""
+def generate_offline_validation(bullet_point: str) -> dict:
+    """A simple offline heuristic validation for fallback/testing."""
+    has_metrics = any(c.isdigit() for c in bullet_point)
+    weak_verbs = ["wrote", "made", "worked", "helped", "assisted", "did", "managed", "used", "responsible"]
+    words = bullet_point.lower().split()
+    action_verb = "None"
+    action_verb_strength = "Weak"
+    
+    if words:
+        first_word = re.sub(r'[^\w]', '', words[0])
+        action_verb = words[0].capitalize()
+        if first_word in weak_verbs:
+            action_verb_strength = "Weak"
+        else:
+            action_verb_strength = "Strong"
+            
+    score = 40
+    if has_metrics:
+        score += 30
+    if action_verb_strength == "Strong":
+        score += 30
+        
+    return {
+        "score": score,
+        "action_verb": action_verb,
+        "action_verb_strength": action_verb_strength,
+        "has_metrics": has_metrics,
+        "critique": "This bullet point could be stronger. Ensure you start with a strong action verb and include quantifiable results.",
+        "star_situation_task": "Needs more context about the business Situation or Task.",
+        "star_action": bullet_point,
+        "star_result": "Needs quantification." if not has_metrics else "Result quantified.",
+        "xyz_accomplished": bullet_point,
+        "xyz_measured": "Missing measurement metric." if not has_metrics else "Measured quantitatively.",
+        "xyz_doing": "Action described but needs stronger verbs."
+    }
+
+def suggest_bullet_rewrites(bullet_point: str, job_desc: str) -> dict:
+    """Gets 3 improved options and a STAR/XYZ validation breakdown for a resume bullet point from AI."""
     from django.conf import settings
     api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
     if not api_key:
-        return [bullet_point] * 3
+        return {
+            "suggestions": [
+                f"{bullet_point} (Enhanced version 1 - Quantified outcome)",
+                f"{bullet_point} (Enhanced version 2 - Skill integration)",
+                f"{bullet_point} (Enhanced version 3 - Strong action verb)"
+            ],
+            "validation": generate_offline_validation(bullet_point)
+        }
         
     try:
         client = Groq(api_key=api_key)
         prompt = build_bullet_rewrite_prompt(bullet_point, job_desc)
-        model = os.environ.get("FAST_MODEL", "llama3-8b-8192")
+        model = os.environ.get("FAST_MODEL", "llama-3.1-8b-instant")
         
         response = client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.5,
-            max_tokens=500
+            max_tokens=800
         )
         
         content = response.choices[0].message.content.strip()
@@ -373,14 +417,34 @@ def suggest_bullet_rewrites(bullet_point: str, job_desc: str) -> list:
             content = content[:-3]
         content = content.strip()
         
-        return json.loads(content)
+        parsed = json.loads(content)
+        if isinstance(parsed, list):
+            # Fallback if the LLM/mock returned a simple list of suggestions
+            return {
+                "suggestions": parsed,
+                "validation": generate_offline_validation(bullet_point)
+            }
+        elif isinstance(parsed, dict):
+            # If the response is a dictionary, validate critical keys
+            if "suggestions" not in parsed:
+                parsed["suggestions"] = [bullet_point] * 3
+            if "validation" not in parsed:
+                parsed["validation"] = generate_offline_validation(bullet_point)
+            return parsed
+        
+        # Absolute fallback
+        raise ValueError("Invalid structure returned by AI.")
     except Exception as exc:
         print(f"[utils.suggest_bullet_rewrites] Error: {exc}")
-        return [
-            f"{bullet_point} (Enhanced version 1 - Quantified outcome)",
-            f"{bullet_point} (Enhanced version 2 - Skill integration)",
-            f"{bullet_point} (Enhanced version 3 - Strong action verb)"
-        ]
+        return {
+            "suggestions": [
+                f"{bullet_point} (Enhanced version 1 - Quantified outcome)",
+                f"{bullet_point} (Enhanced version 2 - Skill integration)",
+                f"{bullet_point} (Enhanced version 3 - Strong action verb)"
+            ],
+            "validation": generate_offline_validation(bullet_point)
+        }
+
 
 def generate_next_interview_question(resume_text: str, job_desc: str, chat_history: list) -> str:
     """Generates the next question in the mock interview chat session."""
@@ -392,7 +456,7 @@ def generate_next_interview_question(resume_text: str, job_desc: str, chat_histo
     try:
         client = Groq(api_key=api_key)
         prompt = build_interview_question_prompt(resume_text, job_desc, chat_history)
-        model = os.environ.get("FAST_MODEL", "llama3-8b-8192")
+        model = os.environ.get("FAST_MODEL", "llama-3.1-8b-instant")
         
         response = client.chat.completions.create(
             model=model,
@@ -415,7 +479,7 @@ def evaluate_interview_answer(question: str, answer: str, job_desc: str) -> dict
     try:
         client = Groq(api_key=api_key)
         prompt = build_interview_feedback_prompt(question, answer, job_desc)
-        model = os.environ.get("FAST_MODEL", "llama3-8b-8192")
+        model = os.environ.get("FAST_MODEL", "llama-3.1-8b-instant")
         
         response = client.chat.completions.create(
             model=model,
@@ -494,7 +558,7 @@ def get_ai_summary_suggestions(job_title: str, industry: str) -> list:
     try:
         client = Groq(api_key=api_key)
         prompt = build_summary_suggestion_prompt(job_title, industry)
-        model = os.environ.get("FAST_MODEL", "llama3-8b-8192")
+        model = os.environ.get("FAST_MODEL", "llama-3.1-8b-instant")
         response = client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
@@ -527,7 +591,7 @@ def get_ai_experience_bullets(job_title: str, company_type: str) -> list:
     try:
         client = Groq(api_key=api_key)
         prompt = build_experience_bullets_prompt(job_title, company_type)
-        model = os.environ.get("FAST_MODEL", "llama3-8b-8192")
+        model = os.environ.get("FAST_MODEL", "llama-3.1-8b-instant")
         response = client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
@@ -552,4 +616,39 @@ def get_ai_experience_bullets(job_title: str, company_type: str) -> list:
             f"Successfully designed and implemented services using industry best practices.",
             f"Resolved critical issues under tight deadlines ensuring high availability."
         ]
+
+
+def localize_resume_data(resume_json: dict, target_lang: str, target_market: str) -> dict:
+    """Invokes AI to translate and localize structured resume JSON data."""
+    from django.conf import settings
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        return resume_json
+        
+    try:
+        client = Groq(api_key=api_key)
+        prompt = build_localization_prompt(resume_json, target_lang, target_market)
+        model = os.environ.get("QUALITY_MODEL", "llama-3.3-70b-versatile")
+        
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=2000
+        )
+        
+        content = response.choices[0].message.content.strip()
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+        content = content.strip()
+        
+        return json.loads(content)
+    except Exception as exc:
+        print(f"[utils.localize_resume_data] Error: {exc}")
+        return resume_json
+
 

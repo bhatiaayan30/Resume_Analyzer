@@ -33,12 +33,12 @@ from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 
 from .ats_knowledge import ATS_FLAG_EXPLANATIONS
-from .models import Coupon, JobDescription, OTP, Persona, ResumeAnalysis, ResumeVersion, UserProfile, InterviewSession, InterviewMessage
+from .models import Coupon, JobDescription, OTP, Persona, ResumeAnalysis, ResumeVersion, UserProfile, InterviewSession, InterviewMessage, LocalizedResume
 from .tasks import process_resume_analysis
 from .utils import (
     analyze_with_ai, extract_text, generate_cover_letter, generate_otp, send_email_otp, send_sms_otp,
     suggest_bullet_rewrites, generate_next_interview_question, evaluate_interview_answer, parse_resume_to_json,
-    get_ai_summary_suggestions, get_ai_experience_bullets
+    get_ai_summary_suggestions, get_ai_experience_bullets, localize_resume_data
 )
 
 razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -1117,7 +1117,7 @@ def send_interview_message_api(request, session_id):
 @login_required
 @require_http_methods(["POST"])
 def suggest_bullet_rewrite_api(request, analysis_id):
-    """Returns 3 optimized rewrites for a specific resume bullet point."""
+    """Returns 3 optimized rewrites and STAR/XYZ validation for a specific resume bullet point."""
     record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
     try:
         body = json.loads(request.body)
@@ -1128,8 +1128,15 @@ def suggest_bullet_rewrite_api(request, analysis_id):
     if not bullet_point:
         return JsonResponse({"error": "Bullet point cannot be empty"}, status=400)
 
-    suggestions = suggest_bullet_rewrites(bullet_point, record.job_desc_full)
-    return JsonResponse({"suggestions": suggestions})
+    result = suggest_bullet_rewrites(bullet_point, record.job_desc_full)
+    if isinstance(result, list):
+        from .utils import generate_offline_validation
+        result = {
+            "suggestions": result,
+            "validation": generate_offline_validation(bullet_point)
+        }
+    return JsonResponse(result)
+
 
 
 @login_required
@@ -1184,18 +1191,25 @@ def export_resume_pdf(request, analysis_id):
     if template_layout not in ["minimal", "executive", "modern"]:
         template_layout = "minimal"
 
-    # If structured JSON is not cached, parse the plain text resume
-    if not record.structured_resume:
-        structured_data = parse_resume_to_json(record.resume_text)
-        record.structured_resume = structured_data
-        record.save()
+    # Check for localization
+    localization_id = request.GET.get("localization_id")
+    if localization_id:
+        loc = get_object_or_404(LocalizedResume, slug=localization_id, analysis=record)
+        resume_data = loc.translated_resume
+    else:
+        # If structured JSON is not cached, parse the plain text resume
+        if not record.structured_resume:
+            structured_data = parse_resume_to_json(record.resume_text)
+            record.structured_resume = structured_data
+            record.save()
+        resume_data = record.structured_resume
 
     from django.template.loader import render_to_string
     import io
     from xhtml2pdf import pisa
 
     context = {
-        "resume": record.structured_resume,
+        "resume": resume_data,
     }
 
     # Render HTML template
@@ -1346,3 +1360,141 @@ def suggest_bullets_api(request):
 
     bullets = get_ai_experience_bullets(job_title, company_type or "tech startup")
     return JsonResponse({"bullets": bullets})
+
+
+def portfolio_view(request, analysis_id):
+    """Renders the personal portfolio preview (interactive web page)."""
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
+    
+    # Determine ownership
+    is_owner = False
+    if request.user.is_authenticated and record.user == request.user:
+        is_owner = True
+    elif not request.user.is_authenticated and record.user is None:
+        is_owner = True
+
+    # If the viewer is not the owner, check if the owner has premium status (sharing permission)
+    if not is_owner:
+        if record.user is not None:
+            owner_perms = get_premium_permissions(record.user, record)
+            can_view_publicly = owner_perms.get("can_download_pdf", False)
+        else:
+            can_view_publicly = False
+
+        if not can_view_publicly:
+            # Render premium-lock screen for recruiters/public
+            return render(request, "analyzer/portfolio.html", {
+                "record": record,
+                "lock_screen": True,
+                "is_owner": False,
+                "is_export": False,
+            })
+
+    # Check for localization
+    localization_id = request.GET.get("localization_id")
+    if localization_id:
+        loc = get_object_or_404(LocalizedResume, slug=localization_id, analysis=record)
+        resume_data = loc.translated_resume
+    else:
+        # Cache structured resume to avoid repeated parser calls
+        if not record.structured_resume:
+            record.structured_resume = parse_resume_to_json(record.resume_text)
+            record.save()
+        resume_data = record.structured_resume
+
+    context = {
+        "record": record,
+        "resume": resume_data,
+        "is_owner": is_owner,
+        "is_export": False,
+        "lock_screen": False,
+        "localization_id": localization_id,
+    }
+    return render(request, "analyzer/portfolio.html", context)
+
+
+def export_portfolio_html(request, analysis_id):
+    """Generates and downloads a self-contained, single-file HTML version of the portfolio."""
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
+    
+    # Ownership and premium permission checks
+    is_owner = request.user.is_authenticated and record.user == request.user
+    if not is_owner:
+        return HttpResponse("Access denied: Only the owner can export this portfolio.", status=403)
+
+    perms = get_premium_permissions(request.user, record)
+    if not perms.get("can_download_pdf", False):
+        return HttpResponse("Pro, Elite, or Unlimited subscription required to export portfolio HTML.", status=403)
+
+    # Check for localization
+    localization_id = request.GET.get("localization_id")
+    if localization_id:
+        loc = get_object_or_404(LocalizedResume, slug=localization_id, analysis=record)
+        resume_data = loc.translated_resume
+    else:
+        # Ensure structured resume is cached
+        if not record.structured_resume:
+            record.structured_resume = parse_resume_to_json(record.resume_text)
+            record.save()
+        resume_data = record.structured_resume
+
+    from django.template.loader import render_to_string
+    context = {
+        "record": record,
+        "resume": resume_data,
+        "is_owner": False,
+        "is_export": True,
+        "lock_screen": False,
+    }
+    
+    html_content = render_to_string("analyzer/portfolio.html", context)
+    
+    # Clean filename for export
+    clean_name = "".join(c for c in record.filename if c.isalnum() or c in "._-").split(".")[0]
+    response = HttpResponse(html_content, content_type="text/html")
+    response["Content-Disposition"] = f'attachment; filename="Portfolio_{clean_name}.html"'
+    return response
+
+
+@login_required
+@require_http_methods(["POST"])
+def localize_resume_api(request, analysis_id):
+    """API endpoint to translate and localize a resume to a target language and market."""
+    record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
+    
+    # Authenticated owner check
+    if record.user != request.user:
+        return JsonResponse({"error": "Access denied: You are not the owner of this resume."}, status=403)
+
+    try:
+        body = json.loads(request.body)
+        target_lang = body.get("language", "").strip()
+        target_market = body.get("target_market", "").strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON body."}, status=400)
+
+    if not target_lang or not target_market:
+        return JsonResponse({"error": "language and target_market are required."}, status=400)
+
+    # Cache structured resume JSON if not already present
+    if not record.structured_resume:
+        record.structured_resume = parse_resume_to_json(record.resume_text)
+        record.save()
+
+    # Call AI localizer
+    translated_data = localize_resume_data(record.structured_resume, target_lang, target_market)
+    
+    # Save/Cache in database
+    loc = LocalizedResume.objects.create(
+        analysis=record,
+        language=target_lang,
+        target_market=target_market,
+        translated_resume=translated_data
+    )
+
+    return JsonResponse({
+        "status": "success",
+        "localization_id": str(loc.slug),
+        "translated_resume": loc.translated_resume
+    })
+

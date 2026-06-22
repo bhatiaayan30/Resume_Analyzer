@@ -186,6 +186,11 @@ html.light .guest-lock-btn-secondary:hover {
                 </a>
                 {% endif %}
 
+                <a href="{% url 'portfolio_view' analysis.slug %}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                    Web Portfolio
+                </a>
+
                 <form action="{% url 'delete_analysis' analysis.slug %}" method="POST" class="m-0">
                     {% csrf_token %}
                     <button type="submit" onclick="return confirm('Are you sure you want to delete this scan?');" class="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold rounded-lg transition-colors border border-red-500/30">
@@ -257,6 +262,10 @@ html.light .guest-lock-btn-secondary:hover {
                 <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
                 <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                 <span class="relative z-10">Cover Letter</span>
+            </button>
+            <button onclick="switchTab('localization')" id="btn-localization" class="tab-btn text-gray-400 hover:text-white hover:bg-white/5 border-transparent px-4 py-2 text-sm font-semibold rounded-lg border transition-all flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 0A18.015 18.015 0 0110 14.5M10 14.5a18.356 18.356 0 01-2.412-3M10 14.5c-.872 2.105-2.072 3.966-3.5 5.5m3.5-5.5a16.85 16.85 0 005.176-5.5M13 18l1.397-3.72L18 20l-1.397-3.72M16 12l2.5 7"></path></svg>
+                Translate & Localize
             </button>
         </div>
 
@@ -398,6 +407,37 @@ html.light .guest-lock-btn-secondary:hover {
                         {% endif %}
                     </div>
                 </div>
+            </div>
+
+            <!-- Job Description Keyword Coverage Heatmap -->
+            <div class="premium-card space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-700/50 pb-4">
+                    <div>
+                        <h4 class="text-white font-bold text-sm flex items-center gap-2">
+                            <span class="text-brand">🎯</span> Job Description Keyword Coverage Heatmap
+                        </h4>
+                        <p class="text-xs text-gray-450">Visual mapping of keywords required by the Job Description. Color density represents occurrence frequency in the JD.</p>
+                    </div>
+                    
+                    {/* Legend */}
+                    <div class="flex flex-wrap items-center gap-4 text-[10px] text-gray-400 font-semibold bg-gray-900/20 px-3 py-1.5 rounded-lg border border-gray-700/50">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 bg-emerald-500 rounded border border-emerald-400/40"></span> Matched
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 bg-rose-500 rounded border border-rose-400/40"></span> Missing
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span>Low Relevance</span>
+                            <span class="w-2 h-2 bg-brand opacity-60 rounded-sm"></span>
+                            <span class="w-2.5 h-2.5 bg-brand opacity-80 rounded-sm"></span>
+                            <span class="w-3 h-3 bg-brand opacity-100 rounded-sm"></span>
+                            <span>High Relevance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="react-heatmap-root"></div>
             </div>
 
             {% if not request.user.is_authenticated %}
@@ -714,6 +754,37 @@ html.light .guest-lock-btn-secondary:hover {
             {% endif %}
         </div>
 
+        <!-- Tab 6: Localization -->
+        <div id="tab-localization" class="tab-content space-y-8 hidden">
+            {% if not request.user.is_authenticated %}
+            <div class="relative min-h-[400px]">
+                <!-- Lock Overlay -->
+                <div class="guest-lock-overlay">
+                    <div class="w-14 h-14 bg-brand/20 border border-brand/50 rounded-full flex items-center justify-center text-brand text-xl mb-4 shadow-[0_0_15px_rgba(139,92,246,0.2)] animate-pulse">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    </div>
+                    <h4 class="guest-lock-title">Create a Free Account to Unlock</h4>
+                    <p class="guest-lock-desc">
+                        Translate and localize your resume context to fit global job markets. Preview and share your profile internationally.
+                    </p>
+                    <div class="flex gap-3">
+                        <a href="{% url 'signup' %}" class="px-5 py-2.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)]">Sign Up Free</a>
+                        <a href="{% url 'account_login' %}" class="guest-lock-btn-secondary">Log In</a>
+                    </div>
+                </div>
+                <!-- Blurred Content -->
+                <div class="filter blur-[6px] select-none pointer-events-none opacity-20">
+            {% endif %}
+
+            <div style="display:none;">{% csrf_token %}</div>
+            <div id="react-localization-root" data-analysis-id="{{ analysis.slug }}" data-can-download-pdf="{{ perms.can_download_pdf|yesno:'true,false' }}"></div>
+
+            {% if not request.user.is_authenticated %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
     </div>
 </div>
 
@@ -721,6 +792,7 @@ html.light .guest-lock-btn-secondary:hover {
 {{ analysis.matched_skills|json_script:"matched-skills-data" }}
 {{ analysis.missing_skills|json_script:"missing-skills-data" }}
 {{ analysis.impact_critiques|json_script:"critiques-initial-data" }}
+{{ analysis.job_desc_full|json_script:"job-desc-data" }}
 
 {% endblock %}
 
@@ -1178,8 +1250,10 @@ html.light .guest-lock-btn-secondary:hover {
         // AI Bulletpoint Rewriter states
         const [customBullet, setCustomBullet] = useState('');
         const [rewrites, setRewrites] = useState([]);
+        const [validation, setValidation] = useState(null);
         const [isRewriting, setIsRewriting] = useState(false);
         const [rewriteCopiedIdx, setRewriteCopiedIdx] = useState(null);
+        const [rewriteAppendedIdx, setRewriteAppendedIdx] = useState(null);
 
         useEffect(() => {
             const initialCritiques = JSON.parse(document.getElementById('critiques-initial-data').textContent || '[]');
@@ -1296,6 +1370,7 @@ html.light .guest-lock-btn-secondary:hover {
             if (!customBullet.trim()) return;
             setIsRewriting(true);
             setRewrites([]);
+            setValidation(null);
             
             fetch(`/bullet-rewrite/${analysisId}/`, {
                 method: 'POST',
@@ -1310,7 +1385,8 @@ html.light .guest-lock-btn-secondary:hover {
                 return res.json();
             })
             .then(data => {
-                setRewrites(data.suggestions);
+                setRewrites(data.suggestions || []);
+                setValidation(data.validation || null);
                 setIsRewriting(false);
             })
             .catch(err => {
@@ -1323,6 +1399,15 @@ html.light .guest-lock-btn-secondary:hover {
             navigator.clipboard.writeText(text);
             setRewriteCopiedIdx(index);
             setTimeout(() => setRewriteCopiedIdx(null), 2000);
+        };
+
+        const appendSuggestion = (text, index) => {
+            setResumeText(prev => {
+                const trimmed = prev.trim();
+                return trimmed + "\n• " + text + "\n";
+            });
+            setRewriteAppendedIdx(index);
+            setTimeout(() => setRewriteAppendedIdx(null), 2000);
         };
 
         if (!canOptimizer) {
@@ -1384,9 +1469,9 @@ html.light .guest-lock-btn-secondary:hover {
                     {/* Bullet Rewriter helper */}
                     <div className="premium-card space-y-4">
                         <h4 className="text-white font-bold text-sm flex items-center gap-2">
-                            <span className="text-brand">🚀</span> AI Bullet-Point Rewrite Helper
+                            <span className="text-brand">🚀</span> Smart Bullet Point Impact & Action-Verb Enhancer
                         </h4>
-                        <p className="text-xs text-gray-400">Type a weak achievements bullet point below to generate 3 high-impact versions with quantified outcomes.</p>
+                        <p className="text-xs text-gray-400">Type a weak achievements bullet point below to audit it against STAR / XYZ criteria and generate high-impact suggestions.</p>
                         
                         <div className="flex gap-2">
                             <textarea
@@ -1400,25 +1485,124 @@ html.light .guest-lock-btn-secondary:hover {
                                 disabled={isRewriting || !customBullet.trim()}
                                 className="bg-gray-800 hover:bg-gray-700 disabled:bg-gray-900 border border-gray-700 text-xs font-bold text-white px-4 rounded-lg flex items-center justify-center transition-colors"
                             >
-                                {isRewriting ? "Writing..." : "Optimize"}
+                                {isRewriting ? "Auditing..." : "Audit & Enhance"}
                             </button>
                         </div>
 
-                        {rewrites.length > 0 && (
-                            <div className="space-y-3 pt-2">
-                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">AI Suggestions (Click card to Copy)</span>
-                                {rewrites.map((text, idx) => (
-                                    <div 
-                                        key={idx} 
-                                        onClick={() => copyRewrite(text, idx)}
-                                        className="p-3 bg-indigo-500/5 hover:bg-indigo-500/10 border border-indigo-500/30 rounded-lg text-xs text-gray-300 cursor-pointer transition-all flex justify-between items-start gap-3 hover:translate-x-1"
-                                    >
-                                        <p className="flex-1 leading-relaxed">{text}</p>
-                                        <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest shrink-0">
-                                            {rewriteCopiedIdx === idx ? "Copied!" : "Copy"}
+                        {/* Interactive Audit Dashboard */}
+                        {validation && (
+                            <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-850/80 space-y-4 animate-fade-in">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-gray-800">
+                                    <div className="flex items-center gap-3">
+                                        <div className="relative flex items-center justify-center">
+                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xs font-extrabold shadow-md border-2 ${
+                                                validation.score >= 75 ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' :
+                                                validation.score >= 50 ? 'border-amber-500 bg-amber-500/10 text-amber-400' :
+                                                'border-rose-500 bg-rose-500/10 text-rose-400'
+                                            }`}>
+                                                {validation.score}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h5 className="text-xs font-bold text-white uppercase tracking-wider">Bullet Impact Score</h5>
+                                            <p className="text-[10px] text-gray-400">
+                                                {validation.score >= 75 ? 'Strong Impact 🎉' :
+                                                 validation.score >= 50 ? 'Needs Metric Enhancement ⚠️' :
+                                                 'Weak Action & Structure ❌'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Action checklist badges */}
+                                    <div className="flex gap-2 flex-wrap">
+                                        <span className={`px-2 py-0.5 text-[9px] font-bold rounded uppercase tracking-wider ${
+                                            validation.action_verb_strength === 'Strong' 
+                                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                                            : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                                        }`}>
+                                            Verb: {validation.action_verb} ({validation.action_verb_strength})
+                                        </span>
+                                        <span className={`px-2 py-0.5 text-[9px] font-bold rounded uppercase tracking-wider ${
+                                            validation.has_metrics 
+                                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                                            : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                        }`}>
+                                            Metrics: {validation.has_metrics ? 'Found' : 'Missing'}
                                         </span>
                                     </div>
-                                ))}
+                                </div>
+
+                                {/* Critique text */}
+                                <div className="p-3 bg-rose-500/5 rounded-lg border border-rose-500/10">
+                                    <span className="text-[9px] font-bold text-rose-450 uppercase tracking-widest block mb-1">Critique Breakdown</span>
+                                    <p className="text-xs text-gray-300 leading-relaxed italic">"{validation.critique}"</p>
+                                </div>
+
+                                {/* STAR & Google XYZ Audits */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                                    {/* STAR Framework Audit */}
+                                    <div className="p-3 bg-white/5 rounded-lg border border-white/5 space-y-2">
+                                        <h6 className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest border-b border-white/5 pb-1">STAR Audit</h6>
+                                        <div className="space-y-1 text-[11px] leading-relaxed">
+                                            <p className="text-gray-400"><strong className="text-white">Situation/Task:</strong> {validation.star_situation_task}</p>
+                                            <p className="text-gray-400"><strong className="text-white">Action:</strong> {validation.star_action}</p>
+                                            <p className="text-gray-400"><strong className="text-white">Result:</strong> {validation.star_result}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Google XYZ Audit */}
+                                    <div className="p-3 bg-white/5 rounded-lg border border-white/5 space-y-2">
+                                        <h6 className="text-[10px] font-bold text-pink-400 uppercase tracking-widest border-b border-white/5 pb-1">Google XYZ Audit</h6>
+                                        <div className="space-y-1 text-[11px] leading-relaxed">
+                                            <p className="text-gray-400"><strong className="text-white">Accomplished [X]:</strong> {validation.xyz_accomplished}</p>
+                                            <p className="text-gray-400"><strong className="text-white">Measured by [Y]:</strong> {validation.xyz_measured}</p>
+                                            <p className="text-gray-400"><strong className="text-white">By Doing [Z]:</strong> {validation.xyz_doing}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {rewrites.length > 0 && (
+                            <div className="space-y-3 pt-2">
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">AI Rephrasing Suggestions</span>
+                                {rewrites.map((text, idx) => {
+                                    const styleTags = [
+                                        { label: "Google XYZ Format", color: "text-pink-455 bg-pink-550/10 border-pink-550/20" },
+                                        { label: "Result-Oriented (STAR)", color: "text-indigo-455 bg-indigo-550/10 border-indigo-550/20" },
+                                        { label: "Action-Verb Focused", color: "text-emerald-455 bg-emerald-550/10 border-emerald-550/20" }
+                                    ];
+                                    const tag = styleTags[idx] || styleTags[0];
+                                    return (
+                                        <div 
+                                            key={idx} 
+                                            className="p-3.5 bg-gray-900/40 hover:bg-gray-900/60 border border-gray-800 hover:border-brand/40 rounded-xl text-xs text-gray-400 transition-all flex flex-col gap-3 shadow-sm"
+                                        >
+                                            <div className="flex justify-between items-center">
+                                                <span className={`px-2 py-0.5 text-[8px] font-bold rounded uppercase tracking-wider border ${tag.color}`}>
+                                                    {tag.label}
+                                                </span>
+                                                <div className="flex gap-2">
+                                                    <button 
+                                                        onClick={() => copyRewrite(text, idx)}
+                                                        className="px-2 py-1 bg-gray-800/80 border border-gray-700 text-[10px] text-gray-300 hover:text-white rounded transition-colors flex items-center gap-1"
+                                                    >
+                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                                        {rewriteCopiedIdx === idx ? "Copied!" : "Copy"}
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => appendSuggestion(text, idx)}
+                                                        className="px-2 py-1 bg-brand/10 border border-brand/20 text-[10px] text-brand-light hover:bg-brand/20 rounded transition-colors flex items-center gap-1"
+                                                    >
+                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                                                        {rewriteAppendedIdx === idx ? "Appended!" : "Append to Editor"}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <p className="leading-relaxed text-gray-200">{text}</p>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -1465,6 +1649,477 @@ html.light .guest-lock-btn-secondary:hover {
         );
     }
 
+    // ──────────────────────────────────────────────────────────────
+    // 4. Job Description Keyword Coverage Heatmap Component
+    // ──────────────────────────────────────────────────────────────
+    function KeywordHeatmap() {
+        const [filterStatus, setFilterStatus] = useState('all'); // all, matched, missing
+        const [filterCat, setFilterCat] = useState('all'); // all, hard, soft
+        const [searchQuery, setSearchQuery] = useState('');
+        const [sortBy, setSortBy] = useState('frequency'); // frequency, name, status
+        const [processedKeywords, setProcessedKeywords] = useState([]);
+        const [stats, setStats] = useState({ total: 0, matched: 0, missing: 0, matchRate: 0 });
+        const [copiedIdx, setCopiedIdx] = useState(null);
+
+        useEffect(() => {
+            const matched = JSON.parse(document.getElementById('matched-skills-data').textContent || '[]');
+            const missing = JSON.parse(document.getElementById('missing-skills-data').textContent || '[]');
+            const jobDesc = JSON.parse(document.getElementById('job-desc-data')?.textContent || '""');
+
+            const allKeywords = [
+                ...matched.map(s => ({ skill: typeof s === 'object' ? s.skill : s, category: typeof s === 'object' ? (s.category || 'hard') : 'hard', matched: true })),
+                ...missing.map(s => ({ skill: typeof s === 'object' ? s.skill : s, category: typeof s === 'object' ? (s.category || 'hard') : 'hard', matched: false }))
+            ];
+
+            const countFrequency = (keyword, text) => {
+                if (!text || !keyword) return 1;
+                const escaped = keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                const regex = new RegExp(`\\b${escaped}\\b`, 'gi');
+                const matches = text.match(regex);
+                return matches ? matches.length : 1;
+            };
+
+            const processed = allKeywords.map(kw => {
+                const freq = countFrequency(kw.skill, jobDesc);
+                return {
+                    name: kw.skill,
+                    category: kw.category,
+                    matched: kw.matched,
+                    frequency: freq,
+                    importance: freq >= 3 ? 'High' : (freq === 2 ? 'Medium' : 'Low')
+                };
+            });
+
+            setProcessedKeywords(processed);
+
+            const total = processed.length;
+            const matchedCount = processed.filter(k => k.matched).length;
+            const missingCount = total - matchedCount;
+            const matchRate = total > 0 ? Math.round((matchedCount / total) * 100) : 0;
+
+            setStats({ total, matched: matchedCount, missing: missingCount, matchRate });
+        }, []);
+
+        const handleCopy = (name, index) => {
+            navigator.clipboard.writeText(name);
+            setCopiedIdx(index);
+            setTimeout(() => setCopiedIdx(null), 2000);
+        };
+
+        const filteredKeywords = processedKeywords
+            .filter(kw => {
+                if (filterStatus === 'matched' && !kw.matched) return false;
+                if (filterStatus === 'missing' && kw.matched) return false;
+                if (filterCat === 'hard' && kw.category !== 'hard') return false;
+                if (filterCat === 'soft' && kw.category !== 'soft') return false;
+                if (searchQuery.trim() && !kw.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+                return true;
+            })
+            .sort((a, b) => {
+                if (sortBy === 'frequency') return b.frequency - a.frequency;
+                if (sortBy === 'name') return a.name.localeCompare(b.name);
+                if (sortBy === 'status') return (a.matched === b.matched) ? 0 : a.matched ? -1 : 1;
+                return 0;
+            });
+
+        return (
+            <div className="space-y-6">
+                {/* Stats Summary cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-gray-800/40 p-4 rounded-xl border border-gray-700/50 text-center">
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Keywords Extracted</span>
+                        <span className="text-2xl font-extrabold text-white">{stats.total}</span>
+                    </div>
+                    <div className="bg-emerald-500/5 p-4 rounded-xl border border-emerald-500/10 text-center">
+                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Matched Keywords</span>
+                        <span className="text-2xl font-extrabold text-emerald-450">{stats.matched}</span>
+                    </div>
+                    <div className="bg-rose-500/5 p-4 rounded-xl border border-rose-500/10 text-center">
+                        <span className="text-[10px] font-bold text-rose-455 uppercase tracking-widest block mb-1">Missing Keywords</span>
+                        <span className="text-2xl font-extrabold text-rose-400">{stats.missing}</span>
+                    </div>
+                    <div className="bg-brand/5 p-4 rounded-xl border border-brand/10 text-center">
+                        <span className="text-[10px] font-bold text-brand-light uppercase tracking-widest block mb-1">Match Rate</span>
+                        <span className="text-2xl font-extrabold text-brand-light">{stats.matchRate}%</span>
+                    </div>
+                </div>
+
+                {/* Filters & search */}
+                <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-gray-900/30 p-4 rounded-xl border border-gray-800">
+                    <div className="flex flex-wrap gap-2 w-full lg:w-auto">
+                        <button
+                            onClick={() => setFilterStatus('all')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${filterStatus === 'all' ? 'bg-brand text-white border-brand' : 'bg-transparent text-gray-400 border-gray-700 hover:text-white'}`}
+                        >
+                            All Statuses
+                        </button>
+                        <button
+                            onClick={() => setFilterStatus('matched')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${filterStatus === 'matched' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-transparent text-gray-400 border-gray-700 hover:text-white'}`}
+                        >
+                            Matched
+                        </button>
+                        <button
+                            onClick={() => setFilterStatus('missing')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${filterStatus === 'missing' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-transparent text-gray-400 border-gray-700 hover:text-white'}`}
+                        >
+                            Missing
+                        </button>
+                        <div className="w-px h-6 bg-gray-700 self-center hidden sm:block"></div>
+                        <button
+                            onClick={() => setFilterCat('all')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${filterCat === 'all' ? 'bg-brand text-white border-brand' : 'bg-transparent text-gray-400 border-gray-700 hover:text-white'}`}
+                        >
+                            All Categories
+                        </button>
+                        <button
+                            onClick={() => setFilterCat('hard')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${filterCat === 'hard' ? 'bg-gray-800 text-gray-200 border-gray-700 hover:text-white' : 'bg-transparent text-gray-400 border-gray-700 hover:text-white'}`}
+                        >
+                            Hard Skills
+                        </button>
+                        <button
+                            onClick={() => setFilterCat('soft')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${filterCat === 'soft' ? 'bg-gray-800 text-gray-200 border-gray-700 hover:text-white' : 'bg-transparent text-gray-400 border-gray-700 hover:text-white'}`}
+                        >
+                            Soft Skills
+                        </button>
+                    </div>
+
+                    <div className="flex gap-2 w-full lg:w-auto">
+                        <input
+                            type="text"
+                            placeholder="Search keywords..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-gray-950 border border-gray-805 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:outline-none focus:border-brand w-full lg:w-48"
+                        />
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="bg-gray-950 border border-gray-805 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:outline-none focus:border-brand"
+                        >
+                            <option value="frequency">Sort by Relevance</option>
+                            <option value="name">Sort by Name</option>
+                            <option value="status">Sort by Match</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Heatmap Grid */}
+                {filteredKeywords.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                        {filteredKeywords.map((kw, idx) => {
+                            let opacityClass = 'opacity-60';
+                            let glowClass = '';
+                            if (kw.frequency >= 3) {
+                                opacityClass = 'opacity-100';
+                                glowClass = kw.matched ? 'shadow-[0_0_12px_rgba(16,185,129,0.35)]' : 'shadow-[0_0_12px_rgba(239,68,68,0.35)]';
+                            } else if (kw.frequency === 2) {
+                                opacityClass = 'opacity-80';
+                                glowClass = kw.matched ? 'shadow-[0_0_8px_rgba(16,185,129,0.2)]' : 'shadow-[0_0_8px_rgba(239,68,68,0.2)]';
+                            }
+
+                            const baseColorClass = kw.matched
+                                ? 'bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-300 border-emerald-500/30'
+                                : 'bg-rose-500/10 hover:bg-rose-500/25 text-rose-350 border-rose-500/30';
+
+                            return (
+                                <div
+                                    key={idx}
+                                    onClick={() => handleCopy(kw.name, idx)}
+                                    className={`relative p-3.5 rounded-xl border text-center transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 cursor-pointer flex flex-col justify-between h-24 ${baseColorClass} ${opacityClass} ${glowClass}`}
+                                    title={`${kw.name}: ${kw.frequency} occurrence(s) in JD (Click to Copy)`}
+                                >
+                                    <div className="flex justify-between items-start mb-1">
+                                        <span className="text-[7.5px] font-extrabold uppercase tracking-widest px-1.5 py-0.5 rounded bg-black/35 text-white">
+                                            {kw.category}
+                                        </span>
+                                        <span className="text-[8px] font-bold bg-black/20 px-1 py-0.2 rounded text-white/90">
+                                            {kw.frequency}x
+                                        </span>
+                                    </div>
+                                    <span className="text-xs font-bold truncate block mb-1 text-white">{kw.name}</span>
+                                    <span className="text-[8.5px] font-bold text-brand-light uppercase tracking-widest block">
+                                        {copiedIdx === idx ? "Copied!" : `${kw.importance} Importance`}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="text-center py-12 text-gray-500 text-xs">
+                        No keywords found matching the selected filters.
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // 5. AI Resume Translator & Market Localizer Component
+    // ──────────────────────────────────────────────────────────────
+    function ResumeTranslator() {
+        const rootElement = document.getElementById('react-localization-root');
+        if (!rootElement) return null;
+        
+        const analysisId = rootElement.getAttribute('data-analysis-id');
+        const canDownloadPdf = rootElement.getAttribute('data-can-download-pdf') === 'true';
+
+        const [status, setStatus] = useState('idle'); // idle, loading, success, error
+        const [language, setLanguage] = useState('German');
+        const [targetMarket, setTargetMarket] = useState('Germany');
+        const [localizedResume, setLocalizedResume] = useState(null);
+        const [localizationId, setLocalizationId] = useState('');
+        const [pdfTemplate, setPdfTemplate] = useState('minimal');
+        const [error, setError] = useState(null);
+        const [loadingStep, setLoadingStep] = useState(0);
+
+        const loadingSteps = [
+            "Extracting source resume structure...",
+            "Analyzing target market professional conventions...",
+            "Translating content & terminology...",
+            "Localizing dates, grading systems, and context...",
+            "Running cultural style adaptations...",
+            "Structuring finalized schema output..."
+        ];
+
+        useEffect(() => {
+            let interval;
+            if (status === 'loading') {
+                interval = setInterval(() => {
+                    setLoadingStep(prev => (prev + 1) % loadingSteps.length);
+                }, 3000);
+            }
+            return () => clearInterval(interval);
+        }, [status]);
+
+        const handleLocalize = () => {
+            setStatus('loading');
+            setLoadingStep(0);
+            setError(null);
+            fetch(`/api/localize/${analysisId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ language, target_market: targetMarket })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.error || "Failed to localize resume.");
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                setLocalizedResume(data.translated_resume);
+                setLocalizationId(data.localization_id);
+                setStatus('success');
+            })
+            .catch(err => {
+                setError(err.message);
+                setStatus('error');
+            });
+        };
+
+        return (
+            <div className="premium-card space-y-6">
+                <div>
+                    <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-3">
+                        <span className="text-2xl">🌐</span> AI Resume Translator & Market Localizer
+                    </h3>
+                    <p className="text-gray-400 text-sm">
+                        Translate your resume and adapt it to international professional styles, education benchmarks, and date conventions.
+                    </p>
+                </div>
+
+                {status === 'loading' && (
+                    <div className="py-12 flex flex-col items-center justify-center text-center space-y-4">
+                        <div className="w-12 h-12 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-brand font-semibold text-sm animate-pulse">{loadingSteps[loadingStep]}</p>
+                        <p className="text-gray-500 text-xs">This takes about 15-20 seconds to compile perfect localized JSON.</p>
+                    </div>
+                )}
+
+                {status === 'error' && (
+                    <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-center space-y-3">
+                        <p className="text-red-400 text-sm font-semibold">{error}</p>
+                        <button onClick={() => setStatus('idle')} className="px-4 py-2 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-colors">
+                            Try Again
+                        </button>
+                    </div>
+                )}
+
+                {(status === 'idle' || status === 'success') && (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-850/40 p-6 rounded-xl border border-gray-700/50">
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Target Language</label>
+                                <select 
+                                    value={language} 
+                                    onChange={(e) => setLanguage(e.target.value)}
+                                    className="w-full bg-gray-950 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-brand"
+                                >
+                                    <option value="German">German (Deutsch)</option>
+                                    <option value="Spanish">Spanish (Español)</option>
+                                    <option value="French">French (Français)</option>
+                                    <option value="Japanese">Japanese (日本語)</option>
+                                    <option value="Hindi">Hindi (हिन्दी)</option>
+                                    <option value="English">English</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Target Market / Country</label>
+                                <select 
+                                    value={targetMarket} 
+                                    onChange={(e) => setTargetMarket(e.target.value)}
+                                    className="w-full bg-gray-950 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-brand"
+                                >
+                                    <option value="Germany">Germany (Lebenslauf format)</option>
+                                    <option value="Spain">Spain (Curriculum Vitae format)</option>
+                                    <option value="France">France (CV format)</option>
+                                    <option value="Japan">Japan (Rirekisho conventions)</option>
+                                    <option value="India">India (Biodata & CV formats)</option>
+                                    <option value="United Kingdom">United Kingdom (UK CV standards)</option>
+                                    <option value="United States">United States (US Resume standards)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-center">
+                            <button 
+                                onClick={handleLocalize}
+                                className="px-6 py-3 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg shadow-lg shadow-brand/20 transition-all flex items-center gap-2 hover:scale-[1.02]"
+                            >
+                                <span>Localize & Translate</span>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {status === 'success' && localizedResume && (
+                    <div className="space-y-6 pt-6 border-t border-gray-700/50 animate-fadeIn">
+                        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                            <div>
+                                <h4 className="text-base font-bold text-white">Localization Complete!</h4>
+                                <p className="text-gray-400 text-xs font-light">Preview the localized resume structure and choose your export options below.</p>
+                            </div>
+                            
+                            <div className="flex flex-wrap items-center gap-3">
+                                <div className="flex items-center gap-2 bg-gray-950 p-1.5 rounded-lg border border-gray-700">
+                                    <select 
+                                        value={pdfTemplate} 
+                                        onChange={(e) => setPdfTemplate(e.target.value)}
+                                        className="bg-transparent text-xs text-gray-300 font-semibold focus:outline-none px-2 py-1"
+                                    >
+                                        <option value="minimal">Minimal PDF</option>
+                                        <option value="executive">Executive PDF</option>
+                                        <option value="modern">Modern PDF</option>
+                                    </select>
+                                    {canDownloadPdf ? (
+                                        <a 
+                                            href={`/export-resume/${analysisId}/?template=${pdfTemplate}&localization_id=${localizationId}`}
+                                            className="px-3 py-1 bg-brand text-white text-xs font-bold rounded hover:bg-brand-hover transition-colors inline-flex items-center gap-1"
+                                        >
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Export PDF
+                                        </a>
+                                    ) : (
+                                        <a 
+                                            href="/pricing/"
+                                            className="px-3 py-1 bg-gray-800 text-gray-400 text-xs font-bold rounded transition-colors inline-flex items-center gap-1"
+                                            title="Requires Premium Subscription"
+                                        >
+                                            <svg className="w-3 h-3 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> Export PDF
+                                        </a>
+                                    )}
+                                </div>
+
+                                <a 
+                                    href={`/portfolio/${analysisId}/?localization_id=${localizationId}`}
+                                    target="_blank"
+                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors inline-flex items-center gap-1.5 shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+                                >
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg> View Web Portfolio
+                                </a>
+
+                                {canDownloadPdf ? (
+                                    <a 
+                                        href={`/portfolio/export/${analysisId}/?localization_id=${localizationId}`}
+                                        className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-bold rounded-lg border border-gray-750 transition-colors inline-flex items-center gap-1.5"
+                                    >
+                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Export Portfolio HTML
+                                    </a>
+                                ) : (
+                                    <a 
+                                        href="/pricing/"
+                                        className="px-4 py-2 bg-gray-900 text-gray-500 text-xs font-bold rounded-lg border border-gray-800 transition-colors inline-flex items-center gap-1.5"
+                                        title="Requires Premium Subscription"
+                                    >
+                                        <svg className="w-3 h-3 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> Export Portfolio HTML
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="bg-gray-950/60 p-5 rounded-xl border border-gray-800 space-y-4">
+                                <h5 className="text-xs font-bold text-brand uppercase tracking-wider">Localized Profile Info</h5>
+                                <div className="space-y-3 text-xs md:text-sm">
+                                    <div>
+                                        <span className="text-gray-500 block mb-0.5">Name</span>
+                                        <span className="text-white font-semibold">{localizedResume.name || "N/A"}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500 block mb-0.5">Professional Summary</span>
+                                        <p className="text-gray-300 leading-relaxed font-light">{localizedResume.summary || "N/A"}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500 block mb-2">Education</span>
+                                        <div className="space-y-2">
+                                            {localizedResume.education && localizedResume.education.map((edu, idx) => (
+                                                <div key={idx} className="p-2.5 rounded bg-gray-900/60 border border-gray-850">
+                                                    <span className="text-brand font-semibold block">{edu.degree}</span>
+                                                    <span className="text-gray-300 block">{edu.institution}</span>
+                                                    <span className="text-gray-500 text-[11px]">{edu.duration}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-950/60 p-5 rounded-xl border border-gray-800 space-y-4">
+                                <h5 className="text-xs font-bold text-brand uppercase tracking-wider">Localized Experience</h5>
+                                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 chat-scrollbar">
+                                    {localizedResume.experience && localizedResume.experience.map((exp, idx) => (
+                                        <div key={idx} className="space-y-2 border-b border-gray-800/80 pb-3 last:border-b-0 last:pb-0">
+                                            <div className="flex justify-between items-start gap-2">
+                                                <div>
+                                                    <span className="text-white font-bold text-xs">{exp.role}</span>
+                                                    <span className="text-indigo-400 font-semibold block text-[11px]">{exp.company}</span>
+                                                </div>
+                                                <span className="text-gray-500 text-[10px] whitespace-nowrap">{exp.duration}</span>
+                                            </div>
+                                            <ul className="list-disc pl-4 space-y-1">
+                                                {exp.bullets && exp.bullets.map((bullet, bIdx) => (
+                                                    <li key={bIdx} className="text-gray-400 text-xs leading-relaxed">{bullet}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
     // Mounting React Roots
     const clRoot = ReactDOM.createRoot(document.getElementById('react-cover-letter-root'));
     clRoot.render(<CoverLetterGenerator />);
@@ -1474,6 +2129,12 @@ html.light .guest-lock-btn-secondary:hover {
 
     const optRoot = ReactDOM.createRoot(document.getElementById('react-optimizer-root'));
     optRoot.render(<ResumeOptimizer />);
+
+    const heatRoot = ReactDOM.createRoot(document.getElementById('react-heatmap-root'));
+    heatRoot.render(<KeywordHeatmap />);
+
+    const locRoot = ReactDOM.createRoot(document.getElementById('react-localization-root'));
+    locRoot.render(<ResumeTranslator />);
 </script>
 
 <script>

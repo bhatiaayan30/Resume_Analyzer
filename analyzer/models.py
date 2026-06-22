@@ -174,3 +174,17 @@ class InterviewMessage(models.Model):
 
     def __str__(self):
         return f"{self.sender.upper()} in Session {self.session.id}"
+
+
+class LocalizedResume(models.Model):
+    """Stores a translated and localized version of a parsed resume."""
+    analysis = models.ForeignKey(ResumeAnalysis, on_delete=models.CASCADE, related_name="localizations")
+    slug = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    language = models.CharField(max_length=50)
+    target_market = models.CharField(max_length=100)
+    translated_resume = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.analysis.filename} — {self.language} ({self.target_market})"
+

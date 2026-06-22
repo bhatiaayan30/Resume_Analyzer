@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ resume.name|default:"Candidate" }} | Personal Portfolio</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        customBg: 'var(--bg)',
+                        customCard: 'var(--card-bg)',
+                        customBorder: 'var(--card-border)',
+                        customAccent: 'var(--accent)',
+                        customTextMain: 'var(--text-main)',
+                        customTextMuted: 'var(--text-muted)',
+                    },
+                    fontFamily: {
+                        sans: 'var(--font-sans)',
+                        serif: 'var(--font-serif)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            /* Modern Dark (default) */
+            --bg: #0b0f19;
+            --card-bg: rgba(255, 255, 255, 0.02);
+            --card-border: rgba(255, 255, 255, 0.07);
+            --accent: #6366f1;
+            --accent-gradient: linear-gradient(135deg, #6366f1, #a855f7);
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --font-sans: 'Outfit', 'Inter', sans-serif;
+            --font-serif: 'Outfit', 'Inter', sans-serif;
+            --glass-blur: blur(16px);
+        }
+
+        body.theme-creative {
+            /* Creative Gradient */
+            --bg: #0f0c1b;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-border: rgba(255, 255, 255, 0.09);
+            --accent: #ec4899;
+            --accent-gradient: linear-gradient(135deg, #ec4899, #8b5cf6);
+            --accent-glow: rgba(236, 72, 153, 0.2);
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+            --font-sans: 'Outfit', 'Inter', sans-serif;
+            --font-serif: 'Outfit', 'Inter', sans-serif;
+            --glass-blur: blur(12px);
+        }
+
+        body.theme-executive {
+            /* Executive Light */
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --card-border: rgba(15, 23, 42, 0.08);
+            --accent: #0f172a;
+            --accent-gradient: linear-gradient(135deg, #0f172a, #334155);
+            --accent-glow: rgba(15, 23, 42, 0.05);
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --font-sans: 'Inter', sans-serif;
+            --font-serif: 'Playfair Display', serif;
+            --glass-blur: none;
+        }
+
+        /* Glassmorphism utilities */
+        .glass-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        /* Custom timeline styles */
+        .timeline-line {
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent), transparent);
+        }
+
+        /* Custom gradient text utility */
+        .gradient-accent-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-accent-bg {
+            background: var(--accent-gradient);
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Glow effects */
+        .glow-accent {
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+    </style>
+</head>
+<body class="bg-customBg text-customTextMain min-h-screen transition-colors duration-300 font-sans antialiased overflow-x-hidden">
+
+    {% if lock_screen %}
+    <!-- Premium Lock Overlay Screen -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-[#090d16] p-4 text-center">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.15),transparent_60%)]"></div>
+        <div class="relative max-w-lg w-full glass-card border border-white/10 rounded-2xl p-8 md:p-12 shadow-2xl overflow-hidden">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl"></div>
+            
+            <div class="mx-auto w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mb-6">
+                <i data-lucide="lock" class="w-8 h-8 text-indigo-400"></i>
+            </div>
+            
+            <h1 class="text-3xl font-bold tracking-tight text-white mb-4">Premium Web Portfolio</h1>
+            <p class="text-gray-400 text-base leading-relaxed mb-8">
+                This personal portfolio requires a Pro or Elite membership to be shared publicly.
+                If you are the candidate, log in and upgrade to activate your custom portfolio web generator.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/pricing/" class="inline-flex justify-center items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.4)]">
+                    <span>View Pricing Plans</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
+                <a href="/" class="inline-flex justify-center items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-semibold rounded-xl transition-all">
+                    <span>Back to Home</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <!-- Top Toolbar (for owner preview) -->
+    {% if not is_export and is_owner %}
+    <div id="preview-toolbar" class="sticky top-0 z-40 bg-gray-900/90 border-b border-gray-800 backdrop-blur-md px-4 py-3 sm:px-6">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 font-bold">
+                    <i data-lucide="layout" class="w-4 h-4"></i>
+                </span>
+                <div>
+                    <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Web Portfolio Preview</h2>
+                    <p class="text-sm font-bold text-white">{{ resume.name|default:"Candidate" }}</p>
+                </div>
+            </div>
+            
+            <!-- Controls -->
+            <div class="flex items-center flex-wrap gap-4">
+                <!-- Theme Selectors -->
+                <div class="flex items-center bg-gray-950 p-1 rounded-lg border border-gray-800 gap-1">
+                    <button onclick="setTheme('modern')" id="theme-btn-modern" class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all text-white bg-indigo-600 shadow-sm" title="Modern Dark">
+                        Modern
+                    </button>
+                    <button onclick="setTheme('creative')" id="theme-btn-creative" class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all text-gray-400 hover:text-white" title="Creative Gradient">
+                        Creative
+                    </button>
+                    <button onclick="setTheme('executive')" id="theme-btn-executive" class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all text-gray-400 hover:text-white" title="Executive Light">
+                        Executive
+                    </button>
+                </div>
+
+                <!-- Recruiter Toggle -->
+                <button onclick="toggleRecruiterMode(true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xs font-semibold rounded-md border border-gray-700 transition-colors">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                    Recruiter View
+                </button>
+
+                <!-- Export standalone HTML button -->
+                <a href="{% url 'export_portfolio_html' record.slug %}" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-md transition-colors shadow-[0_0_10px_rgba(99,102,241,0.3)]">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    Export HTML
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recruiter Mode Exit Button (Floating) -->
+    {% if not is_export and is_owner %}
+    <button id="exit-recruiter-btn" onclick="toggleRecruiterMode(false)" class="hidden fixed bottom-6 right-6 z-50 p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-2xl transition-all border border-indigo-500 hover:scale-105" title="Exit Recruiter Preview Mode">
+        <i data-lucide="eye-off" class="w-6 h-6"></i>
+    </button>
+    {% endif %}
+
+    <!-- Portfolio Webpage Layout -->
+    <div class="max-w-5xl mx-auto px-6 py-12 md:py-20 lg:py-24">
+        
+        <!-- Header / Hero Section -->
+        <header class="mb-16 md:mb-24 relative">
+            <div class="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full opacity-30 pointer-events-none glow-accent bg-[radial-gradient(ellipse_at_center,var(--accent),transparent_60%)]"></div>
+            
+            <div class="relative flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-8 border-b border-customBorder">
+                <div>
+                    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight font-serif transition-all duration-300 mb-4">
+                        {{ resume.name|default:"Candidate Name" }}
+                    </h1>
+                    
+                    <p class="text-lg md:text-2xl font-medium text-customAccent transition-all duration-300">
+                        {{ resume.experience.0.role|default:"Professional Developer" }}
+                    </p>
+                </div>
+                
+                <!-- Contact Details -->
+                <div class="flex flex-col gap-2.5 text-sm md:text-right">
+                    {% if resume.contact.email %}
+                    <a href="mailto:{{ resume.contact.email }}" class="inline-flex md:justify-end items-center gap-2 text-customTextMuted hover:text-customAccent transition-colors">
+                        <span>{{ resume.contact.email }}</span>
+                        <i data-lucide="mail" class="w-4 h-4 text-customAccent"></i>
+                    </a>
+                    {% endif %}
+                    {% if resume.contact.phone %}
+                    <div class="inline-flex md:justify-end items-center gap-2 text-customTextMuted">
+                        <span>{{ resume.contact.phone }}</span>
+                        <i data-lucide="phone" class="w-4 h-4 text-customAccent"></i>
+                    </div>
+                    {% endif %}
+                    {% if resume.contact.location %}
+                    <div class="inline-flex md:justify-end items-center gap-2 text-customTextMuted">
+                        <span>{{ resume.contact.location }}</span>
+                        <i data-lucide="map-pin" class="w-4 h-4 text-customAccent"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Social Links -->
+                    <div class="flex md:justify-end items-center gap-4 mt-3">
+                        {% if resume.contact.linkedin %}
+                        <a href="{{ resume.contact.linkedin }}" target="_blank" class="p-2 rounded-lg glass-card text-customTextMuted hover:text-customAccent hover:border-customAccent/30 hover:scale-105 transition-all">
+                            <i data-lucide="linkedin" class="w-4 h-4"></i>
+                        </a>
+                        {% endif %}
+                        {% if resume.contact.github %}
+                        <a href="{{ resume.contact.github }}" target="_blank" class="p-2 rounded-lg glass-card text-customTextMuted hover:text-customAccent hover:border-customAccent/30 hover:scale-105 transition-all">
+                            <i data-lucide="github" class="w-4 h-4"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Structure -->
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-12 md:gap-16">
+            
+            <!-- Left Column: Summary, Skills, Education -->
+            <div class="lg:col-span-1 flex flex-col gap-12">
+                
+                <!-- About / Summary -->
+                <section>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-customAccent mb-4 inline-flex items-center gap-2">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                        About Me
+                    </h3>
+                    <p class="text-sm text-customTextMuted leading-relaxed font-light">
+                        {{ resume.summary|default:"Experienced professional dedicated to building high-quality, scalable solutions." }}
+                    </p>
+                </section>
+
+                <!-- Skills -->
+                {% if resume.skills %}
+                <section>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-customAccent mb-6 inline-flex items-center gap-2">
+                        <i data-lucide="cpu" class="w-4 h-4"></i>
+                        Skills Matrix
+                    </h3>
+                    
+                    <div class="flex flex-col gap-6">
+                        {% for category, skill_list in resume.skills.items %}
+                            {% if skill_list %}
+                            <div>
+                                <h4 class="text-xs font-semibold text-customTextMain uppercase tracking-wider mb-3">
+                                    {{ category|title }}
+                                </h4>
+                                <div class="flex flex-wrap gap-2">
+                                    {% for skill in skill_list %}
+                                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg glass-card border border-customBorder text-customTextMain hover:border-customAccent/30 hover:text-customAccent transition-all cursor-default">
+                                        {{ skill }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                <!-- Education -->
+                {% if resume.education %}
+                <section>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-customAccent mb-6 inline-flex items-center gap-2">
+                        <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+                        Education
+                    </h3>
+                    <div class="flex flex-col gap-6">
+                        {% for edu in resume.education %}
+                        <div class="relative pl-4 border-l border-customBorder">
+                            <div class="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-customAccent"></div>
+                            <span class="text-xs font-semibold text-customAccent">{{ edu.duration }}</span>
+                            <h4 class="text-sm font-bold text-customTextMain mt-1">{{ edu.degree }}</h4>
+                            <p class="text-xs text-customTextMuted mt-0.5">{{ edu.school }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+            </div>
+
+            <!-- Right Column: Work Experience -->
+            <div class="lg:col-span-2 flex flex-col gap-12">
+                <section>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-customAccent mb-8 inline-flex items-center gap-2">
+                        <i data-lucide="briefcase" class="w-4 h-4"></i>
+                        Work History
+                    </h3>
+
+                    <div class="relative pl-6 md:pl-8 border-l timeline-line">
+                        {% for exp in resume.experience %}
+                        <div class="mb-12 relative last:mb-0">
+                            <!-- Bullet timeline indicator -->
+                            <div class="absolute -left-[31px] md:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-customBg border-2 border-customAccent flex items-center justify-center">
+                                <div class="w-1.5 h-1.5 rounded-full bg-customAccent"></div>
+                            </div>
+
+                            <!-- Work card -->
+                            <div class="glass-card rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md hover:border-customAccent/20 hover:-translate-y-1 transition-all duration-300">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
+                                    <div>
+                                        <h4 class="text-base md:text-lg font-bold text-customTextMain">{{ exp.role }}</h4>
+                                        <span class="text-sm font-semibold text-customAccent mt-0.5 inline-block">{{ exp.company }}</span>
+                                    </div>
+                                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-customAccent/10 text-customAccent border border-customAccent/20 sm:self-start">
+                                        {{ exp.duration }}
+                                    </span>
+                                </div>
+
+                                <ul class="space-y-2">
+                                    {% for bullet in exp.bullets %}
+                                    <li class="flex items-start gap-2.5 text-xs md:text-sm text-customTextMuted leading-relaxed">
+                                        <span class="text-customAccent mt-1.5 select-none flex-shrink-0">•</span>
+                                        <span>{{ bullet }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            </div>
+        </main>
+        
+        <!-- Recruiter Contact panel -->
+        <footer class="mt-20 md:mt-28 border-t border-customBorder pt-12">
+            <div class="glass-card rounded-2xl p-8 md:p-10 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-48 h-48 bg-customAccent/5 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="max-w-2xl mx-auto text-center relative">
+                    <h3 class="text-xl md:text-2xl font-bold mb-3">Interested in working together?</h3>
+                    <p class="text-customTextMuted text-sm md:text-base mb-6 leading-relaxed">
+                        Let's connect and discuss how my skills and experience match your engineering goals.
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        {% if resume.contact.email %}
+                        <a href="mailto:{{ resume.contact.email }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-customAccent text-white hover:bg-customAccent/90 font-semibold text-sm shadow-md transition-all">
+                            <i data-lucide="mail" class="w-4 h-4"></i>
+                            Get In Touch
+                        </a>
+                        {% endif %}
+                        <button onclick="window.print()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-transparent hover:bg-customAccent/5 text-customTextMain border border-customBorder hover:border-customAccent/30 font-semibold text-sm transition-all">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                            Print Resume
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Theme toggler logic -->
+    <script>
+        function setTheme(theme) {
+            // Remove all themes
+            document.body.classList.remove('theme-creative', 'theme-executive');
+            
+            // Remove active classes from buttons
+            const buttons = ['modern', 'creative', 'executive'];
+            buttons.forEach(btn => {
+                const el = document.getElementById('theme-btn-' + btn);
+                if (el) {
+                    el.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+                    el.classList.add('text-gray-400', 'hover:text-white');
+                }
+            });
+            
+            // Set active class and add theme class to body
+            const activeBtn = document.getElementById('theme-btn-' + theme);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-400', 'hover:text-white');
+                activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+            }
+
+            if (theme === 'creative') {
+                document.body.classList.add('theme-creative');
+            } else if (theme === 'executive') {
+                document.body.classList.add('theme-executive');
+            }
+            
+            // Save theme preference in localStorage
+            localStorage.setItem('portfolio-theme-{{ record.slug }}', theme);
+        }
+
+        function toggleRecruiterMode(hide) {
+            const toolbar = document.getElementById('preview-toolbar');
+            const exitBtn = document.getElementById('exit-recruiter-btn');
+            
+            if (hide) {
+                if (toolbar) toolbar.classList.add('hidden');
+                if (exitBtn) exitBtn.classList.remove('hidden');
+            } else {
+                if (toolbar) toolbar.classList.remove('hidden');
+                if (exitBtn) exitBtn.classList.add('hidden');
+            }
+        }
+
+        // Initialize theme from storage
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('portfolio-theme-{{ record.slug }}');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            }
+            
+            // Initialize Lucide icons
+            lucide.createIcons();
+        });
+    </script>
+    {% endif %}
+</body>
+</html>
