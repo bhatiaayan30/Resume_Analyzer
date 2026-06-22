@@ -43,5 +43,12 @@ urlpatterns = [
     path("bullet-rewrite/<uuid:analysis_id>/", views.suggest_bullet_rewrite_api, name="suggest_bullet_rewrite_api"),
     path("recalculate-score/<uuid:analysis_id>/", views.recalculate_score_api, name="recalculate_score_api"),
     path("export-resume/<uuid:analysis_id>/", views.export_resume_pdf, name="export_resume_pdf"),
+    
+    # Resume Builder Wizard
+    path("builder/", views.resume_builder_view, name="resume_builder"),
+    path("api/builder/save/", views.save_builder_resume_api, name="save_builder_resume_api"),
+    path("api/builder/suggest-summary/", views.suggest_summary_api, name="suggest_summary_api"),
+    path("api/builder/suggest-bullets/", views.suggest_bullets_api, name="suggest_bullets_api"),
 ]
+
 

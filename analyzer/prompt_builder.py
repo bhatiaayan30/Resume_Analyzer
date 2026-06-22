@@ -223,3 +223,34 @@ def build_resume_parser_prompt(resume_text: str) -> str:
     Return ONLY a JSON object matching this exact schema:
     {RESUME_STRUCTURE_SCHEMA}
     """
+
+def build_summary_suggestion_prompt(job_title: str, industry: str) -> str:
+    """Constructs the prompt for professional summary suggestions."""
+    return f"""
+    You are an expert resume writer and career coach. Generate exactly 3 distinct professional summary statement options (each 3-4 sentences long) for a candidate targeting:
+    Job Title: {job_title}
+    Industry: {industry}
+    
+    Ensure the options target different professional styles:
+    1. Metrics-driven and results-oriented (focusing on achievements, scaling, and business impact).
+    2. Leadership and strategy-focused (focusing on team guidance, project management, and execution).
+    3. Technical and domain-specific (focusing on tools, languages, methodologies, and technical expertise).
+    
+    Return ONLY a JSON array containing exactly 3 string values. Do not include markdown code fences (like ```json), prefix numbers, or extra text. Output only the valid JSON array.
+    """
+
+def build_experience_bullets_prompt(job_title: str, company_type: str) -> str:
+    """Constructs the prompt for experience bullets generation."""
+    return f"""
+    You are an expert resume writer. Generate exactly 5 high-impact, metrics-driven accomplishment bullet points using the STAR (Situation, Task, Action, Result) or Google XYZ framework for a candidate with the role:
+    Job Title: {job_title}
+    Company / Team Context: {company_type}
+    
+    Ensure the bullets:
+    1. Start with strong, active verbs.
+    2. Quantify achievements (percentages, dollar amounts, performance improvement metrics, team sizes). If context is basic, invent realistic placeholders.
+    3. Highlight industry-standard tools or methodologies relevant to the role.
+    
+    Return ONLY a JSON array containing exactly 5 string values. Do not include markdown code fences (like ```json), prefix numbers, or extra text. Output only the valid JSON array.
+    """
+

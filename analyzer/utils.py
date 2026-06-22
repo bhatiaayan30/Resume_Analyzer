@@ -26,6 +26,8 @@ from analyzer.prompt_builder import (
     build_interview_question_prompt,
     build_interview_feedback_prompt,
     build_resume_parser_prompt,
+    build_summary_suggestion_prompt,
+    build_experience_bullets_prompt,
 )
 import re
 
@@ -478,3 +480,76 @@ def parse_resume_to_json(resume_text: str) -> dict:
             "education": [],
             "skills": {"other": ["AI parsing failed"]}
         }
+
+def get_ai_summary_suggestions(job_title: str, industry: str) -> list:
+    """Invokes AI to get 3 professional summary suggestions."""
+    from django.conf import settings
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        return [
+            f"Experienced {job_title} professional in {industry} industry.",
+            f"Result-driven professional seeking a {job_title} role to deliver value.",
+            f"Passionate specialist with technical competence matching {job_title} requirements."
+        ]
+    try:
+        client = Groq(api_key=api_key)
+        prompt = build_summary_suggestion_prompt(job_title, industry)
+        model = os.environ.get("FAST_MODEL", "llama3-8b-8192")
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=600
+        )
+        content = response.choices[0].message.content.strip()
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+        content = content.strip()
+        return json.loads(content)
+    except Exception as exc:
+        print(f"[utils.get_ai_summary_suggestions] Error: {exc}")
+        return [
+            f"Experienced {job_title} professional in {industry} industry.",
+            f"Result-driven professional seeking a {job_title} role to deliver value.",
+            f"Passionate specialist with technical competence matching {job_title} requirements."
+        ]
+
+def get_ai_experience_bullets(job_title: str, company_type: str) -> list:
+    """Invokes AI to get 5 high-impact bullet points."""
+    from django.conf import settings
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        return [f"Delivered key projects for {job_title} at the company."] * 5
+    try:
+        client = Groq(api_key=api_key)
+        prompt = build_experience_bullets_prompt(job_title, company_type)
+        model = os.environ.get("FAST_MODEL", "llama3-8b-8192")
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=800
+        )
+        content = response.choices[0].message.content.strip()
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+        content = content.strip()
+        return json.loads(content)
+    except Exception as exc:
+        print(f"[utils.get_ai_experience_bullets] Error: {exc}")
+        return [
+            f"Spearheaded key initiatives as {job_title} contributing to team success.",
+            f"Optimized system performance and architecture leading to tangible improvements.",
+            f"Collaborated with cross-functional partners to execute on product requirements.",
+            f"Successfully designed and implemented services using industry best practices.",
+            f"Resolved critical issues under tight deadlines ensuring high availability."
+        ]
+

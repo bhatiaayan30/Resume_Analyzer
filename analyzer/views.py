@@ -37,7 +37,8 @@ from .models import Coupon, JobDescription, OTP, Persona, ResumeAnalysis, Resume
 from .tasks import process_resume_analysis
 from .utils import (
     analyze_with_ai, extract_text, generate_cover_letter, generate_otp, send_email_otp, send_sms_otp,
-    suggest_bullet_rewrites, generate_next_interview_question, evaluate_interview_answer, parse_resume_to_json
+    suggest_bullet_rewrites, generate_next_interview_question, evaluate_interview_answer, parse_resume_to_json,
+    get_ai_summary_suggestions, get_ai_experience_bullets
 )
 
 razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -1213,3 +1214,121 @@ def export_resume_pdf(request, analysis_id):
     return response
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Resume Builder Wizard
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def resume_builder_view(request):
+    """Renders the step-by-step guided resume builder wizard."""
+    analysis_id = request.GET.get("edit")
+    initial_data = {}
+    if analysis_id:
+        try:
+            import uuid
+            record = ResumeAnalysis.objects.get(slug=uuid.UUID(analysis_id), user=request.user)
+            initial_data = record.structured_resume or {}
+        except (ResumeAnalysis.DoesNotExist, ValueError):
+            pass
+    return render(request, "analyzer/builder_wizard.html", {
+        "initial_data_json": json.dumps(initial_data),
+    })
+
+
+@login_required
+@require_http_methods(["POST"])
+def save_builder_resume_api(request):
+    """Saves the wizard JSON payload into a ResumeAnalysis and ResumeVersion."""
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON body."}, status=400)
+
+    name = data.get("name", "").strip()
+    if not name:
+        return JsonResponse({"error": "Candidate name is required."}, status=400)
+
+    # Rebuild plain text from structured data for ATS re-analysis
+    lines = [name]
+    contact = data.get("contact", {})
+    if contact.get("email"):
+        lines.append(contact["email"])
+    if contact.get("phone"):
+        lines.append(contact["phone"])
+    if contact.get("location"):
+        lines.append(contact["location"])
+    summary = data.get("summary", "")
+    if summary:
+        lines.append("\nSUMMARY\n" + summary)
+    for exp in data.get("experience", []):
+        lines.append(f"\n{exp.get('role', '')} at {exp.get('company', '')} | {exp.get('duration', '')}")
+        for b in exp.get("bullets", []):
+            lines.append(f"• {b}")
+    for edu in data.get("education", []):
+        lines.append(f"\n{edu.get('degree', '')} — {edu.get('institution', '')} | {edu.get('duration', '')}")
+    skills = data.get("skills", {})
+    all_skills = []
+    for cat in ["languages", "frameworks", "tools", "other"]:
+        all_skills.extend(skills.get(cat, []))
+    if all_skills:
+        lines.append("\nSKILLS\n" + ", ".join(all_skills))
+    plain_text = "\n".join(lines)
+
+    # Create a ResumeVersion entry
+    resume_version = ResumeVersion.objects.create(
+        user=request.user,
+        filename=f"{name}_wizard_resume.txt",
+        encrypted_text=plain_text,
+    )
+
+    # Create the ResumeAnalysis entry with structured data pre-cached
+    analysis = ResumeAnalysis.objects.create(
+        user=request.user,
+        filename=f"{name}_wizard_resume",
+        resume_text=plain_text,
+        status="completed",
+        resume_version=resume_version,
+        structured_resume=data,
+    )
+
+    return JsonResponse({
+        "status": "success",
+        "analysis_id": str(analysis.slug),
+        "redirect_url": f"/export-resume/{analysis.slug}/",
+    })
+
+
+@login_required
+@require_http_methods(["POST"])
+def suggest_summary_api(request):
+    """Returns 3 AI-generated professional summary options."""
+    try:
+        body = json.loads(request.body)
+        job_title = body.get("job_title", "").strip()
+        industry = body.get("industry", "").strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON body."}, status=400)
+
+    if not job_title:
+        return JsonResponse({"error": "job_title is required."}, status=400)
+
+    suggestions = get_ai_summary_suggestions(job_title, industry or "General")
+    return JsonResponse({"suggestions": suggestions})
+
+
+@login_required
+@require_http_methods(["POST"])
+def suggest_bullets_api(request):
+    """Returns 5 AI-generated high-impact experience bullets."""
+    try:
+        body = json.loads(request.body)
+        job_title = body.get("job_title", "").strip()
+        company_type = body.get("company_type", "").strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON body."}, status=400)
+
+    if not job_title:
+        return JsonResponse({"error": "job_title is required."}, status=400)
+
+    bullets = get_ai_experience_bullets(job_title, company_type or "tech startup")
+    return JsonResponse({"bullets": bullets})

@@ -612,6 +612,7 @@
           </div>
           <a href="{% url 'index' %}">Home</a>
           <a href="{% url 'history' %}">History</a>
+          <a href="{% url 'resume_builder' %}" class="{% if request.resolver_match.url_name == 'resume_builder' %}text-brand font-semibold{% endif %}">Build Resume</a>
           {% if user.profile.is_premium %}
               <a href="{% url 'market_insights' %}">Insights</a>
               <a href="{% url 'pricing' %}" class="text-brand-hover">View Subscription</a>
@@ -681,6 +682,7 @@
               </div>
               <a href="{% url 'index' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Home</a>
               <a href="{% url 'history' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">History</a>
+              <a href="{% url 'resume_builder' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Build Resume</a>
               {% if user.profile.is_premium %}
                   <a href="{% url 'market_insights' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Insights</a>
                   <a href="{% url 'pricing' %}" class="text-brand-hover py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">View Subscription</a>
