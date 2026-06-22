@@ -1,159 +1,208 @@
 <div align="center">
+  <img src="templates/analyzer/static/images/logo.png" alt="Resume Analyzer AI Logo" width="120" height="120" style="border-radius: 24px; margin-bottom: 16px;" onerror="this.style.display='none'"/>
   <h1>Resume Analyzer AI</h1>
-  <p><strong>Beat the ATS. Land the Interview.</strong></p>
-  <p>An intelligent, highly-tailored resume analysis tool powered by Llama-3, Django, and Supabase.</p>
+  <p><strong>Bypass the ATS. Optimise Your Profile. Secure the Interview.</strong></p>
+  <p>An enterprise-ready, AI-driven resume parsing and optimization suite built with Python, Django, Supabase, and Groq's high-throughput Llama-3 models.</p>
 
-  [![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)](#)
-  [![Django](https://img.shields.io/badge/Django-5.1-092E20?logo=django&logoColor=white)](#)
-  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?logo=postgresql&logoColor=white)](#)
-  [![Groq](https://img.shields.io/badge/AI-Groq%20Llama--3-f55036?logo=meta&logoColor=white)](#)
-  [![CI](https://github.com/bhatiaayan30/resume-analyzer-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/bhatiaayan30/resume-analyzer-ai/actions/workflows/ci.yml)
+  <p>
+    <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.12%2B-blue?logo=python&logoColor=white" alt="Python Version"/></a>
+    <a href="https://djangoproject.com"><img src="https://img.shields.io/badge/Django-5.1-092E20?logo=django&logoColor=white" alt="Django Version"/></a>
+    <a href="https://supabase.com"><img src="https://img.shields.io/badge/Database-Supabase%20PostgreSQL-3ECF8E?logo=supabase&logoColor=white" alt="Supabase PostgreSQL"/></a>
+    <a href="https://groq.com"><img src="https://img.shields.io/badge/Inference-Groq%20Llama%203-f55036?logo=meta&logoColor=white" alt="Groq Llama-3"/></a>
+    <a href="https://pytest.org"><img src="https://img.shields.io/badge/Tests-Pytest-0A9EDC?logo=pytest&logoColor=white" alt="Pytest"/></a>
+  </p>
 </div>
 
 ---
 
-## Overview
+## 🌟 Executive Summary
 
-Resume Analyzer AI is an enterprise-grade web application designed to help job seekers bypass Applicant Tracking Systems (ATS) and optimize their applications. By uploading a resume (PDF/DOCX) and providing a target job description, the AI engine extracts text, maps skills, and instantly generates a comprehensive alignment report.
+**Resume Analyzer AI** is a state-of-the-art career-acceleration application designed to help job candidates align their resumes with modern corporate recruitment systems. By leveraging advanced natural language processing (NLP) and vector keyword models, the platform identifies skill gaps, analyzes formatting syntax, exposes parsing vulnerabilities, and generates immediate upskilling pathways. 
 
-<!-- TODO: Replace with actual screenshots or GIF once deployed -->
-![Report Score Overview](/.github/assets/report_score.png)
-![Skill Gap Analysis](/.github/assets/skill_gap.png)
-## Key Features
-
-- **Instant Match Scoring:** Get a precise 0-100 score indicating how well your resume matches the job description.
-- **ATS Formatting Checks:** Detects tables, complex layouts, and invisible text that break standard corporate parsing systems.
-- **Impact & Writing Critique:** Suggests high-impact rewrites for weak bullet points with detailed AI critiques.
-- **Upskilling Roadmap:** Identifies missing skills and generates an upskilling strategy with clickable resource links.
-- **Interview Prep:** Generates 10 to 15 highly tailored interview questions covering technical skills, behavioral situations, and gaps.
-- **Async Processing:** Fast, non-blocking UI using `django-q` background workers to handle intensive AI tasks.
-- **Magic Cover Letters:** Automatically generates a persuasive, tailored cover letter bridging your unique experience to the specific role using Groq's blazing-fast Llama-3 model.
-- **Secure Authentication:** Built-in user accounts and history tracking powered by a Supabase PostgreSQL database.
-
-## Tech Stack
-
-- **Backend:** Django 5.1, Python 3.12
-- **Database:** PostgreSQL (via Supabase Session Pooling)
-- **Background Task Worker:** Django-Q
-- **AI Engine:** Groq API (Llama-3-8b-8192 for near-instant inference)
-- **Frontend:** HTML5, Tailwind CSS (via CDN), Vanilla JavaScript, React 18 (standalone)
-- **Parsing:** `pdfplumber`, `python-docx`
-- **Deployment:** Google Cloud Run (Containerized via Docker)
+Featuring interactive AI interview simulations, an inline resume editor with live scoring recalculation, and a bespoke cover letter generator, it acts as a private, 24/7 technical recruiter.
 
 ---
 
-## Getting Started (Local Development)
+## 🚀 Key Platform Features
 
-### 1. Clone & Install
+### 1. ATS Parsing & Formatting Vulnerability Scanner
+*   **File Formats:** Full document structure parsing for both `.pdf` and `.docx` formats.
+*   **Vulnerability Detection:** Scans for elements that break standard parser pipelines (e.g., hidden text, tables, single-column vs multi-column issues, complex vector layouts, non-standard system fonts, and "keyword stuffing" exploits).
+*   **ATS Score:** Direct 0-100 quantitative score matching resume syntax against job description profiles.
+
+### 2. Live Inline Resume Editor & Real-time Re-Scoring
+*   **Direct Modification:** Edit resume lines and bullet points directly inside the web interface without modifying or re-uploading the source document.
+*   **Instant Recalculation:** Click to trigger a lightweight score recalculation API that feeds updated sections to the AI model, recalculating match score and structural changes on-the-fly.
+
+### 3. AI Bullet Point Optimizer (STAR/XYZ Frameworks)
+*   **Passive-to-Active Rewriting:** Analyzes weak or descriptive resume bullet points and generates metrics-driven, action-oriented suggestions.
+*   **Framework Alignment:** Translates accomplishments into standard STAR (Situation, Task, Action, Result) or Google's XYZ (Accomplished [X] as measured by [Y], by doing [Z]) structures.
+
+### 4. Interactive Recruiter Mock Interview Simulator
+*   **Tailored Chat Role-Play:** Dynamically generates interview tracks tailored to the candidate's exact experience gaps, target job profile, and industry.
+*   **Question-by-Question Interaction:** An AI Recruiter grills the candidate, analyzing their responses.
+*   **Actionable Evaluation:** Provides instant scoring (0-100) and detailed critique on technical depth, behavioral structure, and phrasing after each response.
+
+### 5. Magic Cover Letter Builder
+*   **Bespoke Customization:** Asynchronously generates cover letters by matching candidate background with job descriptions.
+*   **Tuning Parameters:** Custom settings for tone (Professional, Creative, Bold), word length, and targeted highlights of specific career achievements.
+
+### 6. Premium PDF Document Exporters
+*   **ATS-Compliant Resume Templates:** Download optimized resumes directly from the application in three clean, professional layout themes: *Executive*, *Minimal*, and *Modern*.
+*   **Detailed Analytics Reports:** Export comprehensive, print-ready matching reports and generated cover letters with a single click.
+
+### 7. Dual Authentication Paths (OAuth2 & SMS/Email OTP)
+*   **Social Sign-In:** Complete integration with **Google**, **Microsoft**, and **Apple** identity providers via `django-allauth`.
+*   **Passwordless Login:** OTP verification via SMS (Twilio integration) and Email for frictionless onboarding.
+
+### 8. Monetization & Coupon Verification Engine
+*   **Tiered Pricing:** Access limits split across Basic Demo, Standard, Pro, and Enterprise tiers.
+*   **Payment Gateway:** Built-in checkout experience using **Razorpay**.
+*   **Discount Code Handler:** API endpoint to validate coupons, track utilization limits, and calculate dynamic pricing.
+*   **Automated Webhooks:** Secure Razorpay webhook listener to provision subscription changes immediately.
+
+---
+
+## 🛠 Tech Stack & Architecture
+
+### Backend Core
+*   **Framework:** Django 5.1 & Python 3.12+
+*   **Task Queue:** Django-Q backend worker for non-blocking, asynchronous execution of long-running LLM completions.
+*   **Security & Encryption:** Symmetric Fernet database field encryption (`cryptography` package) ensures that all plain text resumes, job descriptions, and user profile data remain secure in transit and at rest.
+
+### Database Layer
+*   **Provider:** Supabase PostgreSQL
+*   **Connection Management:** Connection pooling enabled for high availability and low latency.
+
+### AI Engine
+*   **Provider:** Groq API Cloud
+*   **Models:** High-throughput `llama-3.3-70b-versatile` & `llama-3-8b-8192` configurations with automatic failover to handle processing requests.
+
+### Frontend Layer
+*   **Styling:** Modern Tailwind CSS styling with an aesthetic glassmorphic theme supporting dark and light modes.
+*   **Interactive Components:** React 18 integration for dynamic forms (e.g., Cover Letter customizers, mock interview interfaces).
+
+---
+
+## 📊 Database Schema Details
+
+```mermaid
+erDiagram
+    User ||--|| UserProfile : "has profile"
+    User ||--o{ Persona : "owns"
+    User ||--o{ JobDescription : "uploads"
+    User ||--o{ ResumeVersion : "manages"
+    User ||--o{ ResumeAnalysis : "views"
+    User ||--o{ InterviewSession : "conducts"
+    
+    ResumeAnalysis ||--|| ResumeVersion : "analyzes"
+    ResumeAnalysis ||--|| JobDescription : "matches against"
+    InterviewSession ||--|| ResumeAnalysis : "bound to"
+    InterviewSession ||--o{ InterviewMessage : "contains"
+```
+
+*   **`UserProfile`**: Tracks monetization tiers (0=Free, 1-4=Premium), period dates, Razorpay IDs, and verification statuses.
+*   **`ResumeAnalysis`**: Stores match percentages, list-formatted skill gaps, suggestions, formatting issues, and API usage stats (prompt and completion token metrics).
+*   **`InterviewSession` & `InterviewMessage`**: Manages state, conversation logs, and AI evaluation feedback for the mock interview preparation tool.
+*   **`Coupon`**: Configures discount codes, activation flags, and usage metrics.
+
+---
+
+## ⚙️ Local Installation & Setup
+
+### Prerequisites
+*   Python 3.12 or newer installed.
+*   A Supabase database or local PostgreSQL instance (defaults to SQLite if no URL is provided).
+*   API keys for Groq, and optionally Razorpay, Twilio, and Google Developer Console.
+
+### 1. Clone and Prepare Environment
 ```bash
 git clone https://github.com/bhatiaayan30/Resume_Analyzer.git
 cd Resume_Analyzer
+```
+
+### 2. Configure Virtual Environment and Dependencies
+It is recommended to use `uv` or a standard python `venv` to isolate packages:
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Environment Variables
-Create a `.env` file in the root directory. You will need to configure various API keys for the full functionality:
-
-1. **Django Settings**:
-   - `SECRET_KEY`: A random secure string for Django.
-   - `DEBUG`: Set to `True` for local development, `False` for production.
-   - `ALLOWED_HOSTS`: Set to `localhost,127.0.0.1,*` for local testing.
-
-2. **Database (Supabase PostgreSQL)**:
-   - `DATABASE_URL`: Create a project on [Supabase](https://supabase.com/) and copy the connection string. (Note: You can comment this out to use local SQLite for basic testing).
-
-3. **Groq AI (Llama 3)**:
-   - `GROQ_API_KEY`: Get an API key from the [Groq Console](https://console.groq.com/).
-
-4. **Google OAuth (Authentication)**:
-   - `GOOGLE_CLIENT_ID` and `GOOGLE_SECRET`: Create credentials in the [Google Cloud Console](https://console.cloud.google.com/) under APIs & Services > Credentials.
-
-5. **Razorpay (Payments)**:
-   - `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`: Generate these from your [Razorpay Dashboard](https://dashboard.razorpay.com/) under Settings > API Keys.
-   - `RAZORPAY_WEBHOOK_SECRET`: A secure string you define for your webhook endpoint.
-
-Your `.env` file should look like this:
-```env
-DEBUG=True
-SECRET_KEY=django-insecure-development-key-for-local-testing
-ALLOWED_HOSTS=localhost,127.0.0.1
-DATABASE_URL=postgresql://user:password@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
-GROQ_API_KEY=your_groq_api_key
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_SECRET=your_google_client_secret
-RAZORPAY_KEY_ID=your_razorpay_key_id
-RAZORPAY_KEY_SECRET=your_razorpay_key_secret
-RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
+### 3. Establish Local Configuration (`.env`)
+Copy the template configuration and fill in your developer keys:
+```bash
+cp .env.example .env
 ```
+Ensure you set the following variables in `.env`:
+*   `SECRET_KEY`: Secure random string.
+*   `GROQ_API_KEY`: API token from Groq Console.
+*   `DATABASE_URL`: Connection string to Supabase/PostgreSQL. Leave empty to fallback to local SQLite.
+*   `RAZORPAY_KEY_ID` & `RAZORPAY_KEY_SECRET`: Razorpay tokens.
+*   `TWILIO_ACCOUNT_SID` & `TWILIO_AUTH_TOKEN`: Twilio details (only needed for SMS OTP).
 
-### 3. Database & Run
+### 4. Run Migrations and Start the Servers
+Initialize your database structures:
 ```bash
 python manage.py migrate
+```
+
+Start the primary web application:
+```bash
 python manage.py runserver
 ```
 
-**Note:** You must also start the background worker in a separate terminal:
+In a separate terminal, start the background worker queue (Django-Q):
 ```bash
 python manage.py qcluster
 ```
-*(Windows Users: If `qcluster` gets stuck looping after `Ctrl+C`, run the provided `kill_qcluster.bat` script to terminate it cleanly.)*
+*(Windows: If the worker terminal loops during termination, run `./kill_qcluster.bat` to clear running instances.)*
 
-Visit `http://localhost:8000` to view the application.
-
----
-
-## Deployment (GitHub to Google Cloud Run)
-
-This project is fully containerized and production-ready for Google Cloud Run, utilizing seamless GitHub integration.
-
-### Procedure for GitHub to GCP Deployment:
-
-1. **Prepare Google Cloud Platform (GCP)**:
-   - Create a new project in the [Google Cloud Console](https://console.cloud.google.com/).
-   - Enable the **Cloud Run API** and **Cloud Build API** for your project.
-   - Set up billing for the project.
-
-2. **Connect GitHub to Cloud Run**:
-   - Navigate to **Cloud Run** in the GCP Console.
-   - Click **Create Service**.
-   - Select **Continuously deploy new revisions from a source repository**.
-   - Click **Set up with Cloud Build**.
-   - Select **GitHub** as the provider and authenticate.
-   - Choose your repository (`Resume_Analyzer`) and the branch (e.g., `main`).
-
-3. **Configure Build and Service Settings**:
-   - Build Type: Choose **Dockerfile** or let Cloud Buildpacks automatically detect the environment.
-   - Service Name: e.g., `resume-analyzer`.
-   - Region: Choose a region close to your users.
-   - Authentication: Select **Allow unauthenticated invocations** if this is a public web app.
-
-4. **Environment Variables**:
-   - Expand **Container, Connections, Security**.
-   - Add all your production environment variables from your `.env` file (e.g., `SECRET_KEY`, `GROQ_API_KEY`, `DATABASE_URL`, `GOOGLE_CLIENT_ID`, `RAZORPAY_KEY_ID`, etc.).
-   - Make sure `DEBUG` is set to `False` and `ALLOWED_HOSTS` includes your generated Cloud Run URL.
-
-5. **Deploy**:
-   - Click **Create**.
-   - GCP will now automatically pull the code from GitHub, build the Docker container, and deploy it.
-   - Any future pushes to the connected GitHub branch will automatically trigger a new build and deployment.
+Access the dashboard locally at `http://localhost:8000`.
 
 ---
 
-## Architecture Design
+## 🧪 Automated Testing
 
-- **`analyzer/views.py`**: Logic-thin HTTP handlers. Handles routing, form validation, Magic Number binary file verification (spoofing protection), and rate limits.
-- **`analyzer/utils.py`**: The core AI logic and text extraction engine. Highly decoupled so it can be unit-tested without spinning up a Django HTTP client.
-- **`templates/analyzer/`**: Contains the glassmorphic, responsive Tailwind UI. The Cover Letter generator utilizes a standalone React component for seamless asynchronous rendering.
+We maintain high codebase quality with comprehensive testing. 
+*   **Test Suite:** `pytest` & `pytest-django` covering parsing logic, billing webhooks, security validators, coupon engines, and model configurations.
+*   **Execution Command:**
+    ```bash
+    pytest
+    ```
+*   **Coverage Reporting:** Automated terminal reports indicating test coverage density.
+
+---
+
+## 🚢 Production Deployment
+
+The project is fully containerized and production-hardened for platforms like **Google Cloud Run** or standard virtual private servers.
+
+### Container Details (`Dockerfile`)
+The build file compiles using a python-slim base image, installs essential build systems (`build-essential`, `libpq-dev` for Postgres connections), caches requirements, and uses `supervisord` to manage Gunicorn processes:
+```dockerfile
+# Build image
+FROM python:3.11-slim
+WORKDIR /app
+RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt /app/
+RUN pip install -r requirements.txt
+COPY . /app/
+RUN python manage.py collectstatic --noinput
+EXPOSE 8080
+ENV PORT 8080
+CMD ["supervisord", "-c", "/app/supervisord.conf"]
+```
+
+### Google Cloud Run Deployment Runbook
+1.  **Configure GCP**: Enable Cloud Build and Cloud Run APIs in your Google Cloud Project.
+2.  **Continuous Integration**: In the Cloud Run console, connect your service to your GitHub repository.
+3.  **Build triggers**: Select the production branch (e.g. `master` or `main`) to deploy a new version automatically on git push.
+4.  **Inject Variables**: Add all parameters from your `.env` configuration as environment variables within Cloud Run's service settings.
+5.  **Provision Service**: Execute the build deployment and receive your SSL-encrypted production URL.
 
 ---
 
-## Known Limitations
-- **File Support:** Currently only supports PDF and DOCX files. Google Docs or LinkedIn profile imports are not supported.
-- **Language:** English-language resumes only.
-- **Scope:** This is an analysis tool, not a job application tracker or resume builder.
-
-
----
 <div align="center">
-  <i>Built to get you hired.</i>
+  <sub>Built with care to optimize professional careers.</sub>
 </div>

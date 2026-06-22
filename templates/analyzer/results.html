@@ -66,10 +66,72 @@
 .chat-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(139,92,246,0.5);
 }
+
+/* Guest lock overlay styled with CSS variables for perfect light/dark theme contrast */
+.guest-lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.85); /* Dark background overlay */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+html.light .guest-lock-overlay {
+  background: rgba(241, 245, 249, 0.95) !important; /* Premium clean light background overlay */
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.guest-lock-title {
+  color: var(--text-main);
+  font-weight: 800;
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+
+.guest-lock-desc {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  max-width: 380px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.guest-lock-btn-secondary {
+  padding: 8px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text-main) !important;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.guest-lock-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+html.light .guest-lock-btn-secondary {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+html.light .guest-lock-btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen pt-24 pb-12 bg-gray-900">
+<div class="min-h-screen pt-24 pb-12 bg-[var(--bg-color)]">
     <!-- Header Area -->
     <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -203,17 +265,17 @@
             {% if not request.user.is_authenticated %}
             <div class="relative min-h-[400px]">
                 <!-- Lock Overlay -->
-                <div class="absolute inset-0 bg-gray-950/80 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center rounded-xl border border-white/10">
+                <div class="guest-lock-overlay">
                     <div class="w-14 h-14 bg-brand/20 border border-brand/50 rounded-full flex items-center justify-center text-brand text-xl mb-4 shadow-[0_0_15px_rgba(139,92,246,0.2)] animate-pulse">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     </div>
-                    <h4 class="text-white font-extrabold text-lg mb-2">Create a Free Account to Unlock</h4>
-                    <p class="text-gray-400 text-xs md:text-sm max-w-sm mb-6 leading-relaxed">
+                    <h4 class="guest-lock-title">Create a Free Account to Unlock</h4>
+                    <p class="guest-lock-desc">
                         Get your full resume breakdown, searchability checks, ATS formatting red flags, and matched/missing skills analysis.
                     </p>
                     <div class="flex gap-3">
                         <a href="{% url 'signup' %}" class="px-5 py-2.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)]">Sign Up Free</a>
-                        <a href="{% url 'account_login' %}" class="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-xs font-bold rounded-lg transition-colors">Log In</a>
+                        <a href="{% url 'account_login' %}" class="guest-lock-btn-secondary">Log In</a>
                     </div>
                 </div>
                 <!-- Blurred Content -->
@@ -348,17 +410,17 @@
         <div id="tab-gaps" class="tab-content space-y-8 hidden">
             {% if not request.user.is_authenticated %}
             <div class="relative min-h-[300px]">
-                <div class="absolute inset-0 bg-gray-950/80 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center rounded-xl border border-white/10">
+                <div class="guest-lock-overlay">
                     <div class="w-14 h-14 bg-brand/20 border border-brand/50 rounded-full flex items-center justify-center text-brand text-xl mb-4 shadow-[0_0_15px_rgba(139,92,246,0.2)] animate-pulse">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     </div>
-                    <h4 class="text-white font-extrabold text-lg mb-2">Unlock Experience Gaps & Suggestions</h4>
-                    <p class="text-gray-400 text-xs md:text-sm max-w-sm mb-6 leading-relaxed">
+                    <h4 class="guest-lock-title">Unlock Experience Gaps & Suggestions</h4>
+                    <p class="guest-lock-desc">
                         Identify potential gaps in your work history relative to the job requirements and view actionable suggestions to optimize.
                     </p>
                     <div class="flex gap-3">
                         <a href="{% url 'signup' %}" class="px-5 py-2.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)]">Sign Up Free</a>
-                        <a href="{% url 'account_login' %}" class="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-xs font-bold rounded-lg transition-colors">Log In</a>
+                        <a href="{% url 'account_login' %}" class="guest-lock-btn-secondary">Log In</a>
                     </div>
                 </div>
                 <div class="filter blur-[6px] select-none pointer-events-none opacity-20 space-y-8">
@@ -401,17 +463,17 @@
         <div id="tab-roadmap" class="tab-content space-y-8 hidden">
             {% if not request.user.is_authenticated %}
             <div class="relative min-h-[300px]">
-                <div class="absolute inset-0 bg-gray-950/80 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center rounded-xl border border-white/10">
+                <div class="guest-lock-overlay">
                     <div class="w-14 h-14 bg-brand/20 border border-brand/50 rounded-full flex items-center justify-center text-brand text-xl mb-4 shadow-[0_0_15px_rgba(139,92,246,0.2)] animate-pulse">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     </div>
-                    <h4 class="text-white font-extrabold text-lg mb-2">Unlock Upskilling Roadmap</h4>
-                    <p class="text-gray-400 text-xs md:text-sm max-w-sm mb-6 leading-relaxed">
+                    <h4 class="guest-lock-title">Unlock Upskilling Roadmap</h4>
+                    <p class="guest-lock-desc">
                         View custom learning strategies and top recommended course resources to bridge your missing technical skills.
                     </p>
                     <div class="flex gap-3">
                         <a href="{% url 'signup' %}" class="px-5 py-2.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)]">Sign Up Free</a>
-                        <a href="{% url 'account_login' %}" class="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-xs font-bold rounded-lg transition-colors">Log In</a>
+                        <a href="{% url 'account_login' %}" class="guest-lock-btn-secondary">Log In</a>
                     </div>
                 </div>
                 <div class="filter blur-[6px] select-none pointer-events-none opacity-20 space-y-8">
@@ -475,17 +537,17 @@
         <div id="tab-critique" class="tab-content space-y-8 hidden">
             {% if not request.user.is_authenticated %}
             <div class="relative min-h-[400px]">
-                <div class="absolute inset-0 bg-gray-950/80 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center rounded-xl border border-white/10">
+                <div class="guest-lock-overlay">
                     <div class="w-14 h-14 bg-brand/20 border border-brand/50 rounded-full flex items-center justify-center text-brand text-xl mb-4 shadow-[0_0_15px_rgba(139,92,246,0.2)] animate-pulse">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     </div>
-                    <h4 class="text-white font-extrabold text-lg mb-2">Unlock Resume Optimizer & Editor</h4>
-                    <p class="text-gray-400 text-xs md:text-sm max-w-sm mb-6 leading-relaxed">
+                    <h4 class="guest-lock-title">Unlock Resume Optimizer & Editor</h4>
+                    <p class="guest-lock-desc">
                         Refine weak bullet points with real-time AI rewrites, edit your resume inline, and recalculate your ATS score on-the-fly.
                     </p>
                     <div class="flex gap-3">
                         <a href="{% url 'signup' %}" class="px-5 py-2.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)]">Sign Up Free</a>
-                        <a href="{% url 'account_login' %}" class="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-xs font-bold rounded-lg transition-colors">Log In</a>
+                        <a href="{% url 'account_login' %}" class="guest-lock-btn-secondary">Log In</a>
                     </div>
                 </div>
                 <div class="filter blur-[6px] select-none pointer-events-none opacity-20">
@@ -504,17 +566,17 @@
         <div id="tab-interview" class="tab-content space-y-8 hidden">
             {% if not request.user.is_authenticated %}
             <div class="relative min-h-[400px]">
-                <div class="absolute inset-0 bg-gray-950/80 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center rounded-xl border border-white/10">
+                <div class="guest-lock-overlay">
                     <div class="w-14 h-14 bg-brand/20 border border-brand/50 rounded-full flex items-center justify-center text-brand text-xl mb-4 shadow-[0_0_15px_rgba(139,92,246,0.2)] animate-pulse">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     </div>
-                    <h4 class="text-white font-extrabold text-lg mb-2">Unlock Mock Interview Simulator</h4>
-                    <p class="text-gray-400 text-xs md:text-sm max-w-sm mb-6 leading-relaxed">
+                    <h4 class="guest-lock-title">Unlock Mock Interview Simulator</h4>
+                    <p class="guest-lock-desc">
                         Chat message-by-message with an AI technical recruiter who asks tailored questions, scores your answers, and provides performance coaching.
                     </p>
                     <div class="flex gap-3">
                         <a href="{% url 'signup' %}" class="px-5 py-2.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)]">Sign Up Free</a>
-                        <a href="{% url 'account_login' %}" class="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-xs font-bold rounded-lg transition-colors">Log In</a>
+                        <a href="{% url 'account_login' %}" class="guest-lock-btn-secondary">Log In</a>
                     </div>
                 </div>
                 <div class="filter blur-[6px] select-none pointer-events-none opacity-20">
@@ -533,17 +595,17 @@
         <div id="tab-cover-letter" class="tab-content space-y-8 hidden">
             {% if not request.user.is_authenticated %}
             <div class="relative min-h-[400px]">
-                <div class="absolute inset-0 bg-gray-950/80 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center rounded-xl border border-white/10">
+                <div class="guest-lock-overlay">
                     <div class="w-14 h-14 bg-brand/20 border border-brand/50 rounded-full flex items-center justify-center text-brand text-xl mb-4 shadow-[0_0_15px_rgba(139,92,246,0.2)] animate-pulse">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     </div>
-                    <h4 class="text-white font-extrabold text-lg mb-2">Unlock Cover Letter Generator</h4>
-                    <p class="text-gray-400 text-xs md:text-sm max-w-sm mb-6 leading-relaxed">
+                    <h4 class="guest-lock-title">Unlock Cover Letter Generator</h4>
+                    <p class="guest-lock-desc">
                         Instantly write a personalized, print-ready cover letter tailored to the job description and specify key highlights and tone of voice.
                     </p>
                     <div class="flex gap-3">
                         <a href="{% url 'signup' %}" class="px-5 py-2.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)]">Sign Up Free</a>
-                        <a href="{% url 'account_login' %}" class="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-xs font-bold rounded-lg transition-colors">Log In</a>
+                        <a href="{% url 'account_login' %}" class="guest-lock-btn-secondary">Log In</a>
                     </div>
                 </div>
                 <div class="filter blur-[6px] select-none pointer-events-none opacity-20">
@@ -1285,7 +1347,7 @@
                                         <div className="pt-2 border-t border-gray-700/30 flex justify-between items-start gap-2">
                                             <div className="flex-1">
                                                 <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">Suggested rewrite</span>
-                                                <p class="text-xs text-gray-200 font-medium">{item.suggested_rewrite}</p>
+                                                <p className="text-xs text-gray-200 font-medium">{item.suggested_rewrite}</p>
                                             </div>
                                             <button 
                                                 onClick={() => {

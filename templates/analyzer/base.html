@@ -403,7 +403,6 @@
     html.light .bg-brand-hover,
     html.light .submit-btn,
     html.light button[type="submit"],
-    html.light .bg-gray-700,
     html.light .bg-blue-600,
     html.light .bg-emerald-600,
     html.light .bg-green-600,
@@ -415,7 +414,6 @@
     html.light .bg-brand-hover *,
     html.light .submit-btn *,
     html.light button[type="submit"] *,
-    html.light .bg-gray-700 *,
     html.light .bg-blue-600 *,
     html.light .bg-emerald-600 *,
     html.light .bg-green-600 *,
@@ -480,6 +478,11 @@
     /* bg-gray-700 overrides for light mode */
     html.light .bg-gray-700, html.light .bg-gray-700\/50 {
         background-color: rgba(0, 0, 0, 0.05) !important;
+        color: #0f172a !important;
+    }
+    html.light .bg-gray-700:hover, html.light .bg-gray-700\/50:hover {
+        background-color: rgba(0, 0, 0, 0.1) !important;
+        color: #0f172a !important;
     }
 
     html.light input[type="text"], 
