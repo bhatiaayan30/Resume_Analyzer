@@ -940,13 +940,18 @@
         this.saving = true;
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         
+        const payload = Object.assign({}, this.form, {
+          target_job_title: this.targetJobTitle,
+          target_industry: this.targetIndustry
+        });
+        
         fetch('/api/builder/save/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken
           },
-          body: JSON.stringify(this.form)
+          body: JSON.stringify(payload)
         })
         .then(res => {
           if (!res.ok) return res.json().then(d => { throw new Error(d.error || 'Failed to save resume.') });

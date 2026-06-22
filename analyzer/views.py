@@ -1281,20 +1281,34 @@ def save_builder_resume_api(request):
         encrypted_text=plain_text,
     )
 
-    # Create the ResumeAnalysis entry with structured data pre-cached
+    target_job_title = data.get("target_job_title", "").strip() or "Professional"
+    target_industry = data.get("target_industry", "").strip() or "General"
+    job_desc = f"Looking for a qualified {target_job_title} in the {target_industry} industry. Key responsibilities include executing domain-specific projects, collaborating with teams, and applying relevant technical skills."
+
+    # Create the ResumeAnalysis entry with structured data pre-cached, in pending status
     analysis = ResumeAnalysis.objects.create(
         user=request.user,
         filename=f"{name}_wizard_resume",
         resume_text=plain_text,
-        status="completed",
+        job_desc_full=job_desc,
+        job_desc_snippet=job_desc[:120],
+        status="pending",
         resume_version=resume_version,
         structured_resume=data,
     )
 
+    # Process AI analysis synchronously to populate critiques, score, and interview questions
+    try:
+        process_resume_analysis(str(analysis.slug))
+    except Exception as exc:
+        print(f"[save_builder_resume_api] AI processing fallback error: {exc}")
+        analysis.status = "completed"
+        analysis.save()
+
     return JsonResponse({
         "status": "success",
         "analysis_id": str(analysis.slug),
-        "redirect_url": f"/export-resume/{analysis.slug}/",
+        "redirect_url": f"/results/{analysis.slug}/",
     })
 
 

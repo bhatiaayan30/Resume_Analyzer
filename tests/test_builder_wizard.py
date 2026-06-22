@@ -63,7 +63,8 @@ def test_resume_builder_view_with_edit(factory, premium_user, existing_analysis)
     assert b"jane@example.com" in response.content
 
 @pytest.mark.django_db
-def test_save_builder_resume_api_valid(factory, premium_user):
+@patch("analyzer.views.process_resume_analysis")
+def test_save_builder_resume_api_valid(mock_process, factory, premium_user):
     url = reverse("save_builder_resume_api")
     payload = {
         "name": "Alex Smith",
