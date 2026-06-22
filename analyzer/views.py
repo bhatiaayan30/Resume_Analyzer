@@ -8,6 +8,16 @@ can be unit-tested without an HTTP request.
 
 import json
 import os
+
+# Monkey-patch reportlab to allow xhtml2pdf to import ShowBoundaryValue on newer reportlab versions
+try:
+    import reportlab.platypus.frames
+    if not hasattr(reportlab.platypus.frames, 'ShowBoundaryValue'):
+        from reportlab.pdfgen.canvas import ShowBoundaryValue
+        reportlab.platypus.frames.ShowBoundaryValue = ShowBoundaryValue
+except ImportError:
+    pass
+
 from collections import Counter
 
 import razorpay
