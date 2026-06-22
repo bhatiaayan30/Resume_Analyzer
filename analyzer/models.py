@@ -116,6 +116,9 @@ class ResumeAnalysis(models.Model):
     
     # Cached structured resume JSON for template styling
     structured_resume = models.JSONField(default=dict, blank=True)
+    
+    # Fraud and credibility audit results
+    fraud_audit = models.JSONField(default=dict, blank=True)
     class Meta:
         ordering = ["-created_at"]
 
@@ -187,4 +190,16 @@ class LocalizedResume(models.Model):
 
     def __str__(self):
         return f"{self.analysis.filename} — {self.language} ({self.target_market})"
+
+
+class PreWrittenBullet(models.Model):
+    """Metrics-driven professional bullet points sorted by job title and category."""
+    job_role = models.CharField(max_length=150, db_index=True)
+    category = models.CharField(max_length=100)
+    bullet_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.job_role} - {self.category}: {self.bullet_text[:40]}"
+
 

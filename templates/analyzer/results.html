@@ -246,6 +246,10 @@ html.light .guest-lock-btn-secondary:hover {
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 Gaps & Suggestions
             </button>
+            <button onclick="switchTab('audit')" id="btn-audit" class="tab-btn text-gray-400 hover:text-white hover:bg-white/5 border-transparent px-4 py-2 text-sm font-semibold rounded-lg border transition-all flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                AI Writing & Fraud Scan
+            </button>
             <button onclick="switchTab('roadmap')" id="btn-roadmap" class="tab-btn text-gray-400 hover:text-white hover:bg-white/5 border-transparent px-4 py-2 text-sm font-semibold rounded-lg border transition-all flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 Upskilling Roadmap
@@ -492,6 +496,55 @@ html.light .guest-lock-btn-secondary:hover {
                     {% endfor %}
                 </ul>
             </div>
+
+            {% if not request.user.is_authenticated %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Tab: AI Writing & Fraud Scan -->
+        <div id="tab-audit" class="tab-content space-y-8 hidden">
+            {% if not request.user.is_authenticated %}
+            <div class="relative min-h-[400px]">
+                <div class="guest-lock-overlay">
+                    <div class="w-14 h-14 bg-brand/20 border border-brand/50 rounded-full flex items-center justify-center text-brand text-xl mb-4 shadow-[0_0_15px_rgba(139,92,246,0.2)] animate-pulse">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    </div>
+                    <h4 class="guest-lock-title">Unlock AI Writing & Fraud Scan</h4>
+                    <p class="guest-lock-desc">
+                        Unlock detailed insights into the probability of AI resume generation, date overlaps/timelines verification, and metrics credibility grading.
+                    </p>
+                    <div class="flex gap-3">
+                        <a href="{% url 'signup' %}" class="px-5 py-2.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)]">Sign Up Free</a>
+                        <a href="{% url 'account_login' %}" class="guest-lock-btn-secondary">Log In</a>
+                    </div>
+                </div>
+                <div class="filter blur-[6px] select-none pointer-events-none opacity-20">
+            {% endif %}
+
+            {% if perms.can_audit %}
+                <div id="react-audit-root" data-analysis-id="{{ analysis.slug }}" data-can-audit="true"></div>
+            {% else %}
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
+                    <div class="premium-card text-center py-12 flex flex-col justify-center items-center border border-gray-700/50">
+                        <svg class="w-16 h-16 text-brand/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        <h4 class="text-white font-bold text-lg mb-2">AI Writing & Credential Fraud Scanner</h4>
+                        <p class="text-gray-400 text-sm mb-6 max-w-sm">Upgrade to Pro, Elite, or Unlimited to detect AI-generated phrasing, date range overlaps, and verify metrics credibility.</p>
+                        <a href="{% url 'pricing' %}" class="inline-flex items-center gap-2 bg-brand text-white px-6 py-2.5 rounded-lg font-bold hover:bg-brand-hover transition-colors">
+                            Upgrade to Pro
+                        </a>
+                    </div>
+                    <div class="premium-card text-center py-12 flex flex-col justify-center items-center border border-gray-700/50 opacity-80">
+                        <svg class="w-16 h-16 text-indigo-400/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <h4 class="text-white font-bold text-lg mb-2">Detailed Timeline Audit</h4>
+                        <p class="text-gray-400 text-sm mb-6 max-w-sm">Run chronological validation checkpoints to catch dual employment warnings, duration gaps, and seq errors.</p>
+                        <a href="{% url 'pricing' %}" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-indigo-500 transition-colors">
+                            Upgrade to Pro
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
 
             {% if not request.user.is_authenticated %}
                 </div>
@@ -793,6 +846,7 @@ html.light .guest-lock-btn-secondary:hover {
 {{ analysis.missing_skills|json_script:"missing-skills-data" }}
 {{ analysis.impact_critiques|json_script:"critiques-initial-data" }}
 {{ analysis.job_desc_full|json_script:"job-desc-data" }}
+{{ analysis.fraud_audit|json_script:"fraud-audit-data" }}
 
 {% endblock %}
 
@@ -2132,6 +2186,238 @@ html.light .guest-lock-btn-secondary:hover {
         );
     }
 
+    // ──────────────────────────────────────────────────────────────
+    // 6. AI Writing & Credential Fraud Scanner Component
+    // ──────────────────────────────────────────────────────────────
+    function FraudAuditScanner() {
+        const rootElement = document.getElementById('react-audit-root');
+        if (!rootElement) return null;
+
+        const [fraudData, setFraudData] = useState(() => {
+            try {
+                const el = document.getElementById('fraud-audit-data');
+                return el && el.textContent.trim() ? JSON.parse(el.textContent) : null;
+            } catch (e) {
+                return null;
+            }
+        });
+
+        if (!fraudData || Object.keys(fraudData).length === 0) {
+            return (
+                <div className="premium-card text-center py-12 border border-gray-700/50">
+                    <div className="w-16 h-16 bg-brand/10 border border-brand/35 rounded-full flex items-center justify-center text-brand text-2xl mx-auto mb-4 animate-pulse">
+                        ⚠️
+                    </div>
+                    <h4 className="text-white font-bold text-lg mb-2">No Fraud Audit Data Available</h4>
+                    <p className="text-gray-400 text-sm max-w-md mx-auto mb-6">
+                        This resume was scanned with a previous version of Resume Analyzer AI. Please scan your resume again to generate detailed AI writing, timeline checks, and metric audits.
+                    </p>
+                </div>
+            );
+        }
+
+        const aiProb = fraudData.ai_probability ?? 0;
+        const aiEvidence = fraudData.ai_probability_evidence ?? [];
+        const chronological = fraudData.chronological_consistency ?? [];
+        const metrics = fraudData.metrics_credibility ?? [];
+
+        // Style helper for AI probability index
+        let aiColor = "text-emerald-400";
+        let aiBg = "bg-emerald-500/10";
+        let aiBorder = "border-emerald-500/30";
+        let aiLabel = "Highly Likely Human";
+        let aiRatingText = "The writing style in your resume shows organic variations typical of human writing. Good job!";
+
+        if (aiProb > 75) {
+            aiColor = "text-red-405";
+            aiBg = "bg-red-500/10";
+            aiBorder = "border-red-500/30";
+            aiLabel = "Highly Likely AI-Generated";
+            aiRatingText = "The phrasing, structure, and word choices match common AI generator outputs closely. Consider rewriting sections in your own voice.";
+        } else if (aiProb > 50) {
+            aiColor = "text-orange-400";
+            aiBg = "bg-orange-500/10";
+            aiBorder = "border-orange-500/30";
+            aiLabel = "Likely AI-Assisted";
+            aiRatingText = "Several sections show stylistic features and transition choices commonly produced by AI templates. Mix in personal phrasing.";
+        } else if (aiProb > 25) {
+            aiColor = "text-amber-400";
+            aiBg = "bg-amber-500/10";
+            aiBorder = "border-amber-500/30";
+            aiLabel = "Possibility of AI Assistance";
+            aiRatingText = "Minor stylistic elements suggest possible AI-assisted edits, but the majority of content appears organic and original.";
+        }
+
+        return (
+            <div className="space-y-8 animate-fadeIn">
+                {/* Top Section: AI Writing Index */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Dial / Meter Card */}
+                    <div className="lg:col-span-4 premium-card flex flex-col items-center justify-center text-center border border-gray-700/50">
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-6">AI Writing Probability</span>
+                        
+                        {/* Circular Progress Meter */}
+                        <div className="relative w-36 h-36 flex items-center justify-center mb-6">
+                            <svg className="w-full h-full transform -rotate-90">
+                                <circle
+                                    cx="72"
+                                    cy="72"
+                                    r="60"
+                                    stroke="rgba(255, 255, 255, 0.05)"
+                                    strokeWidth="10"
+                                    fill="transparent"
+                                />
+                                <circle
+                                    cx="72"
+                                    cy="72"
+                                    r="60"
+                                    stroke="currentColor"
+                                    strokeWidth="10"
+                                    fill="transparent"
+                                    strokeDasharray="377"
+                                    strokeDashoffset={377 - (377 * aiProb) / 100}
+                                    className={`${aiColor} transition-all duration-1000 ease-out`}
+                                />
+                            </svg>
+                            <div className="absolute flex flex-col items-center justify-center">
+                                <span className="text-3xl font-black text-white">{aiProb}%</span>
+                                <span className="text-[9px] uppercase font-bold text-gray-400">Match Index</span>
+                            </div>
+                        </div>
+
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${aiBg} ${aiColor} ${aiBorder} mb-3`}>
+                            {aiLabel}
+                        </span>
+                        <p className="text-xs text-gray-400 leading-relaxed px-4">{aiRatingText}</p>
+                    </div>
+
+                    {/* Phrasing & Stylistic Evidence Card */}
+                    <div className="lg:col-span-8 premium-card border border-gray-700/50 flex flex-col justify-between">
+                        <div>
+                            <h4 className="text-white font-bold text-sm mb-2 flex items-center gap-2">
+                                <span className="text-brand">🔍</span> Stylistic Phrasing & AI Evidence
+                            </h4>
+                            <p className="text-gray-400 text-xs font-light mb-4">
+                                Our AI scanner checks for overused ChatGPT staples, repetitive sentence stems, and uniform bullet structures.
+                            </p>
+
+                            {aiEvidence.length > 0 ? (
+                                <ul className="space-y-3">
+                                    {aiEvidence.map((evidence, idx) => (
+                                        <li key={idx} className="flex items-start gap-2 text-xs text-gray-350">
+                                            <span className="text-brand font-bold mt-0.5">•</span>
+                                            <span>{evidence}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <div className="py-6 text-center text-gray-500 text-xs">
+                                    No clear indicators of AI-assisted phrasing or repetitive structural syntax patterns detected.
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-6 pt-4 border-t border-gray-800 text-[10px] text-gray-500 font-semibold leading-relaxed flex items-center gap-2">
+                            <span>💡</span>
+                            <span>Tip: Replace overused buzzwords like 'spearheaded', 'leverage', 'testament', or 'fostered' with specific technical outcomes and active language.</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bottom Section: Chronological Audit & Metrics Credibility */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Chronological Consistency Card */}
+                    <div className="premium-card border border-gray-700/50 space-y-4">
+                        <h4 className="text-white font-bold text-sm flex items-center gap-2">
+                            <span className="text-indigo-400 font-semibold">📅</span> Chronological Consistency Auditor
+                        </h4>
+                        <p className="text-gray-400 text-xs font-light">
+                            Verifies that timeline progression makes logical sense and flags overlapping engagements or unusual gaps.
+                        </p>
+
+                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 chat-scrollbar">
+                            {chronological.length > 0 ? (
+                                chronological.map((check, idx) => {
+                                    let statusBg = "bg-emerald-500/10 border-emerald-500/30 text-emerald-400";
+                                    let statusIcon = "✅";
+                                    if (check.status === 'fail') {
+                                        statusBg = "bg-red-500/10 border-red-500/30 text-red-400";
+                                        statusIcon = "❌";
+                                    } else if (check.status === 'warning') {
+                                        statusBg = "bg-amber-500/10 border-amber-500/30 text-amber-400";
+                                        statusIcon = "⚠️";
+                                    }
+
+                                    return (
+                                        <div key={idx} className={`p-4 rounded-xl border ${statusBg} space-y-1`}>
+                                            <div className="flex justify-between items-center">
+                                                <span className="font-bold text-xs flex items-center gap-1.5 text-white">
+                                                    <span>{statusIcon}</span>
+                                                    {check.issue || "Timeline Check"}
+                                                </span>
+                                                <span className="text-[9px] uppercase font-extrabold tracking-wider bg-black/25 px-2 py-0.5 rounded text-white">
+                                                    {check.status}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-350 leading-relaxed font-light">{check.details}</p>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-start gap-3">
+                                    <span className="text-base">✅</span>
+                                    <div>
+                                        <h5 className="font-bold text-emerald-400 mb-0.5">Timeline Verified</h5>
+                                        <p className="leading-relaxed font-light">No concurrent overlapping jobs or logical chronology sequencing errors detected. Well structured!</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Metrics Credibility Auditor Card */}
+                    <div className="premium-card border border-gray-700/50 space-y-4">
+                        <h4 className="text-white font-bold text-sm flex items-center gap-2">
+                            <span className="text-emerald-450 font-bold">📈</span> Experience Metrics & Credibility
+                        </h4>
+                        <p className="text-gray-400 text-xs font-light">
+                            Audits quantitative claims in your experience section to check for realism, exaggeration, or context gaps.
+                        </p>
+
+                        <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 chat-scrollbar">
+                            {metrics.length > 0 ? (
+                                metrics.map((claim, idx) => {
+                                    let levelBg = "bg-emerald-500/15 text-emerald-450 border border-emerald-500/30";
+                                    if (claim.credibility === 'low') {
+                                        levelBg = "bg-rose-500/15 text-rose-400 border border-rose-500/30";
+                                    } else if (claim.credibility === 'medium') {
+                                        levelBg = "bg-amber-500/15 text-amber-400 border border-amber-500/30";
+                                    }
+
+                                    return (
+                                        <div key={idx} className="p-4 bg-gray-900/40 rounded-xl border border-gray-800 space-y-2">
+                                            <div className="flex justify-between items-start gap-2">
+                                                <span className="text-xs text-white font-semibold flex-1 leading-relaxed">"{claim.metric}"</span>
+                                                <span className={`text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded ${levelBg}`}>
+                                                    {claim.credibility} Credibility
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-400 font-light leading-relaxed">{claim.critique}</p>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="text-center py-12 text-gray-500 text-xs">
+                                    No quantitative accomplishment metrics detected. Try adding numbers, metrics, or percentages (e.g., 'saved 10 hours', 'reduced latency by 20%') to increase credibility and impact!
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     // Mounting React Roots
     const clRoot = ReactDOM.createRoot(document.getElementById('react-cover-letter-root'));
     clRoot.render(<CoverLetterGenerator />);
@@ -2147,6 +2433,12 @@ html.light .guest-lock-btn-secondary:hover {
 
     const locRoot = ReactDOM.createRoot(document.getElementById('react-localization-root'));
     locRoot.render(<ResumeTranslator />);
+
+    const auditRootEl = document.getElementById('react-audit-root');
+    if (auditRootEl) {
+        const auditRoot = ReactDOM.createRoot(auditRootEl);
+        auditRoot.render(<FraudAuditScanner />);
+    }
 </script>
 
 <script>

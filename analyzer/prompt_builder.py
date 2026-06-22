@@ -16,7 +16,17 @@ ANALYSIS_JSON_SCHEMA = """
     ],
     "interview_questions": [
         {"question": "string containing a tailored interview question based on the resume and JD", "answer": "detailed string with key points the candidate should cover"}
-    ]
+    ],
+    "fraud_audit": {
+        "ai_probability": <integer 0-100, probability that the resume was written by AI>,
+        "ai_probability_evidence": [<list of strings detailing evidence of AI writing, stylistic buzzwords, or structural patterns>],
+        "chronological_consistency": [
+            {"status": "pass|warning|fail", "issue": "string summarizing chronological issue", "details": "string explaining dates, durations, concurrent jobs or timeline gaps"}
+        ],
+        "metrics_credibility": [
+            {"metric": "string containing the specific quantitative claim found", "credibility": "high|medium|low", "critique": "string evaluating the realism and context of the claim"}
+        ]
+    }
 }
 """
 
@@ -92,6 +102,11 @@ def build_analysis_prompt(resume_text: str, job_desc: str) -> str:
     - Lack of quantification (metrics, numbers) in achievements.
     - Generate EXACTLY 15 highly tailored interview questions covering technical skills, behavioral situations, experience gaps, and deep-dive questions about specific projects listed in the resume. Avoid generic interview questions. Provide detailed, comprehensive answers for each question detailing key points the candidate must cover.
     - Extract skills and strictly categorize them as "hard" (technical, tools, specific knowledge) or "soft" (interpersonal, leadership, traits).
+    
+    Audit the resume content for potential discrepancies or credibility issues:
+    - AI Content Detection: Estimate the probability (0-100%) that the resume (or parts of it) was written/assisted by AI. Identify specific stylistic evidence (e.g., overused buzzwords like 'spearheaded', 'leverage', 'testament', 'tapestry', or highly standardized structures).
+    - Chronological Consistency: Check dates in work and education sections. Flag concurrent full-time jobs (dual employment), chronologically reversed dates, or graduation year anomalies.
+    - Metrics Credibility: Inspect the quantitative claims (numbers, %, $) listed in experience bullets. Evaluate if they appear realistically achievable or if they are exaggerated or lack necessary context.
     
     Return ONLY a JSON object exactly matching this schema:
     {ANALYSIS_JSON_SCHEMA}

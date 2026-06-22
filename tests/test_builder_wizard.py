@@ -11,6 +11,7 @@ from analyzer.views import (
     save_builder_resume_api,
     suggest_summary_api,
     suggest_bullets_api,
+    parse_resume_for_builder_api,
 )
 
 @pytest.fixture
@@ -174,3 +175,100 @@ def test_suggest_bullets_api(mock_suggest, factory, premium_user):
     assert len(data["bullets"]) == 5
     assert data["bullets"][0] == "Bullet 1"
     mock_suggest.assert_called_once_with("Data Scientist", "Retail")
+
+
+@pytest.mark.django_db
+def test_suggest_bullets_api_db_hit(factory, premium_user):
+    from analyzer.models import PreWrittenBullet
+    
+    # Seed a bullet point in the test DB
+    PreWrittenBullet.objects.create(
+        job_role="Software Engineer",
+        category="Scaling",
+        bullet_text="Optimized scaling by 50%."
+    )
+    
+    url = reverse("suggest_bullets_api")
+    request = factory.post(
+        url,
+        json.dumps({"job_title": "Software Engineer"}),
+        content_type="application/json"
+    )
+    request.user = premium_user
+
+    response = suggest_bullets_api(request)
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert "bullets" in data
+    assert len(data["bullets"]) == 1
+    assert data["bullets"][0] == "Optimized scaling by 50%."
+    
+    # Check that categorized data is populated
+    assert "categorized" in data
+    assert len(data["categorized"]) == 1
+    assert data["categorized"][0]["category"] == "Scaling"
+    assert data["categorized"][0]["bullets"][0] == "Optimized scaling by 50%."
+
+
+@pytest.mark.django_db
+@patch("analyzer.views.extract_text")
+@patch("analyzer.views.parse_resume_to_json")
+def test_parse_resume_for_builder_api_valid(mock_parse_to_json, mock_extract, factory, premium_user):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    
+    mock_extract.return_value = ("Extracted Text Content", [], {})
+    mock_parse_to_json.return_value = {
+        "name": "Jane Smith",
+        "contact": {"email": "jane.smith@example.com"},
+        "summary": "AI Engineer",
+        "experience": [],
+        "education": [],
+        "skills": {"languages": ["Python", "JavaScript"]}
+    }
+
+    url = reverse("parse_resume_for_builder_api")
+    resume_file = SimpleUploadedFile("my_resume.pdf", b"%PDF-1.4 mock pdf content", content_type="application/pdf")
+    
+    request = factory.post(url, {"resume": resume_file})
+    request.user = premium_user
+
+    response = parse_resume_for_builder_api(request)
+    assert response.status_code == 200
+    
+    data = json.loads(response.content)
+    assert data["status"] == "success"
+    assert data["resume"]["name"] == "Jane Smith"
+    assert "Python" in data["resume"]["skills"]["languages"]
+
+
+@pytest.mark.django_db
+def test_parse_resume_for_builder_api_invalid_format(factory, premium_user):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    
+    url = reverse("parse_resume_for_builder_api")
+    resume_file = SimpleUploadedFile("my_resume.txt", b"plain text", content_type="text/plain")
+    
+    request = factory.post(url, {"resume": resume_file})
+    request.user = premium_user
+
+    response = parse_resume_for_builder_api(request)
+    assert response.status_code == 400
+    
+    data = json.loads(response.content)
+    assert "error" in data
+    assert "Unsupported file format" in data["error"]
+
+
+@pytest.mark.django_db
+def test_parse_resume_for_builder_api_unauthorized(factory):
+    from django.contrib.auth.models import AnonymousUser
+    
+    url = reverse("parse_resume_for_builder_api")
+    request = factory.post(url)
+    request.user = AnonymousUser()
+
+    response = parse_resume_for_builder_api(request)
+    # login_required decorator redirects anonymous users to login page (302)
+    assert response.status_code == 302
+
+

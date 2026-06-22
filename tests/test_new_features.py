@@ -494,3 +494,87 @@ def test_compare_versions_view_ownership_safety(factory, premium_user, analysis_
         compare_versions_view(request)
 
 
+# ──────────────────────────────────────────────────────────────
+# 10. AI Writing & Credential Fraud Scanner Tests
+# ──────────────────────────────────────────────────────────────
+@pytest.mark.django_db
+@patch("analyzer.tasks.analyze_with_ai")
+def test_fraud_audit_extraction_and_permissions(mock_analyze_with_ai, factory, premium_user, analysis_record):
+    # Mock AI analysis data including fraud_audit
+    mock_analyze_with_ai.return_value = (
+        {
+            "job_category": "Software Engineering",
+            "match_score": 85,
+            "matched_skills": [{"skill": "Python", "category": "hard", "matched": True}],
+            "missing_skills": [],
+            "experience_gaps": [],
+            "suggestions": [],
+            "upskill_paths": [],
+            "impact_critiques": [],
+            "interview_questions": [],
+            "fraud_audit": {
+                "ai_probability": 35,
+                "ai_probability_evidence": ["Stylistic marker: spearheaded"],
+                "chronological_consistency": [
+                    {"status": "warning", "issue": "Overlap", "details": "Worked two jobs concurrently."}
+                ],
+                "metrics_credibility": [
+                    {"metric": "Grew userbase by 900%", "credibility": "medium", "critique": "Unusually high growth."}
+                ]
+            }
+        },
+        {"prompt_tokens": 100, "completion_tokens": 50}
+    )
+
+    from analyzer.tasks import process_resume_analysis
+    process_resume_analysis(str(analysis_record.slug))
+
+    analysis_record.refresh_from_db()
+    assert analysis_record.fraud_audit["ai_probability"] == 35
+    assert analysis_record.fraud_audit["ai_probability_evidence"] == ["Stylistic marker: spearheaded"]
+    assert len(analysis_record.fraud_audit["chronological_consistency"]) == 1
+    assert analysis_record.fraud_audit["chronological_consistency"][0]["issue"] == "Overlap"
+
+    # Test permissions
+    from analyzer.views import get_premium_permissions
+    
+    # 1. Premium Elite user has access
+    perms = get_premium_permissions(premium_user, analysis_record)
+    assert perms["can_audit"] is True
+
+    # 2. Regular user with tier 2 (Pro) has access
+    pro_user = User.objects.create_user(username="prouser", password="password")
+    pro_user.profile.is_premium = True
+    pro_user.profile.subscription_tier = 2
+    pro_user.profile.save()
+    
+    analysis_record.user = pro_user
+    analysis_record.save()
+    perms_pro = get_premium_permissions(pro_user, analysis_record)
+    assert perms_pro["can_audit"] is True
+
+    # 3. Regular user with tier 1 (Starter) does not have access
+    starter_user = User.objects.create_user(username="starteruser", password="password")
+    starter_user.profile.is_premium = True
+    starter_user.profile.subscription_tier = 1
+    starter_user.profile.save()
+    
+    # Create a dummy first scan in the past so analysis_record is restricted
+    from django.utils import timezone
+    dummy_scan = ResumeAnalysis.objects.create(
+        user=starter_user,
+        filename="dummy_first_scan.pdf",
+        resume_text="Starter First Scan",
+        status="completed",
+        match_score=40
+    )
+    ResumeAnalysis.objects.filter(id=dummy_scan.id).update(
+        created_at=timezone.now() - timezone.timedelta(hours=1)
+    )
+    
+    analysis_record.user = starter_user
+    analysis_record.save()
+    perms_starter = get_premium_permissions(starter_user, analysis_record)
+    assert perms_starter["can_audit"] is False
+
+

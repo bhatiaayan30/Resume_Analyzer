@@ -50,6 +50,7 @@ urlpatterns = [
     
     # Resume Builder Wizard
     path("builder/", views.resume_builder_view, name="resume_builder"),
+    path("api/builder/parse-upload/", views.parse_resume_for_builder_api, name="parse_resume_for_builder_api"),
     path("api/builder/save/", views.save_builder_resume_api, name="save_builder_resume_api"),
     path("api/builder/suggest-summary/", views.suggest_summary_api, name="suggest_summary_api"),
     path("api/builder/suggest-bullets/", views.suggest_bullets_api, name="suggest_bullets_api"),

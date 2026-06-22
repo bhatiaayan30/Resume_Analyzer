@@ -32,6 +32,7 @@ def process_resume_analysis(analysis_slug: str):
         analysis_record.upskill_paths = analysis_data.get("upskill_paths", [])
         analysis_record.impact_critiques = analysis_data.get("impact_critiques", [])
         analysis_record.interview_questions = analysis_data.get("interview_questions", [])
+        analysis_record.fraud_audit = analysis_data.get("fraud_audit", {})
         
         analysis_record.status = 'completed'
         analysis_record.save()

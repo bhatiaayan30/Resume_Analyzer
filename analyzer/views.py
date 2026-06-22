@@ -316,6 +316,7 @@ def get_premium_permissions(user, record):
         "can_interview": False,
         "can_critique": False,
         "can_download_pdf": False,
+        "can_audit": False,
         "record": record,
     }
 
@@ -325,6 +326,7 @@ def get_premium_permissions(user, record):
         perms["can_interview"] = True
         perms["can_critique"] = True
         perms["can_download_pdf"] = True
+        perms["can_audit"] = True
 
     # 1. Unauthenticated user checking their one-time free scan
     if not user.is_authenticated:
@@ -349,6 +351,7 @@ def get_premium_permissions(user, record):
             perms["can_cover_letter"] = True
             perms["can_interview"] = True
             perms["can_download_pdf"] = True
+            perms["can_audit"] = True
         if tier >= 3: # Elite, Unlimited
             perms["can_critique"] = True
             
@@ -1251,6 +1254,41 @@ def resume_builder_view(request):
 
 @login_required
 @require_http_methods(["POST"])
+def parse_resume_for_builder_api(request):
+    """
+    Accepts an uploaded resume, extracts text, parses to structured JSON via Groq AI,
+    and returns the structured data to prefill the builder workspace.
+    """
+    resume_file = request.FILES.get("resume")
+    if not resume_file:
+        return JsonResponse({"error": "No resume file provided."}, status=400)
+
+    # Validate file extension
+    ext = os.path.splitext(resume_file.name)[1].lower()
+    if ext not in [".pdf", ".docx"]:
+        return JsonResponse({"error": "Unsupported file format. Please upload PDF or DOCX."}, status=400)
+
+    # Validate file size (2 MB cap)
+    if resume_file.size > 2 * 1024 * 1024:
+        return JsonResponse({"error": "File size exceeds 2 MB limit."}, status=400)
+
+    try:
+        # Extract text using our existing utility function
+        resume_text, _, _ = extract_text(resume_file, ext)
+        if not resume_text:
+            return JsonResponse({"error": "Could not extract text from this file."}, status=422)
+
+        # Parse text into structured resume JSON via our existing utility function
+        structured_data = parse_resume_to_json(resume_text)
+        
+        return JsonResponse({"status": "success", "resume": structured_data})
+
+    except Exception as exc:
+        return JsonResponse({"error": f"Failed to parse resume: {str(exc)}"}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
 def save_builder_resume_api(request):
     """Saves the wizard JSON payload into a ResumeAnalysis and ResumeVersion."""
     try:
@@ -1347,7 +1385,7 @@ def suggest_summary_api(request):
 @login_required
 @require_http_methods(["POST"])
 def suggest_bullets_api(request):
-    """Returns 5 AI-generated high-impact experience bullets."""
+    """Returns 15 metrics-driven pre-written bullets grouped by category, with AI fallback."""
     try:
         body = json.loads(request.body)
         job_title = body.get("job_title", "").strip()
@@ -1358,8 +1396,57 @@ def suggest_bullets_api(request):
     if not job_title:
         return JsonResponse({"error": "job_title is required."}, status=400)
 
+    from .models import PreWrittenBullet
+
+    # 1. Look up exact matches
+    bullet_objs = PreWrittenBullet.objects.filter(job_role__iexact=job_title)
+
+    # 2. Look up contains/fuzzy matches if exact fails
+    if not bullet_objs.exists():
+        cleaned_title = job_title.lower()
+        for prefix in ["senior", "junior", "lead", "staff", "associate", "principal", "expert"]:
+            cleaned_title = cleaned_title.replace(prefix, "").strip()
+        
+        bullet_objs = PreWrittenBullet.objects.filter(job_role__icontains=cleaned_title)
+
+    # 3. If database hits found, format and return them
+    if bullet_objs.exists():
+        bullets_list = []
+        categories_dict = {}
+        for obj in bullet_objs:
+            bullets_list.append(obj.bullet_text)
+            if obj.category not in categories_dict:
+                categories_dict[obj.category] = []
+            categories_dict[obj.category].append(obj.bullet_text)
+
+        categorized = [
+            {"category": cat, "bullets": blts}
+            for cat, blts in categories_dict.items()
+        ]
+        
+        return JsonResponse({
+            "bullets": bullets_list[:15], # Flat list for backward compatibility
+            "categorized": categorized
+        })
+
+    # 4. Fallback to LLM generation
     bullets = get_ai_experience_bullets(job_title, company_type or "tech startup")
-    return JsonResponse({"bullets": bullets})
+
+    # Cache AI results in the database
+    for text in bullets:
+        try:
+            PreWrittenBullet.objects.get_or_create(
+                job_role=job_title,
+                category="AI Recommendations",
+                bullet_text=text
+            )
+        except Exception:
+            pass
+
+    return JsonResponse({
+        "bullets": bullets,
+        "categorized": [{"category": "AI Recommendations", "bullets": bullets}]
+    })
 
 
 def portfolio_view(request, analysis_id):
