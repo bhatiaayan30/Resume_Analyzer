@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /history/
+Disallow: /settings/
+Disallow: /builder/
+Disallow: /results/
+Disallow: /analyze/
+Disallow: /create-razorpay-order/
+Disallow: /webhook/
+
+Sitemap: http{% if request.is_secure %}s{% endif %}://{{ request.get_host }}/sitemap.xml
