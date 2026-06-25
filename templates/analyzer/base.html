@@ -283,6 +283,17 @@
         radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.15), transparent 40%);
     }
 
+    /* Light Mode Header & Menu Overrides */
+    html.light .site-header {
+      background-color: rgba(255, 255, 255, 0.8) !important;
+      border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+    }
+    
+    html.light .site-header .md\:hidden {
+      background-color: rgba(255, 255, 255, 0.95) !important;
+      border-top-color: rgba(0, 0, 0, 0.08) !important;
+    }
+
     /* Tailwind Overrides for Light Mode */
     html.light .text-white { color: #0f172a !important; }
     html.light .text-gray-400, html.light .text-gray-300 { color: #475569 !important; }
@@ -423,6 +434,13 @@
     html.light .bg-blue-600,
     html.light .bg-emerald-600,
     html.light .bg-green-600,
+    html.light .bg-indigo-600,
+    html.light .bg-indigo-500,
+    html.light .bg-pink-600,
+    html.light .bg-pink-500,
+    html.light .bg-purple-600,
+    html.light .bg-rose-600,
+    html.light .bg-rose-500,
     html.light button.bg-gradient-to-r,
     html.light a.bg-gradient-to-r {
         color: #ffffff !important;
@@ -434,6 +452,13 @@
     html.light .bg-blue-600 *,
     html.light .bg-emerald-600 *,
     html.light .bg-green-600 *,
+    html.light .bg-indigo-600 *,
+    html.light .bg-indigo-500 *,
+    html.light .bg-pink-600 *,
+    html.light .bg-pink-500 *,
+    html.light .bg-purple-600 *,
+    html.light .bg-rose-600 *,
+    html.light .bg-rose-500 *,
     html.light button.bg-gradient-to-r *,
     html.light a.bg-gradient-to-r * {
         color: inherit;
@@ -467,6 +492,10 @@
     html.light .text-indigo-300,
     html.light .text-indigo-400 {
         color: #3730a3 !important;
+    }
+    html.light .text-blue-300,
+    html.light .text-blue-400 {
+        color: #1e3a8a !important;
     }
 
     /* Hover Inversions for light mode buttons & links */
@@ -584,6 +613,35 @@
       text-shadow: 0 0 40px var(--title-shadow);
     }
 
+    /* Submit button (Global Styles) */
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(270deg, #8b5cf6, #ec4899, #8b5cf6);
+      background-size: 200% 200%;
+      animation: gradientFlow 3s ease infinite;
+      color: #fff !important;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 12px;
+      box-shadow: 0 10px 25px rgba(236, 72, 153, 0.4);
+    }
+    .submit-btn:hover { 
+      transform: translateY(-4px) scale(1.02); 
+      box-shadow: 0 15px 35px rgba(236, 72, 153, 0.6), 0 0 30px rgba(139, 92, 246, 0.6); 
+    }
+    .submit-btn:active { transform: translateY(0) scale(1); box-shadow: 0 5px 15px rgba(236, 72, 153, 0.4); }
+
     {% block extra_css %}{% endblock %}
   </style>
   <script>
@@ -609,7 +667,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.187.904zM18 5v6m-3-3h6" />
               </svg>
           </div>
-          <span class="bg-gradient-to-r from-white via-gray-100 to-gray-200 bg-clip-text text-transparent font-black">Resume Analyzer</span>
+          <span class="logo font-black">Resume Analyzer</span>
         </a>
         
         <!-- Desktop Navigation Links -->

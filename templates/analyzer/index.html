@@ -40,34 +40,6 @@
   box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15), 0 8px 30px rgba(139, 92, 246, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Submit button */
-@keyframes gradientFlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-.submit-btn {
-  width: 100%;
-  padding: 18px;
-  background: linear-gradient(270deg, #8b5cf6, #ec4899, #8b5cf6);
-  background-size: 200% 200%;
-  animation: gradientFlow 3s ease infinite;
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-top: 12px;
-  box-shadow: 0 10px 25px rgba(236, 72, 153, 0.4);
-}
-.submit-btn:hover { 
-  transform: translateY(-4px) scale(1.02); 
-  box-shadow: 0 15px 35px rgba(236, 72, 153, 0.6), 0 0 30px rgba(139, 92, 246, 0.6); 
-}
-.submit-btn:active { transform: translateY(0) scale(1); box-shadow: 0 5px 15px rgba(236, 72, 153, 0.4); }
 {% endblock %}
 
 {% block content %}
