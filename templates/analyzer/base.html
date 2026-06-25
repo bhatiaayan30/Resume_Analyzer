@@ -616,8 +616,69 @@
 
     /* Upload Resume Box in Light Mode */
     html.light .upload-resume-box {
-        background-color: rgba(255,255,255,0.6) !important;
-        border-color: #a1a1aa !important;
+        background-color: rgba(255, 255, 255, 0.65) !important;
+        border-color: rgba(139, 92, 246, 0.3) !important;
+        color: #475569 !important;
+    }
+    html.light .upload-resume-box:hover {
+        background-color: rgba(255, 255, 255, 0.85) !important;
+        border-color: rgba(139, 92, 246, 0.5) !important;
+    }
+
+    /* Keep elements white in Light Mode */
+    html.light .keep-white,
+    html.light .keep-white * {
+        color: #ffffff !important;
+        stroke: #ffffff !important;
+    }
+
+    /* Subscription Badges in Light Mode */
+    html.light .subscription-badge-unlimited {
+        background-color: #fce7f3 !important;
+        color: #db2777 !important;
+        border-color: #fbcfe8 !important;
+    }
+    html.light .subscription-badge-elite {
+        background-color: #dcfce7 !important;
+        color: #15803d !important;
+        border-color: #bbf7d0 !important;
+    }
+    html.light .subscription-badge-pro {
+        background-color: #ede9fe !important;
+        color: #6d28d9 !important;
+        border-color: #ddd6fe !important;
+    }
+    html.light .subscription-badge-starter {
+        background-color: #f1f5f9 !important;
+        color: #475569 !important;
+        border-color: #cbd5e1 !important;
+    }
+
+    /* Form inputs / Textareas in Light Mode */
+    html.light .field textarea {
+        background-color: rgba(255, 255, 255, 0.65) !important;
+        border-color: rgba(0, 0, 0, 0.1) !important;
+        color: #0f172a !important;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03) !important;
+    }
+    html.light .field textarea:focus {
+        background-color: #ffffff !important;
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15), 0 8px 30px rgba(139, 92, 246, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+    }
+
+    /* Dropdown Menus in Light Mode */
+    html.light .dropdown-menu {
+        background-color: rgba(255, 255, 255, 0.98) !important;
+        border-color: rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+    }
+    html.light .dropdown-menu a {
+        color: #475569 !important;
+    }
+    html.light .dropdown-menu a:hover {
+        color: #0f172a !important;
+        background-color: rgba(0, 0, 0, 0.03) !important;
     }
 
 
@@ -678,9 +739,9 @@
 </head>
 <body>
 
+  {% if user.is_authenticated %}
   <header x-data="{ mobileMenuOpen: false }" class="site-header border-b border-white/5 bg-gray-950/70 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
     <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3 w-full">
-      
       <div class="flex items-center gap-8">
         <!-- Logo -->
         <a class="flex items-center gap-2.5 font-bold text-lg tracking-tight text-white hover:opacity-90 transition-opacity" href="{% url 'index' %}">
@@ -691,125 +752,293 @@
           </div>
           <span class="logo font-black">Resume Analyzer</span>
         </a>
-        
-        <!-- Desktop Navigation Links -->
         <nav class="hidden md:flex items-center gap-1 desktop-nav-links">
           <a href="{% url 'index' %}">Home</a>
-          {% if user.is_authenticated %}
-            <a href="{% url 'history' %}">History</a>
-            <a href="{% url 'resume_builder' %}" class="{% if request.resolver_match.url_name == 'resume_builder' %}active{% endif %}">Build Resume</a>
-            {% if user.profile.is_premium %}
-                <a href="{% url 'market_insights' %}">Insights</a>
-            {% else %}
-                <a href="{% url 'market_insights' %}" class="flex items-center gap-1 text-gray-500 hover:text-gray-300" title="Premium Feature">
-                    <span>Insights</span> 
-                    <span class="text-[8px] font-black bg-pink-500/20 text-pink-400 px-1 py-0.2 rounded border border-pink-500/30 uppercase tracking-wider">PRO</span>
-                </a>
-            {% endif %}
-          {% else %}
+          <a href="{% url 'history' %}">History</a>
+          <a href="{% url 'resume_builder' %}" class="{% if request.resolver_match.url_name == 'resume_builder' %}active{% endif %}">Build Resume</a>
+          {% if user.profile.is_premium %}
               <a href="{% url 'market_insights' %}">Insights</a>
+          {% else %}
+              <a href="{% url 'market_insights' %}" class="flex items-center gap-1 text-gray-500 hover:text-gray-300" title="Premium Feature">
+                  <span>Insights</span> 
+                  <span class="text-[8px] font-black bg-pink-500/20 text-pink-400 px-1 py-0.2 rounded border border-pink-500/30 uppercase tracking-wider">PRO</span>
+              </a>
           {% endif %}
           <a href="{% url 'contact' %}">Contact Us</a>
         </nav>
       </div>
-      
-      <!-- Desktop Actions (Right Side) -->
       <div class="hidden md:flex items-center gap-3">
-        <!-- Theme Toggle -->
         <button class="theme-toggle-btn p-2 rounded-full hover:bg-white/5 text-gray-400 hover:text-white transition-all" title="Toggle Theme" aria-label="Toggle dark mode" role="switch">
             <svg class="theme-icon-dark w-4 h-4 text-gray-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
             <svg class="theme-icon-light w-4 h-4 text-amber-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
         </button>
-
-        {% if user.is_authenticated %}
-          <!-- User Profile Dropdown -->
-          <div x-data="{ userDropdownOpen: false }" class="relative" @click.away="userDropdownOpen = false">
-            <button @click="userDropdownOpen = !userDropdownOpen" class="flex items-center gap-2 p-1 pl-2 pr-3 rounded-full bg-white/5 border border-white/10 hover:border-brand/40 transition-all text-left focus:outline-none select-none group">
-              <!-- Avatar Circle -->
-              <div class="w-6.5 h-6.5 rounded-full bg-gradient-to-tr from-brand to-indigo-600 flex items-center justify-center text-white text-xs font-bold ring-1 ring-white/15">
-                {{ user.username|slice:":1"|upper }}
-              </div>
-              <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors max-w-[100px] truncate">{{ user.username }}</span>
-              <svg class="w-3 h-3 text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
-              </svg>
-            </button>
-
-            <!-- Dropdown Menu -->
-            <div x-show="userDropdownOpen" 
-                 x-transition:enter="transition ease-out duration-100"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 x-transition:leave="transition ease-in duration-75"
-                 x-transition:leave-start="opacity-100 scale-100"
-                 x-transition:leave-end="opacity-0 scale-95"
-                 class="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-slate-950/95 backdrop-blur-xl shadow-2xl z-50 py-1.5 text-slate-200 dropdown-menu"
-                 style="display: none;">
-              
-              <!-- User Header -->
-              <div class="px-4 py-2 border-b border-white/5 mb-1.5">
-                <p class="text-[10px] text-gray-500 font-semibold tracking-wide uppercase">Signed in as</p>
-                <p class="text-sm font-bold text-white truncate">{{ user.username }}</p>
-                {% if user.profile.is_premium %}
-                  <div class="mt-1.5">
-                    {% if user.profile.subscription_tier == 4 %}
-                      <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded bg-pink-500/20 text-pink-400 border border-pink-500/30">Unlimited</span>
-                    {% elif user.profile.subscription_tier == 3 %}
-                      <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded bg-green-500/20 text-green-400 border border-green-500/30">Elite</span>
-                    {% elif user.profile.subscription_tier == 2 %}
-                      <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded bg-brand/20 text-brand-hover border border-brand/30">Pro</span>
-                    {% elif user.profile.subscription_tier == 1 %}
-                      <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded bg-gray-700 text-gray-300 border border-gray-650">Starter</span>
-                    {% endif %}
-                  </div>
-                {% else %}
-                  <div class="mt-1.5 flex items-center justify-between">
-                    <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded bg-slate-800 text-gray-400 border border-white/5">Free Tier</span>
-                    <a href="{% url 'pricing' %}" class="text-[10px] text-brand hover:text-brand-hover font-bold hover:underline">Upgrade</a>
-                  </div>
+        <div x-data="{ userDropdownOpen: false }" class="relative" @click.away="userDropdownOpen = false">
+          <button @click="userDropdownOpen = !userDropdownOpen" class="flex items-center gap-2 p-1 pl-2 pr-3 rounded-full bg-white/5 border border-white/10 hover:border-brand/40 transition-all text-left focus:outline-none select-none group">
+            <div class="w-6.5 h-6.5 rounded-full bg-gradient-to-tr from-brand to-indigo-600 flex items-center justify-center text-white text-xs font-bold ring-1 ring-white/15">
+              {{ user.username|slice:":1"|upper }}
+            </div>
+            <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors max-w-[100px] truncate">{{ user.username }}</span>
+            <svg class="w-3 h-3 text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div x-show="userDropdownOpen" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-slate-950/95 backdrop-blur-xl shadow-2xl z-50 py-1.5 text-slate-200 dropdown-menu" style="display: none;">
+            <div class="px-4 py-2 border-b border-white/5 mb-1.5">
+              <p class="text-[10px] text-gray-500 font-semibold tracking-wide uppercase">Signed in as</p>
+              <p class="text-sm font-bold text-white truncate">{{ user.username }}</p>
+              <div class="mt-1.5">
+                {% if user.profile.subscription_tier == 4 %}
+                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded subscription-badge-unlimited border">Unlimited</span>
+                {% elif user.profile.subscription_tier == 3 %}
+                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded subscription-badge-elite border">Elite</span>
+                {% elif user.profile.subscription_tier == 2 %}
+                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded subscription-badge-pro border">Pro</span>
+                {% elif user.profile.subscription_tier == 1 %}
+                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded subscription-badge-starter border">Starter</span>
                 {% endif %}
               </div>
-
-              <!-- Menu Links -->
-              <a href="{% url 'settings' %}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-                <span>Settings</span>
-              </a>
-
-              <a href="{% url 'pricing' %}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                </svg>
-                <span>Subscription</span>
-              </a>
-
-              <div class="h-[1px] bg-white/5 my-1.5"></div>
-
-              <form action="{% url 'logout' %}" method="post" class="w-full">
-                {% csrf_token %}
-                <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors cursor-pointer text-left">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                  </svg>
-                  <span>Log out</span>
-                </button>
-              </form>
             </div>
+            <a href="{% url 'settings' %}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              <span>Settings</span>
+            </a>
+            <a href="{% url 'pricing' %}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+              <span>Subscription</span>
+            </a>
+            <div class="h-[1px] bg-white/5 my-1.5"></div>
+            <form action="{% url 'logout' %}" method="post" class="w-full">
+              {% csrf_token %}
+              <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors cursor-pointer text-left rounded-lg">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                <span>Log out</span>
+              </button>
+            </form>
           </div>
-        {% else %}
-          <a class="px-3.5 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all" href="{% url 'login' %}">Log in</a>
-          <a class="px-4 py-1.5 rounded-lg text-sm font-bold text-white bg-brand hover:bg-brand-hover transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:scale-[1.02]" href="{% url 'signup' %}">Sign up</a>
-        {% endif %}
+        </div>
       </div>
-
-      <!-- Mobile Actions Toggle -->
       <div class="flex items-center gap-2 md:hidden">
         <button class="theme-toggle-btn p-2 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 transition-colors" title="Toggle Theme" aria-label="Toggle dark mode" role="switch">
             <svg class="theme-icon-dark w-4 h-4 text-gray-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
             <svg class="theme-icon-light w-4 h-4 text-amber-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </button>
+        <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 transition-colors text-gray-300" aria-label="Toggle menu" :aria-expanded="mobileMenuOpen.toString()">
+            <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            <svg x-show="mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+    </div>
+    <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-4" class="md:hidden border-t border-white/10 bg-gray-950/95 backdrop-blur-lg px-6 py-4 flex flex-col gap-3" style="display: none;">
+         <div class="flex items-center justify-between border-b border-white/5 pb-2 mb-1">
+             <span class="text-sm font-semibold text-gray-400">Hi, {{ user.username }}</span>
+             {% if user.profile.subscription_tier == 4 %}
+                 <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold rounded-full subscription-badge-unlimited border">Unlimited</span>
+             {% elif user.profile.subscription_tier == 3 %}
+                 <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold rounded-full subscription-badge-elite border">Elite</span>
+             {% elif user.profile.subscription_tier == 2 %}
+                 <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold rounded-full subscription-badge-pro border">Pro</span>
+             {% elif user.profile.subscription_tier == 1 %}
+                 <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold rounded-full subscription-badge-starter border">Starter</span>
+             {% endif %}
+         </div>
+         <a href="{% url 'index' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Home</a>
+         <a href="{% url 'history' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">History</a>
+         <a href="{% url 'resume_builder' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Build Resume</a>
+         {% if user.profile.is_premium %}
+             <a href="{% url 'market_insights' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Insights</a>
+             <a href="{% url 'pricing' %}" class="text-brand-hover py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">View Subscription</a>
+         {% else %}
+             <a href="{% url 'market_insights' %}" class="text-gray-400 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Insights <span class="text-[10px] bg-pink-500/20 text-pink-400 px-1 py-0.5 rounded border border-pink-500/30 font-bold uppercase tracking-wide">PRO</span></a>
+             <a href="{% url 'pricing' %}" class="text-brand font-bold py-2 px-3 rounded-lg hover:bg-white/5">Upgrade to Premium</a>
+         {% endif %}
+         <a href="{% url 'contact' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Contact Us</a>
+         <a href="{% url 'settings' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2 font-semibold">
+             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+             Settings
+         </a>
+         <form action="{% url 'logout' %}" method="post" class="w-full mt-2">
+             {% csrf_token %}
+             <button type="submit" class="w-full text-left py-2 px-3 rounded-lg text-rose-400 hover:bg-rose-500/10 font-semibold transition-colors">Log out</button>
+         </form>
+    </div>
+  </header>
+  {% else %}
+  <header x-data="{ 
+    mobileMenuOpen: false, 
+    isLight: document.documentElement.classList.contains('light'), 
+    toggleTheme() { 
+      document.documentElement.classList.toggle('light'); 
+      this.isLight = document.documentElement.classList.contains('light'); 
+      localStorage.setItem('theme', this.isLight ? 'light' : 'dark'); 
+    } 
+  }" class="site-header border-b border-white/5 bg-gray-950/70 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3.5 w-full">
+      
+      <div class="flex items-center gap-10">
+        <!-- Logo -->
+        <a class="flex items-center gap-2.5 font-bold text-lg tracking-tight text-white hover:opacity-90 transition-opacity" href="{% url 'index' %}">
+          <div class="keep-white w-8 h-8 rounded-lg bg-gradient-to-tr from-brand to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-brand/20">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.187.904zM18 5v6m-3-3h6" />
+              </svg>
+          </div>
+          <span class="logo font-black">Resume Analyzer</span>
+        </a>
+        
+        <!-- Desktop Navigation Links (Vet and Hire inspired) -->
+        <nav class="hidden md:flex items-center gap-6 desktop-nav-links">
+          <!-- Features Dropdown -->
+          <div x-data="{ open: false }" class="relative" @mouseenter="open = true" @mouseleave="open = false">
+            <button class="flex items-center gap-1.5 py-2 text-sm font-semibold text-gray-300 hover:text-white dark:text-gray-400 dark:hover:text-white transition-colors duration-200 focus:outline-none">
+              <span>Features</span>
+              <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            <!-- Dropdown Panel -->
+            <div x-show="open" 
+                 x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-100"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="absolute left-0 mt-1 w-72 rounded-2xl border border-white/10 dark:border-white/5 bg-slate-950/95 backdrop-blur-xl shadow-2xl py-2 z-50 dropdown-menu"
+                 style="display: none;">
+                 
+                 <!-- Resume Analysis -->
+                 <a href="{% url 'index' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                   <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                     </svg>
+                   </div>
+                   <div>
+                     <div class="text-xs font-bold text-white">Resume Scan & Analysis</div>
+                     <div class="text-[10px] text-gray-400">Score and scan against job details</div>
+                   </div>
+                 </a>
+                 
+                 <!-- Resume Builder -->
+                 <a href="{% url 'resume_builder' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                   <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                     </svg>
+                   </div>
+                   <div>
+                     <div class="text-xs font-bold text-white">AI Resume Builder</div>
+                     <div class="text-[10px] text-gray-400">Build ATS-optimized resumes</div>
+                   </div>
+                 </a>
+                 
+                 <!-- Market Insights -->
+                 <a href="{% url 'market_insights' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                   <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
+                     </svg>
+                   </div>
+                   <div>
+                     <div class="text-xs font-bold text-white">Market Insights</div>
+                     <div class="text-[10px] text-gray-400">Explore salary and skill demand</div>
+                   </div>
+                 </a>
+                 
+                 <!-- Resume Comparison -->
+                 <a href="{% url 'compare_versions' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                   <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                     </svg>
+                   </div>
+                   <div>
+                     <div class="text-xs font-bold text-white">Resume Comparison</div>
+                     <div class="text-[10px] text-gray-400">Compare score across versions</div>
+                   </div>
+                 </a>
+                 
+                 <!-- Scan History -->
+                 <a href="{% url 'history' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                   <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                     </svg>
+                   </div>
+                   <div>
+                     <div class="text-xs font-bold text-white">Analysis History</div>
+                     <div class="text-[10px] text-gray-400">View and manage previous reports</div>
+                   </div>
+                 </a>
+            </div>
+          </div>
+          
+          <a href="{% url 'index' %}#how-it-works" class="text-sm font-semibold text-gray-300 hover:text-white transition-colors">How It Works</a>
+          <a href="{% url 'pricing' %}" class="text-sm font-semibold text-gray-300 hover:text-white transition-colors">Pricing</a>
+          <a href="{% url 'contact' %}" class="text-sm font-bold text-brand hover:text-brand-hover dark:text-brand dark:hover:text-brand-hover transition-colors">Contact Us</a>
+        </nav>
+      </div>
+      
+      <!-- Desktop Actions (Right Side) -->
+      <div class="hidden md:flex items-center gap-5">
+        <!-- Sliding Switch Theme Toggle (Vet and Hire style) -->
+        <button 
+          @click="toggleTheme()" 
+          class="relative inline-flex h-6.5 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none ring-1 ring-white/10"
+          :class="isLight ? 'bg-amber-500 ring-amber-400' : 'bg-slate-900 border border-slate-700/50'"
+          role="switch" 
+          aria-label="Toggle Theme"
+          title="Toggle Theme"
+        >
+          <span 
+            class="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md transition-transform duration-300 transform"
+            :class="isLight ? 'translate-x-6' : 'translate-x-1'"
+          >
+            <!-- Sun Icon (visible in light mode) -->
+            <svg x-show="isLight" class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.46 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+            </svg>
+            <!-- Moon Icon (visible in dark mode) -->
+            <svg x-show="!isLight" class="w-3 h-3 text-slate-500" fill="currentColor" viewBox="0 0 20 20" style="display: none;">
+              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+            </svg>
+          </span>
+        </button>
+
+          <a class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-300 hover:text-white transition-all" href="{% url 'login' %}">Sign In</a>
+          <a class="keep-white px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-brand to-indigo-600 hover:from-brand-hover hover:to-indigo-500 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5 shadow-lg shadow-brand/20" href="{% url 'signup' %}">
+            <span>Get Started</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+      </div>
+
+      <!-- Mobile Actions Toggle -->
+      <div class="flex items-center gap-3.5 md:hidden">
+        <!-- Sliding Switch Theme Toggle -->
+        <button 
+          @click="toggleTheme()" 
+          class="relative inline-flex h-6.5 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none"
+          :class="isLight ? 'bg-amber-500' : 'bg-slate-900 border border-slate-700'"
+          role="switch" 
+          aria-label="Toggle Theme"
+          title="Toggle Theme"
+        >
+          <span 
+            class="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md transition-transform duration-300 transform"
+            :class="isLight ? 'translate-x-6' : 'translate-x-1'"
+          >
+            <!-- Sun Icon (visible in light mode) -->
+            <svg x-show="isLight" class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.46 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+            </svg>
+            <!-- Moon Icon (visible in dark mode) -->
+            <svg x-show="!isLight" class="w-3 h-3 text-slate-500" fill="currentColor" viewBox="0 0 20 20" style="display: none;">
+              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+            </svg>
+          </span>
         </button>
         
         <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 transition-colors text-gray-300" aria-label="Toggle menu" :aria-expanded="mobileMenuOpen.toString()">
@@ -829,46 +1058,22 @@
          x-transition:leave-end="opacity-0 -translate-y-4"
          class="md:hidden border-t border-white/10 bg-gray-950/95 backdrop-blur-lg px-6 py-4 flex flex-col gap-3"
          style="display: none;">
-         {% if user.is_authenticated %}
-              <div class="flex items-center justify-between border-b border-white/5 pb-2 mb-1">
-                  <span class="text-sm font-semibold text-gray-400">Hi, {{ user.username }}</span>
-                  {% if user.profile.is_premium %}
-                      {% if user.profile.subscription_tier == 4 %}
-                          <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30">Unlimited</span>
-                      {% elif user.profile.subscription_tier == 3 %}
-                          <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold rounded-full bg-green-500/20 text-green-400 border border-green-500/30">Elite</span>
-                      {% elif user.profile.subscription_tier == 2 %}
-                          <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold rounded-full bg-brand/20 text-brand-hover border border-brand/30">Pro</span>
-                      {% elif user.profile.subscription_tier == 1 %}
-                          <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold rounded-full bg-gray-700 text-gray-300 border border-gray-650">Starter</span>
-                      {% endif %}
-                  {% endif %}
-              </div>
-              <a href="{% url 'index' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Home</a>
-              <a href="{% url 'history' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">History</a>
-              <a href="{% url 'resume_builder' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Build Resume</a>
-              {% if user.profile.is_premium %}
-                  <a href="{% url 'market_insights' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Insights</a>
-                  <a href="{% url 'pricing' %}" class="text-brand-hover py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">View Subscription</a>
-              {% else %}
-                  <a href="{% url 'market_insights' %}" class="text-gray-400 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Insights <span class="text-[10px] bg-pink-500/20 text-pink-400 px-1 py-0.5 rounded border border-pink-500/30 font-bold uppercase tracking-wide">PRO</span></a>
-                  <a href="{% url 'pricing' %}" class="text-brand font-bold py-2 px-3 rounded-lg hover:bg-white/5">Upgrade to Premium</a>
-              {% endif %}
-              <a href="{% url 'contact' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Contact Us</a>
-              <a href="{% url 'settings' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2 font-semibold">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                  Settings
-              </a>
-              <form action="{% url 'logout' %}" method="post" class="w-full mt-2">
-                  {% csrf_token %}
-                  <button type="submit" class="w-full text-left py-2 px-3 rounded-lg text-rose-400 hover:bg-rose-500/10 font-semibold transition-colors">Log out</button>
-              </form>
-         {% else %}
-              <a href="{% url 'contact' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Contact Us</a>
-              <a href="{% url 'login' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Log in</a>
-              <a href="{% url 'signup' %}" class="py-2 px-3 rounded-lg bg-brand/20 text-brand text-center font-bold">Sign up</a>
-         {% endif %}
+         <a href="{% url 'index' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Home</a>
+         <div class="px-3 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Features</div>
+         <div class="pl-4 flex flex-col gap-1.5 border-l border-white/10">
+             <a href="{% url 'index' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Resume Scan & Analysis</a>
+             <a href="{% url 'resume_builder' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">AI Resume Builder</a>
+             <a href="{% url 'market_insights' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Market Insights</a>
+             <a href="{% url 'compare_versions' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Resume Comparison</a>
+             <a href="{% url 'history' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Analysis History</a>
+         </div>
+         <a href="{% url 'index' %}#how-it-works" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">How It Works</a>
+         <a href="{% url 'pricing' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Pricing</a>
+         <a href="{% url 'contact' %}" class="text-brand font-bold py-2 px-3 rounded-lg hover:bg-white/5">Contact Us</a>
+         <a href="{% url 'login' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Sign In</a>
     </div>
+  </header>
+  {% endif %}
 
   <main>
     {% if messages %}

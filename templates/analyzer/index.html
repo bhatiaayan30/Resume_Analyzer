@@ -100,7 +100,7 @@
               </div>
               
               <!-- Drag & Drop Zone -->
-              <div id="upload-section" class="relative flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-700/60 bg-slate-950/20 hover:border-brand/60 hover:bg-brand-light/5 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] rounded-2xl cursor-pointer transition-all duration-300">
+              <div id="upload-section" class="upload-resume-box relative flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-700/60 bg-slate-950/20 hover:border-brand/60 hover:bg-brand-light/5 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] rounded-2xl cursor-pointer transition-all duration-300">
                    <div class="flex flex-col items-center justify-center pt-5 pb-6 pointer-events-none">
                        <div class="p-4 rounded-full bg-brand/10 border border-brand/20 mb-4 transition-all duration-300 group-hover:scale-110 group-hover:bg-brand/20">
                            <svg class="w-8 h-8 text-brand animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -126,7 +126,7 @@
               </div>
 
               <!-- Camera Section -->
-              <div id="camera-section" class="hidden relative flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-700/60 bg-slate-950/20 hover:border-brand/60 hover:bg-brand-light/5 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] rounded-2xl cursor-pointer transition-all duration-300">
+              <div id="camera-section" class="upload-resume-box hidden relative flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-700/60 bg-slate-950/20 hover:border-brand/60 hover:bg-brand-light/5 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] rounded-2xl cursor-pointer transition-all duration-300">
                    <div class="flex flex-col items-center justify-center pt-5 pb-6 pointer-events-none">
                        <div class="p-4 rounded-full bg-brand/10 border border-brand/20 mb-4 transition-all duration-300 group-hover:scale-110">
                            <svg class="w-8 h-8 text-brand animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -148,7 +148,7 @@
               </div>
 
                <!-- Cloud / LinkedIn Section -->
-               <div id="cloud-section" class="hidden flex flex-col w-full rounded-2xl border border-dashed border-gray-700/60 bg-slate-950/20 p-5 gap-4">
+               <div id="cloud-section" class="upload-resume-box hidden flex flex-col w-full rounded-2xl border border-dashed border-gray-700/60 bg-slate-950/20 p-5 gap-4">
                    <div class="text-center text-xs text-gray-400 mb-2">
                        <span class="inline-flex items-center gap-1.5 justify-center">
                            <svg class="w-4 h-4 text-brand animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -293,6 +293,65 @@
       {% endif %}
       
     </div>
+
+    <!-- How It Works Section -->
+    <div id="how-it-works" class="max-w-6xl mx-auto mt-28 px-6 py-16 border-t border-white/5 relative z-10">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+          How It <span class="bg-gradient-to-r from-brand to-pink-500 bg-clip-text text-transparent font-black">Works</span>
+        </h2>
+        <p class="text-base text-gray-400 mt-3 font-light leading-relaxed">
+          Optimizing your resume is simple. Follow these 4 easy steps to make your application stand out to hiring managers and applicant tracking systems.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- Step 1 -->
+        <div class="premium-card flex flex-col items-start relative group">
+          <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-brand font-black text-xl mb-6 border border-purple-500/20 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+            1
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Upload Resume</h3>
+          <p class="text-sm text-gray-400 font-light leading-relaxed">
+            Upload your resume as a PDF, DOCX, or scan a snapshot. You can also paste your resume text directly.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="premium-card flex flex-col items-start relative group">
+          <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-brand font-black text-xl mb-6 border border-purple-500/20 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+            2
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Input Target Job</h3>
+          <p class="text-sm text-gray-400 font-light leading-relaxed">
+            Paste the job description of your target role. This allows our AI to analyze specific keyword alignment.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="premium-card flex flex-col items-start relative group">
+          <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-brand font-black text-xl mb-6 border border-purple-500/20 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+            3
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">AI Scanner Audit</h3>
+          <p class="text-sm text-gray-400 font-light leading-relaxed">
+            Our AI scans your resume against the job description to find missing skills, formatting issues, and ATS roadblocks.
+          </p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="premium-card flex flex-col items-start relative group">
+          <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-brand font-black text-xl mb-6 border border-purple-500/20 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+            4
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Get Scored & Optimize</h3>
+          <p class="text-sm text-gray-400 font-light leading-relaxed">
+            Receive an alignment score, detailed keyword gaps, cover letter generator, and actionable advice to land your interview.
+          </p>
+        </div>
+      </div>
+    </div>
+
 </div>
 {% endblock %}
 
