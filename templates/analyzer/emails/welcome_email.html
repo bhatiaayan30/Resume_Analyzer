@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Resume Analyzer</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
     <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; padding: 48px 0;">
         <tr>
             <td align="center">
                 <!-- Card Container -->
                 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 540px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);">
-                    <!-- Brand Top Bar (Purple accent) -->
+                    <!-- Brand Top Bar (Accent gradient) -->
                     <tr>
-                        <td style="height: 5px; background: linear-gradient(to right, #6366f1, #8b5cf6);"></td>
+                        <td style="height: 5px; background: linear-gradient(to right, #8b5cf6, #ec4899);"></td>
                     </tr>
                     
                     <!-- Content Area -->
@@ -23,8 +23,8 @@
                             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 32px;">
                                 <tr>
                                     <td>
-                                        <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: #0f172a;">
-                                            Resume <span style="color: #6366f1;">Analyzer</span>
+                                        <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: #0f172a;">
+                                            Resume <span style="color: #8b5cf6;">Analyzer</span>
                                         </h1>
                                     </td>
                                 </tr>
@@ -37,15 +37,15 @@
                             
                             <!-- Welcome Message -->
                             <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 22px; color: #475569;">
-                                We're thrilled to welcome you to <strong>Resume Analyzer</strong>. Our platform is designed to help you optimize your resume, identify and bridge key skills gaps, and generate customized, high-converting cover letters for your target job descriptions.
+                                We are thrilled to welcome you to <strong>Resume Analyzer</strong>. Our platform is engineered to streamline your job search by auditing your resume for applicant tracking systems, identifying critical skills gaps, and generating high-impact, tailored cover letters.
                             </p>
                             
                             <!-- CTA Button Block -->
                             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0; text-align: center;">
                                 <tr>
                                     <td>
-                                        <a href="http://{{ domain }}/" 
-                                           style="display: inline-block; background-color: #6366f1; color: #ffffff; padding: 12px 30px; font-size: 14px; font-weight: 600; border-radius: 8px; text-decoration: none; text-align: center; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);">
+                                        <a href="{% if 'localhost' in domain or '127.0.0.1' in domain %}http{% else %}https{% endif %}://{{ domain }}/" 
+                                           style="display: inline-block; background-color: #8b5cf6; color: #ffffff; padding: 12px 32px; font-size: 14px; font-weight: 600; border-radius: 8px; text-decoration: none; text-align: center; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);">
                                             Go to Dashboard
                                         </a>
                                     </td>
@@ -54,32 +54,40 @@
                             
                             <!-- Quick Start Guide -->
                             <h3 style="margin: 32px 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-top: 1px solid #f1f5f9; padding-top: 24px;">
-                                Three Quick Steps to Get Started:
+                                Get Started in 3 Simple Steps:
                             </h3>
                             
                             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 32px;">
                                 <tr>
-                                    <td valign="top" style="padding-right: 12px; font-size: 14px; font-weight: 700; color: #6366f1; width: 20px;">1.</td>
-                                    <td style="font-size: 14px; line-height: 20px; color: #475569; padding-bottom: 12px;">
-                                        <strong>Upload Your Resume:</strong> Upload your PDF or Word document in seconds.
+                                    <td style="padding: 16px; background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; display: block;">
+                                        <span style="font-size: 14px; font-weight: 700; color: #8b5cf6; display: block; margin-bottom: 4px;">1. Upload Your Resume</span>
+                                        <span style="font-size: 13px; line-height: 18px; color: #475569; display: block;">
+                                            Upload your PDF or Word document to parse your skills and experience instantly.
+                                        </span>
                                     </td>
                                 </tr>
+                                <tr style="height: 12px; display: block;"></tr>
                                 <tr>
-                                    <td valign="top" style="padding-right: 12px; font-size: 14px; font-weight: 700; color: #6366f1; width: 20px;">2.</td>
-                                    <td style="font-size: 14px; line-height: 20px; color: #475569; padding-bottom: 12px;">
-                                        <strong>Paste a Job Description:</strong> Enter the target job requirements to compare your resume directly against what recruiters are looking for.
+                                    <td style="padding: 16px; background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; display: block;">
+                                        <span style="font-size: 14px; font-weight: 700; color: #8b5cf6; display: block; margin-bottom: 4px;">2. Paste the Job Description</span>
+                                        <span style="font-size: 13px; line-height: 18px; color: #475569; display: block;">
+                                            Paste the job details to compare your qualifications directly against recruiter expectations.
+                                        </span>
                                     </td>
                                 </tr>
+                                <tr style="height: 12px; display: block;"></tr>
                                 <tr>
-                                    <td valign="top" style="padding-right: 12px; font-size: 14px; font-weight: 700; color: #6366f1; width: 20px;">3.</td>
-                                    <td style="font-size: 14px; line-height: 20px; color: #475569;">
-                                        <strong>Get Actionable Feedback:</strong> Review detailed analysis on ATS compatibility, skills gaps, and optimize your formatting.
+                                    <td style="padding: 16px; background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; display: block;">
+                                        <span style="font-size: 14px; font-weight: 700; color: #8b5cf6; display: block; margin-bottom: 4px;">3. Optimize &amp; Apply</span>
+                                        <span style="font-size: 13px; line-height: 18px; color: #475569; display: block;">
+                                            Follow the actionable audit checklist and generate a tailored cover letter to stand out.
+                                        </span>
                                     </td>
                                 </tr>
                             </table>
 
                             <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 22px; color: #475569;">
-                                If you have any questions or feedback, feel free to reach out to our team at any time. We are here to support your career journey.
+                                If you have any questions or feedback, feel free to reply to this email. We are here to support you at every stage of your career journey.
                             </p>
 
                             <!-- Signature -->

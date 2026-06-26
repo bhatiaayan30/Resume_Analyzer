@@ -216,3 +216,49 @@ def test_blog_detail_view(factory):
     assert b"Main content of detail test post." in response.content
 
 
+@pytest.mark.django_db
+def test_signup_view_post(factory):
+    """POSTing valid registration data should register the user, log them in, and send a welcome email."""
+    from analyzer.views import signup_view
+    from django.core import mail
+    from django.contrib.auth.models import User
+    
+    # Clear outbox
+    mail.outbox = []
+    
+    # Prepare POST request
+    data = {
+        "username": "newtestuser",
+        "email": "newtestuser@example.com",
+        "password1": "SecurePassword123!",
+        "password2": "SecurePassword123!",
+    }
+    request = factory.post(reverse("signup"), data)
+    
+    # Mock request.session for login() to work
+    from django.contrib.sessions.middleware import SessionMiddleware
+    middleware = SessionMiddleware(lambda req: None)
+    middleware.process_request(request)
+    request.session.save()
+    
+    # We also need a message storage backend if Django messages are used
+    from django.contrib.messages.storage.fallback import FallbackStorage
+    setattr(request, '_messages', FallbackStorage(request))
+    
+    response = signup_view(request)
+    
+    # Should redirect to index upon successful signup
+    assert response.status_code == 302
+    assert response.url == reverse("index")
+    
+    # Check that user was created
+    assert User.objects.filter(username="newtestuser").exists()
+    user = User.objects.get(username="newtestuser")
+    assert user.email == "newtestuser@example.com"
+    
+    # Check that welcome email was sent
+    assert len(mail.outbox) == 1
+    email = mail.outbox[0]
+    assert email.to == ["newtestuser@example.com"]
+    assert "Welcome to Resume Analyzer" in email.subject
+

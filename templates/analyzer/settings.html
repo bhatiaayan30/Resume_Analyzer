@@ -35,6 +35,29 @@
             otpSuccess: '',
             isLoading: false,
             
+            // Cooldown & Resend state
+            resendCooldown: 0,
+            resendAttempt: 0,
+            cooldownTimerId: null,
+
+            startCooldownTimer() {
+                if (this.cooldownTimerId) {
+                    clearInterval(this.cooldownTimerId);
+                }
+                // First request wait: 30s. Subsequent: 60s (1m).
+                let duration = this.resendAttempt === 0 ? 30 : 60;
+                this.resendCooldown = duration;
+                
+                this.cooldownTimerId = setInterval(() => {
+                    if (this.resendCooldown > 0) {
+                        this.resendCooldown--;
+                    } else {
+                        clearInterval(this.cooldownTimerId);
+                        this.cooldownTimerId = null;
+                    }
+                }, 1000);
+            },
+            
             async requestOTP(purpose) {
                 this.otpPurpose = purpose;
                 this.otpError = '';
@@ -64,6 +87,9 @@
                     if (res.ok) {
                         this.otpModalOpen = true;
                         this.otpSuccess = data.message || 'OTP sent successfully.';
+                        // Start the cooldown timer on initial request
+                        this.resendAttempt = 0;
+                        this.startCooldownTimer();
                     } else {
                         alert(data.message || 'Server returned an error. Please try again.');
                     }
@@ -72,6 +98,56 @@
                 } finally {
                     this.isLoading = false;
                 }
+            },
+
+            async resendOTP() {
+                if (this.resendCooldown > 0) return;
+                this.isLoading = true;
+                this.otpError = '';
+                this.otpSuccess = '';
+                
+                const csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+                const csrfToken = csrfEl ? csrfEl.value : '{{ csrf_token }}';
+                
+                try {
+                    const res = await fetch('{% url "request_otp" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({ purpose: this.otpPurpose })
+                    });
+                    
+                    let data = {};
+                    const contentType = res.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await res.json();
+                    }
+                    
+                    if (res.ok) {
+                        this.otpSuccess = data.message || 'OTP resent successfully.';
+                        // Increment resend attempt and start the next cooldown
+                        this.resendAttempt++;
+                        this.startCooldownTimer();
+                    } else {
+                        this.otpError = data.message || 'Failed to resend OTP. Please try again.';
+                    }
+                } catch (e) {
+                    this.otpError = 'An error occurred: ' + e.message;
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
+            closeOTPModal() {
+                this.otpModalOpen = false;
+                if (this.cooldownTimerId) {
+                    clearInterval(this.cooldownTimerId);
+                    this.cooldownTimerId = null;
+                }
+                this.resendCooldown = 0;
+                this.resendAttempt = 0;
             },
             
             async verifyOTP() {
@@ -366,9 +442,9 @@
 
             <!-- OTP Verification Modal -->
             <div x-show="otpModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display:none;">
-                <div class="glass-panel w-full max-w-md p-6 sm:p-8 rounded-2xl relative shadow-2xl animate-fade-in-up" @click.away="otpModalOpen = false">
+                <div class="glass-panel w-full max-w-md p-6 sm:p-8 rounded-2xl relative shadow-2xl animate-fade-in-up" @click.away="closeOTPModal()">
                     <!-- Close button -->
-                    <button @click="otpModalOpen = false" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                    <button @click="closeOTPModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                     
@@ -393,6 +469,18 @@
                                 Verifying...
                             </span>
                         </button>
+
+                        <!-- Send again (Resend OTP) Option -->
+                        <div class="flex justify-between items-center text-xs text-gray-400 pt-3 border-t border-gray-700/30">
+                            <span>Didn't receive the code?</span>
+                            <button type="button" 
+                                    @click="resendOTP()" 
+                                    :disabled="isLoading || resendCooldown > 0"
+                                    class="text-brand hover:text-brand-hover font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150">
+                                <span x-show="resendCooldown > 0">Resend in <span x-text="resendCooldown"></span>s</span>
+                                <span x-show="resendCooldown === 0">Send again</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
