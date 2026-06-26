@@ -37,3 +37,7 @@ uploads/
 .pytest_cache/
 .ruff_cache/
 htmlcov/
+
+# Agents Customizations
+.agents/
+

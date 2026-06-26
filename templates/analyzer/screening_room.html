@@ -1,0 +1,413 @@
+{% extends "analyzer/base.html" %}
+
+{% block title %}AI Interview Screening Room - Resume Analyzer AI{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 relative z-10" x-data="{
+    interviewing: false,
+    ended: false,
+    role: 'Full-Stack Developer',
+    messages: [],
+    inputMessage: '',
+    aiThinking: false,
+    sessionScore: null,
+    evaluation: {},
+    
+    // Interviewer Personas
+    selectedPersona: 'sarah',
+    personas: {
+        sarah: { name: 'Sarah', role: 'Friendly Recruiter', emoji: '👩‍💼', color: 'from-brand to-pink-500', intro: 'Hi there! I am Sarah, your friendly recruiter today. I want to understand your general career journey and how you fit our collaborative culture.', questions: [
+            'Could you tell me about a time you had to resolve a conflict or design disagreement within your project team?',
+            'What values and team dynamics are most important to you when choosing a workplace environment?',
+            'Can you share an experience where you had to quickly adapt to a major shift in project requirements?'
+        ]},
+        marcus: { name: 'Marcus', role: 'Tough Tech Lead', emoji: '🧑‍💻', color: 'from-red-500 to-amber-500', intro: 'Let\'s get straight to business. I am Marcus. I want to see if your technical decisions make solid architectural sense under load.', questions: [
+            'Could you tell me about a time you had to identify and optimize a performance bottleneck in a production database?',
+            'How do you approach structuring application state in a large-scale frontend React app under high state updates?',
+            'Explain how you would design a highly available cache layer with Redis for an API handling 10k requests per second.'
+        ]},
+        viktor: { name: 'Viktor', role: 'Fast-Paced CTO', emoji: '👨‍💼', color: 'from-purple-600 to-indigo-600', intro: 'Welcome. I am Viktor. We are scaling our engineering pipeline rapidly. I want to check your high-level product sense, systems thinking, and execution speed.', questions: [
+            'How do you balance technical debt against the pressure to deliver product features on tight deadlines?',
+            'Describe a situation where you had to build a core feature with minimal requirements and high ambiguity.',
+            'What major architectural decision did you make in your last role that you would do differently today?'
+        ]}
+    },
+    currentQuestionIndex: 0,
+    
+    // Biometric & Sentiment Variables
+    fillerCount: 0,
+    confidenceLevel: 85,
+    speedWPM: 110,
+    eyeContactStatus: 'Excellent',
+    
+    startInterview() {
+        this.interviewing = true;
+        this.ended = false;
+        this.currentQuestionIndex = 0;
+        this.messages = [];
+        this.aiThinking = true;
+        this.fillerCount = 0;
+        this.confidenceLevel = 85;
+        this.speedWPM = 110;
+        this.eyeContactStatus = 'Excellent';
+        
+        let p = this.personas[this.selectedPersona];
+        setTimeout(() => {
+            this.messages.push({
+                sender: 'ai',
+                text: p.intro + ' Let\'s begin with the first question: ' + p.questions[0]
+            });
+            this.aiThinking = false;
+        }, 1500);
+    },
+    
+    submitAnswer() {
+        if (!this.inputMessage.trim()) return;
+        
+        let answer = this.inputMessage;
+        
+        // Sentiment and Biometric Calculations
+        let text = answer.toLowerCase();
+        let fillers = ['um', 'uh', 'like', 'actually', 'basically', 'so'];
+        let matchedFillers = 0;
+        fillers.forEach(f => {
+            let regex = new RegExp('\\b' + f + '\\b', 'g');
+            let matches = text.match(regex);
+            if (matches) {
+                matchedFillers += matches.length;
+            }
+        });
+        this.fillerCount += matchedFillers;
+        
+        // Dynamically adjust confidence and speech speed
+        let wordsCount = answer.split(/\s+/).length;
+        this.speedWPM = Math.min(180, Math.max(90, Math.floor(wordsCount * 4 + 80)));
+        this.confidenceLevel = Math.max(40, Math.min(98, 100 - (this.fillerCount * 8) + (wordsCount > 15 ? 10 : -5)));
+        this.eyeContactStatus = matchedFillers > 1 ? 'Focus Drifted' : 'Excellent';
+        
+        // Add user response
+        this.messages.push({
+            sender: 'user',
+            text: answer
+        });
+        
+        this.inputMessage = '';
+        this.aiThinking = true;
+        
+        let p = this.personas[this.selectedPersona];
+        setTimeout(() => {
+            this.currentQuestionIndex++;
+            if (this.currentQuestionIndex < p.questions.length) {
+                this.messages.push({
+                    sender: 'ai',
+                    text: 'Thank you. Next question: ' + p.questions[this.currentQuestionIndex]
+                });
+                this.aiThinking = false;
+            } else {
+                this.finishInterview();
+            }
+        }, 2000);
+    },
+    
+    finishInterview() {
+        this.messages.push({
+            sender: 'ai',
+            text: 'We have completed our screening questions. Generating your evaluation report...'
+        });
+        
+        let p = this.personas[this.selectedPersona];
+        
+        setTimeout(() => {
+            this.aiThinking = false;
+            this.interviewing = false;
+            this.ended = true;
+            
+            // Adjust end scores based on bio metrics
+            let fillerDeduction = this.fillerCount * 3;
+            let comScore = Math.max(50, 92 - fillerDeduction);
+            let techScore = this.selectedPersona === 'marcus' ? 88 : (this.selectedPersona === 'viktor' ? 84 : 80);
+            this.sessionScore = Math.floor((comScore + techScore + 85) / 3);
+            
+            this.evaluation = {
+                communication: comScore,
+                technical_depth: techScore,
+                clarity: Math.max(55, 90 - (this.fillerCount * 2)),
+                strengths: [
+                    'Great clarity on architectural decisions.',
+                    'Structured problem descriptions using the STAR framework.',
+                    this.selectedPersona === 'marcus' ? 'Demonstrated strong understanding of backend scaling/caching.' : 'Exhibited solid adaptability and collaboration skills.'
+                ],
+                gaps: [
+                    this.fillerCount > 4 ? 'Frequent usage of verbal filler words (e.g. \"like\", \"um\").' : 'Communication was steady, though voice speed varied.',
+                    this.selectedPersona === 'viktor' ? 'Could focus more on the strategic business impact of design decisions.' : 'Expand details on testing coverage patterns.'
+                ]
+            };
+        }, 2500);
+    }
+}">
+    <!-- Page Header -->
+    <div class="text-center max-w-2xl mx-auto mb-12">
+        <h1 class="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+            AI Screening <span class="bg-gradient-to-r from-brand to-pink-500 bg-clip-text text-transparent font-black">Room</span>
+        </h1>
+        <p class="text-base text-gray-400 mt-3 font-light leading-relaxed">
+            Enter the interactive simulated screening room. Experience mock behavioral and technical interviews with real-time scoring.
+        </p>
+    </div>
+
+    <!-- Pre-Interview Settings Panel -->
+    <div x-show="!interviewing && !ended" class="max-w-xl mx-auto premium-card p-8 space-y-6">
+        <h2 class="text-xl font-bold text-white text-center">Setup Interview Session</h2>
+        
+        <div class="space-y-4">
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Target Job Role</label>
+                <select x-model="role" class="w-full bg-[#1e1e24] border border-gray-700/60 rounded-xl p-3 text-white focus:border-brand outline-none">
+                    <option value="Full-Stack Developer">Full-Stack Developer</option>
+                    <option value="Backend Engineer">Backend Engineer</option>
+                    <option value="Frontend Specialist">Frontend Specialist</option>
+                    <option value="Lead Software Architect">Lead Software Architect</option>
+                </select>
+            </div>
+
+            <!-- Interviewer Persona cards selection -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Select Interviewer Persona</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <template x-for="(pData, pKey) in personas" :key="pKey">
+                        <div @click="selectedPersona = pKey" 
+                             class="p-3.5 rounded-xl border cursor-pointer text-center transition-all duration-300 relative overflow-hidden flex flex-col items-center justify-between"
+                             :class="selectedPersona === pKey ? 'border-brand bg-brand/10 shadow-[0_0_15px_rgba(139,92,246,0.15)]' : 'border-white/5 bg-white/[0.02] hover:border-white/10'">
+                            <span class="text-3xl mb-2" x-text="pData.emoji"></span>
+                            <div>
+                                <span class="text-xs font-bold text-white block" x-text="pData.name"></span>
+                                <span class="text-[9px] text-gray-500 block leading-tight mt-0.5" x-text="pData.role"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Interview Mode</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="flex items-center gap-3 p-4 rounded-xl border border-brand bg-brand/5 cursor-pointer">
+                        <input type="radio" name="mode" checked class="text-brand focus:ring-0">
+                        <div class="text-left">
+                            <span class="text-sm font-bold text-white block">Text Chat</span>
+                            <span class="text-[10px] text-gray-400 font-light">Interactive simulator</span>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 p-4 rounded-xl border border-white/5 bg-white/[0.02] cursor-not-allowed opacity-50">
+                        <input type="radio" name="mode" disabled class="text-brand focus:ring-0">
+                        <div class="text-left">
+                            <span class="text-sm font-bold text-white block">Voice Call</span>
+                            <span class="text-[10px] text-gray-400 font-light">Speech-to-text (PRO)</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button @click="startInterview()" class="submit-btn w-full py-4 text-center font-bold">
+            Start Live Simulation
+        </button>
+    </div>
+
+    <!-- Active Interview Screening Room -->
+    <div x-show="interviewing" class="grid grid-cols-1 lg:grid-cols-3 gap-8" style="display: none;">
+        
+        <!-- Interviewer Feed / Waveform -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="premium-card p-6 text-center space-y-6 relative overflow-hidden">
+                <!-- Glowing Pulsers -->
+                <div class="absolute inset-0 bg-brand/5 pointer-events-none radial-gradient"></div>
+                
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest relative z-10">AI Recruiter Feed</h3>
+                
+                <!-- Recruiter Avatar -->
+                <div class="w-32 h-32 mx-auto rounded-full bg-gradient-to-tr flex items-center justify-center text-white text-5xl relative z-10 shadow-xl border border-white/10 group"
+                     :class="personas[selectedPersona].color">
+                    <span x-text="personas[selectedPersona].emoji"></span>
+                    <div class="absolute -inset-1 rounded-full border border-brand/40 animate-ping opacity-60"></div>
+                </div>
+
+                <div class="space-y-1 relative z-10">
+                    <h4 class="text-white font-bold" x-text="'Interviewer ' + personas[selectedPersona].name"></h4>
+                    <p class="text-xs text-gray-400 font-light" x-text="personas[selectedPersona].role"></p>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        Streaming
+                    </span>
+                </div>
+
+                <!-- Animated Waveforms -->
+                <div class="flex items-center justify-center gap-1 h-12 relative z-10">
+                    <span class="w-1 rounded-full bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 48px; transform: scaleY(0.7)' : 'height: 12px; transform: scaleY(1)'"></span>
+                    <span class="w-1 rounded-full bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 32px; transform: scaleY(1)' : 'height: 8px; transform: scaleY(1)'"></span>
+                    <span class="w-1 rounded-full bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 44px; transform: scaleY(0.5)' : 'height: 16px; transform: scaleY(1)'"></span>
+                    <span class="w-1 rounded-full bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 36px; transform: scaleY(1.2)' : 'height: 10px; transform: scaleY(1)'"></span>
+                    <span class="w-1 rounded-full bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 24px; transform: scaleY(0.8)' : 'height: 14px; transform: scaleY(1)'"></span>
+                </div>
+            </div>
+
+            <!-- Biometric & Sentiment Analysis Panel -->
+            <div class="premium-card p-5 space-y-4 text-left">
+                <h4 class="text-xs font-bold text-white uppercase tracking-widest border-b border-white/5 pb-2">Real-Time Biometrics</h4>
+                
+                <!-- Confidence Bar -->
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center text-[10px]">
+                        <span class="text-gray-400">Confidence Index</span>
+                        <span class="text-brand font-bold" x-text="confidenceLevel + '%'"></span>
+                    </div>
+                    <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-brand h-full rounded-full transition-all duration-300" :style="'width: ' + confidenceLevel + '%'"></div>
+                    </div>
+                </div>
+
+                <!-- Speech Speed WPM -->
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center text-[10px]">
+                        <span class="text-gray-400">Estimated Speed</span>
+                        <span class="text-emerald-400 font-bold" x-text="speedWPM + ' WPM'"></span>
+                    </div>
+                    <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" :style="'width: ' + (speedWPM / 2) + '%'"></div>
+                    </div>
+                </div>
+
+                <!-- Filler Words Counter -->
+                <div class="flex justify-between items-center text-[10px]">
+                    <span class="text-gray-400">Filler Hesitations</span>
+                    <span class="text-yellow-500 font-bold" x-text="fillerCount + ' matches'"></span>
+                </div>
+
+                <!-- Eye Contact Indicator -->
+                <div class="flex justify-between items-center text-[10px]">
+                    <span class="text-gray-400">Simulated Attention Focus</span>
+                    <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase" 
+                          :class="eyeContactStatus === 'Excellent' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'"
+                          x-text="eyeContactStatus"></span>
+                </div>
+            </div>
+            
+            <button @click="finishInterview()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-xl border border-red-500/20 transition-colors text-center text-sm">
+                End Session Early
+            </button>
+        </div>
+
+        <!-- Transcript Feed & Inputs -->
+        <div class="lg:col-span-2 premium-card p-6 flex flex-col h-[500px]">
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">Interview Console</h3>
+            
+            <!-- Chat Logs -->
+            <div class="flex-grow overflow-y-auto space-y-4 mb-4 pr-2">
+                <template x-for="(msg, index) in messages" :key="index">
+                    <div class="flex flex-col" :class="msg.sender === 'user' ? 'items-end' : 'items-start'">
+                        <div class="max-w-md p-4 rounded-2xl text-sm leading-relaxed" 
+                             :class="msg.sender === 'user' ? 'bg-brand text-white rounded-br-none' : 'bg-white/5 border border-white/5 text-gray-300 rounded-bl-none'">
+                            <p x-text="msg.text"></p>
+                        </div>
+                        <span class="text-[9px] text-gray-500 font-bold uppercase mt-1 px-1" x-text="msg.sender === 'user' ? 'You' : 'AI Recruiter'"></span>
+                    </div>
+                </template>
+                
+                <!-- Thinking State -->
+                <div x-show="aiThinking" class="flex flex-col items-start">
+                    <div class="p-4 bg-white/5 border border-white/5 text-gray-300 rounded-2xl rounded-bl-none flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 0ms"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 150ms"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 300ms"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Input Form -->
+            <form @submit.prevent="submitAnswer()" class="flex gap-3">
+                <input type="text" x-model="inputMessage" placeholder="Type your response here..." :disabled="aiThinking"
+                       class="flex-grow bg-[#1e1e24] border border-gray-700/60 rounded-xl p-3 text-white placeholder-gray-500 focus:border-brand outline-none text-sm">
+                <button type="submit" :disabled="aiThinking"
+                        class="bg-brand hover:bg-brand-hover text-white px-5 py-3 rounded-xl font-bold transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center">
+                    Send
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- Post-Interview Evaluation Report -->
+    <div x-show="ended" class="max-w-3xl mx-auto space-y-6" style="display: none;">
+        
+        <!-- Score Header Card -->
+        <div class="premium-card p-8 text-center space-y-6">
+            <div class="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-4xl mx-auto">
+                🎓
+            </div>
+            <div class="space-y-1">
+                <h2 class="text-2xl font-bold text-white">Interview Score: <span class="text-brand font-black" x-text="sessionScore + '%'"></span></h2>
+                <p class="text-sm text-gray-400 font-light">Screening session successfully completed. Great effort!</p>
+            </div>
+            <div class="grid grid-cols-3 gap-4 max-w-md mx-auto border-t border-white/5 pt-6">
+                <div>
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Communication</span>
+                    <span class="text-lg font-black text-white mt-1 block" x-text="evaluation.communication + '%'"></span>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Technical Depth</span>
+                    <span class="text-lg font-black text-white mt-1 block" x-text="evaluation.technical_depth + '%'"></span>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Response Clarity</span>
+                    <span class="text-lg font-black text-white mt-1 block" x-text="evaluation.clarity + '%'"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluation Logs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Strengths -->
+            <div class="premium-card p-6 space-y-4">
+                <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+                    <span>🟢 Key Strengths</span>
+                </h3>
+                <ul class="space-y-3">
+                    <template x-for="(str, index) in evaluation.strengths" :key="index">
+                        <li class="flex items-start gap-2.5 text-xs text-gray-300 font-light leading-relaxed">
+                            <span class="text-emerald-500 font-bold mt-0.5">•</span>
+                            <span x-text="str"></span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+
+            <!-- Gaps / Next Steps -->
+            <div class="premium-card p-6 space-y-4">
+                <h3 class="text-sm font-bold text-yellow-500 uppercase tracking-widest flex items-center gap-2">
+                    <span>🟡 Areas to Refine</span>
+                </h3>
+                <ul class="space-y-3">
+                    <template x-for="(gap, index) in evaluation.gaps" :key="index">
+                        <li class="flex items-start gap-2.5 text-xs text-gray-300 font-light leading-relaxed">
+                            <span class="text-yellow-500 font-bold mt-0.5">•</span>
+                            <span x-text="gap"></span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Action Call -->
+        <div class="flex gap-4">
+            <button @click="startInterview()" class="flex-grow py-3.5 bg-brand hover:bg-brand-hover text-white font-bold rounded-xl transition-colors text-center text-sm">
+                Retake Interview Simulation
+            </button>
+            <a href="{% url 'index' %}" class="flex-grow py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-colors text-center text-sm flex items-center justify-center">
+                Return to Dashboard
+            </a>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

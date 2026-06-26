@@ -54,6 +54,13 @@ urlpatterns = [
     path("api/builder/save/", views.save_builder_resume_api, name="save_builder_resume_api"),
     path("api/builder/suggest-summary/", views.suggest_summary_api, name="suggest_summary_api"),
     path("api/builder/suggest-bullets/", views.suggest_bullets_api, name="suggest_bullets_api"),
+    
+    # Vet and Hire Inspired Premium Features
+    path("features/authenticity-audit/", views.authenticity_audit_view, name="authenticity_audit"),
+    path("features/screening-room/", views.screening_room_view, name="screening_room"),
+    path("features/auto-vet/", views.auto_vet_view, name="auto_vet"),
+    path("features/skills-gap/", views.skills_gap_view, name="skills_gap"),
+    path("features/chrome-extension/", views.chrome_extension_view, name="chrome_extension"),
 ]
 
 

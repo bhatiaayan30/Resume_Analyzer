@@ -1,0 +1,435 @@
+{% extends "analyzer/base.html" %}
+
+{% block title %}Skills Gap Analysis & Competency Map - Resume Analyzer AI{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 relative z-10" x-data="{
+    uploading: false,
+    analyzed: false,
+    resumeText: '',
+    jdText: '',
+    fitScore: 0,
+    categories: [],
+    resources: [],
+    radarChart: null,
+    
+    // Dynamic Role-Switching Simulator data
+    targetRole: 'backend',
+    roleData: {
+        backend: {
+            title: 'Backend Engineer',
+            fitScore: 76,
+            categories: [
+                {
+                    name: 'Core Technical Skills',
+                    match: 80,
+                    matched: ['React', 'JavaScript', 'HTML5/CSS3', 'Git'],
+                    missing: ['TypeScript', 'Next.js']
+                },
+                {
+                    name: 'Backend & Database',
+                    match: 65,
+                    matched: ['Node.js', 'Express'],
+                    missing: ['GraphQL', 'MongoDB', 'Redis']
+                },
+                {
+                    name: 'DevOps & Cloud',
+                    match: 40,
+                    matched: ['Docker'],
+                    missing: ['AWS', 'CI/CD Pipelines', 'Terraform']
+                }
+            ],
+            learning_resources: [
+                { skill: 'TypeScript', resource: 'Official TypeScript Deep Dive Guide (Free)', link: 'https://www.typescriptlang.org/', difficulty: 'Intermediate', time: '12 hours' },
+                { skill: 'Next.js', resource: 'Next.js Learn Dashboard (Interactive)', link: 'https://nextjs.org/learn', difficulty: 'Beginner', time: '8 hours' },
+                { skill: 'AWS', resource: 'AWS Cloud Practitioner Essentials (Free Course)', link: 'https://aws.amazon.com/training/', difficulty: 'Beginner', time: '6 hours' },
+                { skill: 'GraphQL', resource: 'Apollo Odyssey GraphQL Tutorials', link: 'https://odyssey.apollographql.com/', difficulty: 'Advanced', time: '15 hours' }
+            ],
+            pathwayNodes: [
+                { skill: 'TypeScript', status: 'missing', desc: 'Type safety layer for web code.', x: 12, y: 50 },
+                { skill: 'Next.js', status: 'missing', desc: 'React meta-framework for routing and SSR.', x: 32, y: 25 },
+                { skill: 'GraphQL', status: 'missing', desc: 'API querying layer to reduce payload.', x: 52, y: 70 },
+                { skill: 'Redis', status: 'missing', desc: 'Cache layer for blazing database access.', x: 72, y: 30 },
+                { skill: 'AWS Cloud', status: 'missing', desc: 'Cloud provisioning and deployments.', x: 88, y: 50 }
+            ]
+        },
+        lead: {
+            title: 'Full-Stack Tech Lead',
+            fitScore: 58,
+            categories: [
+                {
+                    name: 'Core Technical Skills',
+                    match: 70,
+                    matched: ['React', 'JavaScript', 'Git'],
+                    missing: ['TypeScript', 'Testing (Jest/Cypress)']
+                },
+                {
+                    name: 'Systems & Management',
+                    match: 30,
+                    matched: ['Team Mentoring'],
+                    missing: ['Microservices Design', 'Agile Product Lifecycle', 'System Scalability']
+                },
+                {
+                    name: 'DevOps & Cloud',
+                    match: 25,
+                    matched: [],
+                    missing: ['Kubernetes', 'AWS Architectures', 'CI/CD Pipelines']
+                }
+            ],
+            learning_resources: [
+                { skill: 'System Design', resource: 'Pragmatic System Design Primer', link: 'https://github.com/donnemartin/system-design-primer', difficulty: 'Advanced', time: '30 hours' },
+                { skill: 'Kubernetes', resource: 'K8s Official Interactive Tutorials', link: 'https://kubernetes.io/docs/tutorials/', difficulty: 'Advanced', time: '20 hours' }
+            ],
+            pathwayNodes: [
+                { skill: 'TypeScript', status: 'missing', desc: 'Typing constraints for large enterprise codebases.', x: 12, y: 50 },
+                { skill: 'System Scalability', status: 'missing', desc: 'Architecting distributed high-availability services.', x: 32, y: 25 },
+                { skill: 'Microservices', status: 'missing', desc: 'Decoupling monolithic setups into distinct logic APIs.', x: 52, y: 70 },
+                { skill: 'CI/CD Pipelines', status: 'missing', desc: 'Continuous testing, building, and automated deployments.', x: 72, y: 30 },
+                { skill: 'Team Leadership', status: 'missing', desc: 'Agile sprints coordination and design conflict resolutions.', x: 88, y: 50 }
+            ]
+        },
+        devops: {
+            title: 'DevOps Cloud Architect',
+            fitScore: 42,
+            categories: [
+                {
+                    name: 'Infrastructure as Code',
+                    match: 20,
+                    matched: [],
+                    missing: ['Terraform', 'Ansible', 'CloudFormation']
+                },
+                {
+                    name: 'Containerization & Orchestration',
+                    match: 60,
+                    matched: ['Docker'],
+                    missing: ['Kubernetes', 'AWS EKS']
+                },
+                {
+                    name: 'Automation & Monitoring',
+                    match: 15,
+                    matched: ['Git'],
+                    missing: ['GitHub Actions', 'Prometheus & Grafana']
+                }
+            ],
+            learning_resources: [
+                { skill: 'Terraform', resource: 'HashiCorp Learn Terraform Associate Prep', link: 'https://developer.hashicorp.com/terraform', difficulty: 'Intermediate', time: '14 hours' },
+                { skill: 'Prometheus', resource: 'Monitoring Systems with Prometheus (Free Guide)', link: 'https://prometheus.io/docs/introduction/overview/', difficulty: 'Advanced', time: '10 hours' }
+            ],
+            pathwayNodes: [
+                { skill: 'Terraform', status: 'missing', desc: 'Provisioning infrastructure resources safely as code.', x: 12, y: 50 },
+                { skill: 'Kubernetes', status: 'missing', desc: 'Automating deployment, scaling, and container operations.', x: 32, y: 25 },
+                { skill: 'AWS Cloud EKS', status: 'missing', desc: 'Managed Kubernetes clusters provisioning.', x: 52, y: 70 },
+                { skill: 'CI/CD Automation', status: 'missing', desc: 'Deploy scripts verification and package tracking.', x: 72, y: 30 },
+                { skill: 'Prometheus Logs', status: 'missing', desc: 'Telemetry, alerting, and metrics collection.', x: 88, y: 50 }
+            ]
+        }
+    },
+    
+    changeRole() {
+        let current = this.roleData[this.targetRole];
+        this.fitScore = current.fitScore;
+        this.categories = current.categories;
+        this.resources = current.learning_resources;
+        
+        // Re-render chart vector data
+        this.renderChart();
+    },
+    
+    startAnalysis() {
+        if (!this.resumeText.trim() || !this.jdText.trim()) {
+            alert('Please paste both the Resume and the Job Description.');
+            return;
+        }
+        this.uploading = true;
+        this.analyzed = false;
+        
+        setTimeout(() => {
+            this.submitAnalysis();
+        }, 1500);
+    },
+    
+    submitAnalysis() {
+        fetch('{% url 'skills_gap' %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'x-requested-with': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            this.uploading = false;
+            this.analyzed = true;
+            this.targetRole = 'backend';
+            
+            // Set initial state from backend/local defaults
+            this.changeRole();
+        })
+        .catch(err => {
+            console.error(err);
+            this.uploading = false;
+            alert('Error running skills gap analysis.');
+        });
+    },
+    
+    renderChart() {
+        const ctx = document.getElementById('gapRadarChart').getContext('2d');
+        if (this.radarChart) {
+            this.radarChart.destroy();
+        }
+        
+        const labels = this.categories.map(c => c.name);
+        const scores = this.categories.map(c => c.match);
+        
+        const isDark = !document.documentElement.classList.contains('light');
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+        const labelColor = isDark ? '#94a3b8' : '#475569';
+        
+        this.radarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Candidate Competency %',
+                    data: scores,
+                    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                    borderColor: '#8b5cf6',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#8b5cf6',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#8b5cf6'
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        angleLines: { color: gridColor },
+                        grid: { color: gridColor },
+                        pointLabels: { color: labelColor, font: { family: 'Outfit', size: 11, weight: '600' } },
+                        ticks: { display: false },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+}">
+    <!-- Page Header -->
+    <div class="text-center max-w-2xl mx-auto mb-12">
+        <h1 class="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+            Skills Gap <span class="bg-gradient-to-r from-brand to-pink-500 bg-clip-text text-transparent font-black">Analysis</span>
+        </h1>
+        <p class="text-base text-gray-400 mt-3 font-light leading-relaxed">
+            Map your competencies against a target role. Visualize technical alignment and discover recommended upskilling paths.
+        </p>
+    </div>
+
+    <!-- Inputs Panel -->
+    <div x-show="!uploading && !analyzed" class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <!-- Paste Resume -->
+        <div class="premium-card p-6 space-y-4">
+            <h3 class="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                <span>📄 Paste Resume Text</span>
+            </h3>
+            <textarea x-model="resumeText" placeholder="Paste your resume text here..." rows="12"
+                      class="w-full bg-slate-950/20 border border-gray-700/60 rounded-xl p-3 text-white placeholder-gray-500 focus:border-brand outline-none text-sm resize-none"></textarea>
+        </div>
+
+        <!-- Paste Job Description -->
+        <div class="premium-card p-6 space-y-4 flex flex-col justify-between">
+            <div class="space-y-4">
+                <h3 class="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                    <span>📋 Paste Job Description</span>
+                </h3>
+                <textarea x-model="jdText" placeholder="Paste the target job description here..." rows="8"
+                          class="w-full bg-slate-950/20 border border-gray-700/60 rounded-xl p-3 text-white placeholder-gray-500 focus:border-brand outline-none text-sm resize-none"></textarea>
+            </div>
+            
+            <button @click="startAnalysis()" class="submit-btn w-full mt-6 py-3.5 font-bold">
+                Run Gap Analysis
+            </button>
+        </div>
+    </div>
+
+    <!-- Processing State -->
+    <div x-show="uploading" class="max-w-md mx-auto premium-card p-10 text-center space-y-6" style="display: none;">
+        <svg class="animate-spin h-8 w-8 text-brand mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <div class="space-y-1">
+            <h3 class="text-lg font-bold text-white">Mapping Competencies</h3>
+            <p class="text-xs text-gray-400 font-light">Cross-checking skills definitions & alignment...</p>
+        </div>
+    </div>
+
+    <!-- Output Dashboard -->
+    <div x-show="analyzed" class="grid grid-cols-1 lg:grid-cols-3 gap-8" style="display: none;">
+        
+        <!-- Left Side: Competency Graph & Score -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Target Role dropdown selector -->
+            <div class="premium-card p-5 space-y-2 text-left">
+                <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest block">Target Career Role</label>
+                <select x-model="targetRole" @change="changeRole()" class="w-full bg-[#1e1e24] border border-gray-700/60 rounded-xl p-3 text-sm text-white focus:border-brand outline-none">
+                    <option value="backend">Backend Engineer</option>
+                    <option value="lead">Full-Stack Tech Lead</option>
+                    <option value="devops">DevOps Cloud Architect</option>
+                </select>
+            </div>
+
+            <!-- Score Card -->
+            <div class="premium-card p-6 text-center space-y-4">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-widest block">Role Fit Score</span>
+                <span class="text-5xl font-black text-brand block" x-text="fitScore + '%'"></span>
+                <p class="text-xs text-gray-400 font-light leading-relaxed">
+                    Overall capability match based on requested certifications, stack expertise, and experience years.
+                </p>
+            </div>
+
+            <!-- Radar Competency Chart -->
+            <div class="premium-card p-6 space-y-4">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-widest block text-center">Competency Vector</span>
+                <div class="w-full max-w-[280px] mx-auto">
+                    <canvas id="gapRadarChart"></canvas>
+                </div>
+            </div>
+            
+            <button @click="analyzed = false" class="w-full py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-colors text-center text-sm">
+                Map Another Role
+            </button>
+        </div>
+
+        <!-- Right Side: Detailed Skills Matrix & Resources -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Skills Matrix -->
+            <div class="premium-card p-6 space-y-6">
+                <h3 class="text-lg font-bold text-white">Competency Alignment Matrix</h3>
+                
+                <div class="space-y-6 divide-y divide-white/5">
+                    <template x-for="(cat, idx) in categories" :key="idx">
+                        <div class="space-y-3" :class="idx > 0 ? 'pt-6' : ''">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="font-bold text-white" x-text="cat.name"></span>
+                                <span class="text-brand font-bold" x-text="cat.match + '% Match'"></span>
+                            </div>
+                            
+                            <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-brand h-full rounded-full" :style="'width: ' + cat.match + '%'"></div>
+                            </div>
+                            
+                            <!-- Skills Lists -->
+                            <div class="grid grid-cols-2 gap-4 pt-1">
+                                <div>
+                                    <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block mb-1.5">Matched</span>
+                                    <div class="flex flex-wrap gap-1">
+                                        <template x-for="skill in cat.matched">
+                                            <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px]" x-text="skill"></span>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-red-400 font-bold uppercase tracking-wider block mb-1.5">Missing Gaps</span>
+                                    <div class="flex flex-wrap gap-1">
+                                        <template x-for="skill in cat.missing">
+                                            <span class="px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 text-[10px]" x-text="skill"></span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Metro Upskilling Roadmap Card -->
+            <div class="premium-card p-6 space-y-4">
+                <h3 class="text-lg font-bold text-white mb-2">🗺️ Interactive Upskilling Learning Path</h3>
+                <p class="text-xs text-gray-400 mb-6 font-light">Hover or click on the metro stations below to inspect target upskilling milestones.</p>
+                
+                <!-- SVG Container for Metro Roadmap -->
+                <div class="relative bg-slate-950/40 border border-white/5 rounded-2xl p-6 h-64 flex items-center justify-center overflow-hidden">
+                    <!-- Connecting Curve Line -->
+                    <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 50 120 C 150 40, 250 200, 350 70 C 450 180, 550 40, 650 120" 
+                              fill="none" stroke="url(#metro-grad)" stroke-width="4" stroke-dasharray="8 6" class="animate-dash" />
+                        <defs>
+                            <linearGradient id="metro-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#8b5cf6" />
+                                <stop offset="100%" stop-color="#ec4899" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    
+                    <!-- SVG dash animation style -->
+                    <style>
+                        @keyframes dash {
+                            to {
+                                stroke-dashoffset: -40;
+                            }
+                        }
+                        .animate-dash {
+                            animation: dash 5s linear infinite;
+                        }
+                    </style>
+                    
+                    <!-- Interactive Nodes -->
+                    <div class="absolute inset-0 flex justify-between items-center px-8 z-10 w-full h-full">
+                        <template x-for="(node, idx) in roleData[targetRole].pathwayNodes" :key="node.skill">
+                            <div x-data="{ hovered: false }" 
+                                 class="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer flex flex-col items-center group"
+                                 :style="'left: ' + node.x + '%; top: ' + node.y + '%;'"
+                                 @mouseenter="hovered = true"
+                                 @mouseleave="hovered = false">
+                                 
+                                <!-- Node button circle -->
+                                <div class="w-8 h-8 rounded-full border border-dark flex items-center justify-center font-bold text-xs shadow-lg transition-all duration-300 group-hover:scale-125"
+                                     :class="hovered ? 'bg-pink-500 text-white ring-4 ring-pink-500/20' : 'bg-brand text-white ring-4 ring-brand/10'">
+                                    <span x-text="idx + 1"></span>
+                                </div>
+                                
+                                <!-- Label tag -->
+                                <span class="text-[10px] font-bold text-white mt-2 bg-slate-900 border border-white/5 px-2 py-0.5 rounded text-center whitespace-nowrap" x-text="node.skill"></span>
+                                
+                                <!-- Hover tooltip overlay -->
+                                <div x-show="hovered" x-transition 
+                                     class="absolute z-20 bottom-12 left-1/2 transform -translate-x-1/2 w-48 p-3 rounded-xl border border-white/10 bg-slate-950 shadow-2xl text-left pointer-events-none"
+                                     style="display: none;">
+                                    <span class="text-[9px] font-black uppercase tracking-wider text-brand block mb-1">UPSKILL STEP</span>
+                                    <h5 class="text-xs font-bold text-white mb-1" x-text="node.skill"></h5>
+                                    <p class="text-[10px] text-gray-400 leading-normal font-light" x-text="node.desc"></p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Recommendations -->
+            <div class="premium-card p-6 space-y-4">
+                <h3 class="text-lg font-bold text-white">📚 Recommended Upskilling Resources</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <template x-for="(res, idx) in resources" :key="idx">
+                        <a :href="res.link" target="_blank" class="p-4 rounded-xl border border-white/5 bg-white/[0.01] hover:border-brand/30 transition-all flex flex-col justify-between group">
+                            <div>
+                                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-brand/10 border border-brand/20 text-brand inline-block mb-2" x-text="res.skill"></span>
+                                <h4 class="text-sm font-bold text-white group-hover:text-brand transition-colors" x-text="res.resource"></h4>
+                            </div>
+                            <span class="text-[10px] text-gray-500 font-bold mt-3 block group-hover:translate-x-1 transition-transform">Explore Course →</span>
+                        </a>
+                    </template>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

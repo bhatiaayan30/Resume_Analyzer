@@ -1,0 +1,544 @@
+{% extends "analyzer/base.html" %}
+
+{% block title %}Resume Authenticity Audit & Verification - Resume Analyzer AI{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 relative z-10" x-data="{
+    uploading: false,
+    analyzed: false,
+    verifying: false,
+    fileName: '',
+    progress: 0,
+    authScore: 0,
+    aiProb: 0,
+    redFlags: [],
+    verification: {},
+    linkedinVerifyOpen: false,
+    linkedinChecking: false,
+    linkedinDiscrepancies: [],
+    
+    // Gaps and timeline explorer
+    gapsModalOpen: false,
+    activeGap: null,
+    timelineJobs: [
+        { title: 'Senior Frontend Developer', company: 'WebFlow Corp', duration: 'Jun 2021 - Oct 2023', color: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' },
+        { gap: true, duration: '7 Months Gap', label: 'Oct 2023 - May 2024', description: 'Chronological gap detected between WebFlow Corp and Full-Stack Lead.', tips: [
+            { type: 'Upskilling / Freelancing', text: 'Spent this period designing a micro-SaaS mockup product and freelancing on architectural layouts.' },
+            { type: 'Health & Professional Sabbatical', text: 'Took time off for career refocusing, health improvements, and studying advanced cloud protocols.' },
+            { type: 'Technical Upskilling', text: 'Enrolled in full-time specialized backend frameworks certifications and advanced system architecture courses.' }
+        ]},
+        { title: 'Full-Stack Lead', company: 'DevSync', duration: 'May 2024 - Present', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }
+    ],
+    
+    // Registry Verification Bot steps
+    verificationSteps: [
+        { name: 'Education Registry', label: 'Pinging National Student Clearinghouse Database', status: 'pending', desc: 'Verifying Bachelor of Science in Computer Science.' },
+        { name: 'AWS Credentials Registry', label: 'Validating Solutions Architect Certificate ID', status: 'pending', desc: 'Matching certification code against AWS training database.' },
+        { name: 'Employment Records Check', label: 'Cross-checking former employment timelines', status: 'pending', desc: 'Verifying durations at WebFlow Corp & DevSync.' },
+        { name: 'Reference Contact Auto-Ping', label: 'Initiating simulated email outreach', status: 'pending', desc: 'Reaching out to designated team lead references.' }
+    ],
+    currentCheckIndex: 0,
+    
+    startUpload(e) {
+        let files = e.target.files || e.dataTransfer.files;
+        if (!files.length) return;
+        this.fileName = files[0].name;
+        this.uploading = true;
+        this.analyzed = false;
+        this.verifying = false;
+        this.progress = 5;
+        
+        let interval = setInterval(() => {
+            if (this.progress < 95) {
+                this.progress += Math.floor(Math.random() * 15) + 5;
+            } else {
+                clearInterval(interval);
+                this.submitAudit();
+            }
+        }, 150);
+    },
+    
+    submitAudit() {
+        let formData = new FormData();
+        formData.append('resume', document.getElementById('resume-file-input').files[0]);
+        
+        fetch('{% url 'authenticity_audit' %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            this.uploading = false;
+            this.verifying = true;
+            this.authScore = data.authenticity_score;
+            this.aiProb = data.ai_writing_probability;
+            this.redFlags = data.red_flags;
+            this.verification = data.authenticity_checks;
+            
+            // Run the Background registry bot checks
+            this.runVerifications();
+        })
+        .catch(err => {
+            console.error(err);
+            this.uploading = false;
+            this.verifying = false;
+            alert('Simulation error occurred.');
+        });
+    },
+    
+    runVerifications() {
+        this.currentCheckIndex = 0;
+        this.verificationSteps.forEach(s => s.status = 'pending');
+        
+        let runNext = () => {
+            if (this.currentCheckIndex < this.verificationSteps.length) {
+                this.verificationSteps[this.currentCheckIndex].status = 'checking';
+                let stepIdx = this.currentCheckIndex;
+                setTimeout(() => {
+                    this.verificationSteps[stepIdx].status = stepIdx === 1 ? 'warning' : 'success';
+                    this.currentCheckIndex++;
+                    runNext();
+                }, 1000);
+            } else {
+                setTimeout(() => {
+                    this.verifying = false;
+                    this.analyzed = true;
+                }, 800);
+            }
+        };
+        runNext();
+    },
+    
+    checkLinkedIn() {
+        this.linkedinChecking = true;
+        this.linkedinVerifyOpen = true;
+        setTimeout(() => {
+            this.linkedinChecking = false;
+            this.linkedinDiscrepancies = [
+                { field: 'Lead Software Engineer', resume: 'March 2024 - Present', linkedin: 'March 2024 - October 2024 (Contract)' },
+                { field: 'Senior Developer', resume: 'AWS Certified Cloud Practitioner', linkedin: 'No matching certificate records found' }
+            ];
+        }, 2200);
+    }
+}">
+    <!-- Page Header -->
+    <div class="text-center max-w-2xl mx-auto mb-12">
+        <h1 class="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+            Authenticity <span class="bg-gradient-to-r from-brand to-pink-500 bg-clip-text text-transparent font-black">Audit</span>
+        </h1>
+        <p class="text-base text-gray-400 mt-3 font-light leading-relaxed">
+            Audit candidate credentials, identify resume fraud risks, estimate AI-generated content probability, and verify background timelines.
+        </p>
+    </div>
+
+    <!-- Main Section Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" x-show="!verifying">
+        
+        <!-- Left Panel: Uploader or Main Scores -->
+        <div class="lg:col-span-1 space-y-6">
+            
+            <!-- Upload Box (Visible when not analyzed) -->
+            <div x-show="!analyzed && !uploading" 
+                 class="premium-card text-center py-16 border-2 border-dashed border-gray-700/60 bg-slate-950/20 hover:border-brand/60 hover:bg-brand-light/5 rounded-2xl cursor-pointer transition-all duration-300 relative group"
+                 @dragover.prevent=""
+                 @drop.prevent="startUpload($event)"
+                 @click="$refs.fileInput.click()">
+                 
+                <input type="file" id="resume-file-input" x-ref="fileInput" class="hidden" accept=".pdf,.docx" @change="startUpload($event)">
+                
+                <div class="p-4 w-16 h-16 mx-auto rounded-2xl bg-brand/10 border border-brand/20 mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-8 h-8 text-brand animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">Upload Resume for Audit</h3>
+                <p class="text-sm text-gray-400 max-w-xs mx-auto mb-4 font-light">Drag & drop candidate PDF/DOCX or click to browse</p>
+                <div class="inline-flex px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 group-hover:bg-brand group-hover:text-white transition-colors duration-200">
+                    Browse File
+                </div>
+            </div>
+
+            <!-- Uploading Loader -->
+            <div x-show="uploading" class="premium-card p-10 text-center space-y-6">
+                <div class="relative w-24 h-24 mx-auto flex items-center justify-center">
+                    <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                        <path class="text-white/5" stroke="currentColor" stroke-width="2.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="text-brand transition-all duration-150" stroke="currentColor" stroke-width="2.5" stroke-dasharray="100" :stroke-dashoffset="100 - progress" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <span class="text-lg font-black text-white" x-text="progress + '%'"></span>
+                </div>
+                <div class="space-y-1">
+                    <h4 class="text-white font-bold">Vetting Resume Credibility</h4>
+                    <p class="text-xs text-gray-400 font-light">Checking background history & qualifications...</p>
+                </div>
+            </div>
+
+            <!-- Authenticity Score Indicators (Visible when analyzed) -->
+            <div x-show="analyzed" class="premium-card p-6 space-y-8" style="display: none;">
+                <div class="text-center">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-4">Authenticity Score</span>
+                    
+                    <div class="relative w-40 h-40 mx-auto flex flex-col items-center justify-center">
+                        <!-- Score Radial -->
+                        <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-white/5" stroke="currentColor" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="text-emerald-500" stroke="currentColor" stroke-width="3" :stroke-dasharray="authScore + ', 100'" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <span class="text-4xl font-black text-white" x-text="authScore + '%'"></span>
+                        <span class="text-[10px] uppercase font-bold tracking-wider mt-1 text-emerald-400">Verifiably Valid</span>
+                    </div>
+                </div>
+
+                <div class="border-t border-white/5 pt-6 space-y-4">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-400 font-light">AI Generated Content</span>
+                        <span class="font-bold text-yellow-500" x-text="aiProb + '% Probability'"></span>
+                    </div>
+                    <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                        <div class="bg-yellow-500 h-full rounded-full transition-all duration-500" :style="'width: ' + aiProb + '%'"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 font-light leading-relaxed">
+                        Evaluates sentence structure and vocabulary patterns against common AI LLM templates (e.g. GPT-4).
+                    </p>
+                </div>
+            </div>
+
+            <!-- Upload Another Card -->
+            <button x-show="analyzed" @click="analyzed = false" class="w-full py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-colors text-center text-sm" style="display: none;">
+                Audit Another Resume
+            </button>
+            
+        </div>
+
+        <!-- Right/Center Panel: Detailed Reports -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Default Welcome Card -->
+            <div x-show="!analyzed && !uploading" class="premium-card p-8 flex flex-col justify-center min-h-[300px]">
+                <h3 class="text-xl font-bold text-white mb-4">Why perform an Authenticity Audit?</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                    <div class="flex gap-4">
+                        <div class="p-3 w-11 h-11 rounded-xl bg-purple-500/10 text-brand flex items-center justify-center flex-shrink-0">
+                            🛡️
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white">Identify Exaggerations</h4>
+                            <p class="text-xs text-gray-400 font-light mt-1 leading-relaxed">Cross-check job durations, certifications, and graduation timelines to prevent resume fraud.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="p-3 w-11 h-11 rounded-xl bg-purple-500/10 text-brand flex items-center justify-center flex-shrink-0">
+                            🤖
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white">Detect AI-Generated Text</h4>
+                            <p class="text-xs text-gray-400 font-light mt-1 leading-relaxed">Flag generic resumes written entirely by chatbots to filter for genuine written applications.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="p-3 w-11 h-11 rounded-xl bg-purple-500/10 text-brand flex items-center justify-center flex-shrink-0">
+                            📅
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white">Timeline Gaps</h4>
+                            <p class="text-xs text-gray-400 font-light mt-1 leading-relaxed">Map candidate employment chronology and call out overlaps or unexplained gaps.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="p-3 w-11 h-11 rounded-xl bg-purple-500/10 text-brand flex items-center justify-center flex-shrink-0">
+                            🔗
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white">Verification Checking</h4>
+                            <p class="text-xs text-gray-400 font-light mt-1 leading-relaxed">Verify degrees and certificates through online registries and simulated verification.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Audit Results Dashboard -->
+            <div x-show="analyzed" class="space-y-6" style="display: none;">
+                
+                <!-- Reference & Education Verification Registry Bot Logs -->
+                <div class="premium-card p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <span>🔍 Background Verification Log</span>
+                            </h3>
+                            <p class="text-xs text-gray-400 font-light mt-0.5">Summary of automated registry inquiries and reference pings.</p>
+                        </div>
+                        <button @click="startVerification()" :disabled="verifying"
+                                class="text-xs font-bold bg-brand hover:bg-brand-hover disabled:opacity-50 disabled:pointer-events-none text-white px-3 py-1.5 rounded-lg transition-colors">
+                            Re-Run Checks
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs font-light text-gray-400">Education Registry Check</span>
+                                <p class="text-sm font-bold text-white mt-0.5" x-text="verification.education_verification"></p>
+                            </div>
+                            <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded uppercase">VERIFIED</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs font-light text-gray-400">Employment History Match</span>
+                                <p class="text-sm font-bold text-white mt-0.5" x-text="verification.employment_history"></p>
+                            </div>
+                            <span class="text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded uppercase">WARNING</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center col-span-1 md:col-span-2">
+                            <div>
+                                <span class="text-xs font-light text-gray-400">LinkedIn Profile Mapping</span>
+                                <p class="text-sm font-bold text-white mt-0.5 text-red-400">
+                                    Discrepancies found next to resume claims.
+                                </p>
+                            </div>
+                            <button @click="checkLinkedIn()" class="text-xs font-bold bg-brand hover:bg-brand-hover text-white px-3 py-1.5 rounded-lg transition-colors">
+                                Review Discrepancies
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Career Title Escalation Index -->
+                <div class="premium-card p-6">
+                    <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                        <span>📈 Career Title Escalation Index</span>
+                    </h3>
+                    <p class="text-xs text-gray-400 mb-4 font-light">Checks title progression speed to identify artificial credential inflation.</p>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-300 font-medium">Progression Velocity</span>
+                            <span class="text-red-400 font-bold">Fast (+160% above average)</span>
+                        </div>
+                        <div class="w-full bg-white/5 h-2.5 rounded-full overflow-hidden relative">
+                            <div class="bg-red-500 h-full rounded-full" style="width: 85%"></div>
+                        </div>
+                        <div class="p-3.5 rounded-xl border border-red-500/20 bg-red-500/5 text-xs text-red-300 leading-relaxed font-light">
+                            ⚠️ <strong>Title Inflation Warning:</strong> Transition from <em>Senior Frontend Developer</em> to <em>Full-Stack Lead</em> in 11 months. The median duration for this transition is 3.2 years.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chronological Timeline & Gap Explorer -->
+                <div class="premium-card p-6">
+                    <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                        <span>📅 Chronological Timeline & Gap Explorer</span>
+                    </h3>
+                    <p class="text-xs text-gray-400 mb-6 font-light">Click on highlighted gap intervals to explore positive career explanation narratives.</p>
+                    
+                    <div class="space-y-4 relative before:absolute before:bottom-0 before:top-0 before:left-2 before:w-0.5 before:bg-white/5">
+                        <template x-for="(item, idx) in timelineJobs" :key="idx">
+                            <div class="relative pl-8">
+                                <!-- Node bullet -->
+                                <div class="absolute left-[3px] top-1.5 w-2 h-2 rounded-full border border-dark transition-all duration-300"
+                                     :class="item.gap ? 'bg-amber-500 ring-4 ring-amber-500/20' : 'bg-brand ring-4 ring-brand/20'"></div>
+                                     
+                                <!-- If regular Job -->
+                                <div x-show="!item.gap" class="p-4 rounded-xl border" :class="item.color">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h4 class="text-sm font-bold text-white" x-text="item.title"></h4>
+                                            <p class="text-xs text-gray-400 mt-0.5" x-text="item.company"></p>
+                                        </div>
+                                        <span class="text-[10px] bg-white/5 border border-white/10 px-2 py-0.5 rounded text-gray-400" x-text="item.duration"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- If Gap -->
+                                <div x-show="item.gap" @click="activeGap = item; gapsModalOpen = true" 
+                                     class="p-3 rounded-xl border border-dashed border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 cursor-pointer transition-colors flex justify-between items-center group">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="text-sm">⚠️</span>
+                                        <div>
+                                            <span class="text-xs font-bold text-amber-400" x-text="item.duration"></span>
+                                            <span class="text-[10px] text-gray-400 block" x-text="item.label"></span>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-amber-400 group-hover:translate-x-1 transition-transform">Explore Explanations &rarr;</span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+
+                <!-- Red Flags Log (Interactive Accordion) -->
+                <div class="premium-card p-6">
+                    <h3 class="text-lg font-bold text-white mb-4">⚠️ Flagged Discrepancies (<span x-text="redFlags.length"></span>)</h3>
+                    
+                    <div class="space-y-4">
+                        <template x-for="(flag, index) in redFlags" :key="index">
+                            <div x-data="{ open: false }" class="rounded-xl border border-white/5 bg-slate-950/20 overflow-hidden">
+                                <!-- Accordion Header -->
+                                <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left focus:outline-none">
+                                    <div class="flex items-center gap-3">
+                                        <!-- Severity Badge -->
+                                        <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded border"
+                                              :class="{
+                                                  'bg-red-500/10 border-red-500/30 text-red-400': flag.severity === 'high',
+                                                  'bg-yellow-500/10 border-yellow-500/30 text-yellow-400': flag.severity === 'medium',
+                                                  'bg-blue-500/10 border-blue-500/30 text-blue-400': flag.severity === 'low'
+                                              }"
+                                              x-text="flag.severity + ' risk'">
+                                        </span>
+                                        <span class="text-sm font-bold text-white" x-text="flag.type"></span>
+                                    </div>
+                                    <svg class="w-4 h-4 text-gray-400 transform transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                                
+                                <!-- Accordion Content -->
+                                <div x-show="open" x-transition class="p-4 border-t border-white/5 bg-white/[0.02] text-sm space-y-3">
+                                    <div>
+                                        <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider block mb-1">Details</span>
+                                        <p class="text-gray-300 font-light leading-relaxed" x-text="flag.description"></p>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider block mb-1">Audit Mitigation Advice</span>
+                                        <p class="text-gray-400 font-light leading-relaxed" x-text="flag.mitigation"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Sequential Background Verification Loader -->
+    <div x-show="verifying" class="premium-card p-8 max-w-xl mx-auto space-y-6" style="display: none;">
+        <div class="text-center">
+            <div class="animate-pulse w-14 h-14 bg-brand/10 rounded-full flex items-center justify-center text-brand mx-auto mb-4 text-2xl">
+                🔍
+            </div>
+            <h3 class="text-lg font-bold text-white mb-1">Verifying Credentials</h3>
+            <p class="text-xs text-gray-400 font-light">Registry Lookup Bot query in progress...</p>
+        </div>
+        
+        <div class="space-y-4 border-t border-white/5 pt-4">
+            <template x-for="(step, idx) in verificationSteps" :key="idx">
+                <div class="flex items-start gap-4 p-3 rounded-xl border border-white/5 bg-white/[0.01]">
+                    <!-- Status Indicator -->
+                    <div class="mt-0.5">
+                        <span x-show="step.status === 'pending'" class="text-gray-600">⚪</span>
+                        <span x-show="step.status === 'checking'" class="text-brand animate-spin inline-block">🔄</span>
+                        <span x-show="step.status === 'success'" class="text-emerald-400">✅</span>
+                        <span x-show="step.status === 'warning'" class="text-yellow-500">⚠️</span>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-white" x-text="step.name"></span>
+                            <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded"
+                                  :class="{
+                                      'bg-gray-800 text-gray-400': step.status === 'pending',
+                                      'bg-brand/10 text-brand': step.status === 'checking',
+                                      'bg-emerald-500/10 text-emerald-400': step.status === 'success',
+                                      'bg-yellow-500/10 text-yellow-400': step.status === 'warning'
+                                  }"
+                                  x-text="step.status"></span>
+                        </div>
+                        <span class="text-[10px] text-gray-400 block mt-0.5" x-text="step.label"></span>
+                        <span x-show="step.status !== 'pending'" class="text-[9px] text-gray-500 block mt-1 leading-relaxed font-light" x-text="step.desc"></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Career Gaps Explanation Template Modal -->
+    <div x-show="gapsModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" style="display: none;" @click.self="gapsModalOpen = false">
+        <div class="premium-card max-w-xl w-full p-8 space-y-6 bg-slate-950 border border-white/10" x-show="activeGap">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-xl font-bold text-white">Career Gap Explanation Templates</h3>
+                    <p class="text-xs text-gray-400 mt-1" x-text="'Addressing your ' + activeGap?.duration + ' (' + activeGap?.label + ')'"></p>
+                </div>
+                <button @click="gapsModalOpen = false" class="text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="space-y-4 max-h-[380px] overflow-y-auto pr-2">
+                <template x-for="(tip, idx) in activeGap?.tips" :key="idx">
+                    <div class="p-4 rounded-xl border border-white/5 bg-white/[0.02] space-y-2 relative group">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-brand" x-text="tip.type"></span>
+                            <button @click="navigator.clipboard.writeText(tip.text); alert('Copied template to clipboard!')" 
+                                    class="text-[10px] text-brand hover:text-brand-hover font-bold transition-colors">
+                                Copy Template
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-300 leading-relaxed font-light" x-text="tip.text"></p>
+                    </div>
+                </template>
+            </div>
+            
+            <button @click="gapsModalOpen = false" class="w-full py-3 bg-brand hover:bg-brand-hover text-white font-bold rounded-xl transition-colors text-sm">
+                Close Gap Explorer
+            </button>
+        </div>
+    </div>
+
+    <!-- LinkedIn Verification Modal overlay -->
+    <div x-show="linkedinVerifyOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" style="display: none;" @click.self="linkedinVerifyOpen = false">
+        <div class="premium-card max-w-lg w-full p-8 space-y-6 bg-slate-950 border border-white/10">
+            <div class="flex justify-between items-start">
+                <h3 class="text-xl font-bold text-white">LinkedIn Profiler Check</h3>
+                <button @click="linkedinVerifyOpen = false" class="text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Loader -->
+            <div x-show="linkedinChecking" class="text-center py-10 space-y-4">
+                <svg class="animate-spin h-8 w-8 text-brand mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="text-sm text-gray-400 font-light">Cross-verifying resume entries with LinkedIn API...</p>
+            </div>
+
+            <!-- Results -->
+            <div x-show="!linkedinChecking" class="space-y-4">
+                <p class="text-sm text-gray-300 font-light">
+                    The platform matched this resume to a LinkedIn profile. The following discrepancies were found:
+                </p>
+                
+                <div class="space-y-3">
+                    <template x-for="(disc, index) in linkedinDiscrepancies" :key="index">
+                        <div class="p-4 rounded-xl border border-red-500/20 bg-red-500/[0.02] text-xs space-y-2">
+                            <span class="font-bold text-red-400" x-text="disc.field"></span>
+                            <div class="grid grid-cols-2 gap-4 text-gray-400">
+                                <div>
+                                    <span class="font-semibold block uppercase tracking-wider text-[9px] text-gray-500">Stated on Resume</span>
+                                    <span class="text-white font-medium" x-text="disc.resume"></span>
+                                </div>
+                                <div>
+                                    <span class="font-semibold block uppercase tracking-wider text-[9px] text-gray-500">Found on LinkedIn</span>
+                                    <span class="text-white font-medium" x-text="disc.linkedin"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                
+                <button @click="linkedinVerifyOpen = false" class="w-full py-3 bg-brand hover:bg-brand-hover text-white font-bold rounded-xl transition-colors text-sm">
+                    Acknowledge & Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

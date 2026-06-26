@@ -747,8 +747,95 @@
         <a class="flex items-center gap-2 font-bold text-lg tracking-tight text-white hover:opacity-90 transition-opacity" href="{% url 'index' %}">
           <span class="logo font-black">Resume Analyzer</span>
         </a>
-        <nav class="hidden md:flex items-center gap-1 desktop-nav-links">
+        <nav class="hidden md:flex items-center gap-6 desktop-nav-links">
           <a href="{% url 'index' %}">Home</a>
+          
+          <!-- Features Dropdown (Logged In) -->
+          <div x-data="{ open: false }" class="relative" @mouseenter="open = true" @mouseleave="open = false">
+            <button class="flex items-center gap-1.5 py-2 text-sm font-semibold text-gray-300 hover:text-white dark:text-gray-400 dark:hover:text-white transition-colors duration-200 focus:outline-none">
+              <span>Features</span>
+              <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div x-show="open" 
+                 x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-100"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="absolute left-0 mt-1 w-72 rounded-2xl border border-white/10 dark:border-white/5 bg-slate-950/95 backdrop-blur-xl shadow-2xl py-2 z-50 dropdown-menu"
+                 style="display: none;">
+                 
+                 <!-- Authenticity Audit -->
+                 <a href="{% url 'authenticity_audit' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                   <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                     </svg>
+                   </div>
+                   <div>
+                     <div class="text-xs font-bold text-white">Authenticity Audit</div>
+                     <div class="text-[10px] text-gray-400">Scan resume credibility and AI text</div>
+                   </div>
+                 </a>
+                 
+                 <!-- AI Screening Room -->
+                 <a href="{% url 'screening_room' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                   <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                     </svg>
+                   </div>
+                   <div>
+                     <div class="text-xs font-bold text-white">AI Screening Room</div>
+                     <div class="text-[10px] text-gray-400">Mock audio/text interview simulator</div>
+                   </div>
+                 </a>
+                 
+                 <!-- Auto-Vet Agent -->
+                 <a href="{% url 'auto_vet' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                   <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                     </svg>
+                   </div>
+                   <div>
+                     <div class="text-xs font-bold text-white">Auto-Vet Agent</div>
+                     <div class="text-[10px] text-gray-400">Bulk screen & rank candidate resumes</div>
+                   </div>
+                 </a>
+                 
+                 <!-- Skills Gap Analysis -->
+                 <a href="{% url 'skills_gap' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                   <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.003 9.003 0 1020.945 13H11V3.055z" />
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                     </svg>
+                   </div>
+                   <div>
+                     <div class="text-xs font-bold text-white">Skills Gap Analysis</div>
+                     <div class="text-[10px] text-gray-400">Visual mapping of role alignment</div>
+                   </div>
+                 </a>
+                 
+                 <!-- Chrome Extension -->
+                 <a href="{% url 'chrome_extension' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                   <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                     </svg>
+                   </div>
+                   <div>
+                     <div class="text-xs font-bold text-white">Chrome Extension</div>
+                     <div class="text-[10px] text-gray-400">Scan LinkedIn profiles directly</div>
+                   </div>
+                 </a>
+            </div>
+          </div>
+          
           <a href="{% url 'history' %}">History</a>
           <a href="{% url 'resume_builder' %}" class="{% if request.resolver_match.url_name == 'resume_builder' %}active{% endif %}">Build Resume</a>
           {% if user.profile.is_premium %}
@@ -837,6 +924,14 @@
              {% endif %}
          </div>
          <a href="{% url 'index' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Home</a>
+         <div class="px-3 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Features</div>
+         <div class="pl-4 flex flex-col gap-1.5 border-l border-white/10">
+              <a href="{% url 'authenticity_audit' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Authenticity Audit</a>
+              <a href="{% url 'screening_room' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">AI Screening Room</a>
+              <a href="{% url 'auto_vet' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Auto-Vet Agent</a>
+              <a href="{% url 'skills_gap' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Skills Gap Analysis</a>
+              <a href="{% url 'chrome_extension' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Chrome Extension</a>
+         </div>
          <a href="{% url 'history' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">History</a>
          <a href="{% url 'resume_builder' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Build Resume</a>
          {% if user.profile.is_premium %}
@@ -897,68 +992,69 @@
                  class="absolute left-0 mt-1 w-72 rounded-2xl border border-white/10 dark:border-white/5 bg-slate-950/95 backdrop-blur-xl shadow-2xl py-2 z-50 dropdown-menu"
                  style="display: none;">
                  
-                 <!-- Resume Analysis -->
-                 <a href="{% url 'index' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                 <!-- Authenticity Audit -->
+                 <a href="{% url 'authenticity_audit' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
                    <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                      </svg>
                    </div>
                    <div>
-                     <div class="text-xs font-bold text-white">Resume Scan & Analysis</div>
-                     <div class="text-[10px] text-gray-400">Score and scan against job details</div>
+                     <div class="text-xs font-bold text-white">Authenticity Audit</div>
+                     <div class="text-[10px] text-gray-400">Scan resume credibility and AI text</div>
                    </div>
                  </a>
                  
-                 <!-- Resume Builder -->
-                 <a href="{% url 'resume_builder' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                 <!-- AI Screening Room -->
+                 <a href="{% url 'screening_room' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
                    <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                       <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                      </svg>
                    </div>
                    <div>
-                     <div class="text-xs font-bold text-white">AI Resume Builder</div>
-                     <div class="text-[10px] text-gray-400">Build ATS-optimized resumes</div>
+                     <div class="text-xs font-bold text-white">AI Screening Room</div>
+                     <div class="text-[10px] text-gray-400">Mock audio/text interview simulator</div>
                    </div>
                  </a>
                  
-                 <!-- Market Insights -->
-                 <a href="{% url 'market_insights' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                 <!-- Auto-Vet Agent -->
+                 <a href="{% url 'auto_vet' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
                    <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                      </svg>
                    </div>
                    <div>
-                     <div class="text-xs font-bold text-white">Market Insights</div>
-                     <div class="text-[10px] text-gray-400">Explore salary and skill demand</div>
+                     <div class="text-xs font-bold text-white">Auto-Vet Agent</div>
+                     <div class="text-[10px] text-gray-400">Bulk screen & rank candidate resumes</div>
                    </div>
                  </a>
                  
-                 <!-- Resume Comparison -->
-                 <a href="{% url 'compare_versions' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                 <!-- Skills Gap Analysis -->
+                 <a href="{% url 'skills_gap' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
                    <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.003 9.003 0 1020.945 13H11V3.055z" />
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                      </svg>
                    </div>
                    <div>
-                     <div class="text-xs font-bold text-white">Resume Comparison</div>
-                     <div class="text-[10px] text-gray-400">Compare score across versions</div>
+                     <div class="text-xs font-bold text-white">Skills Gap Analysis</div>
+                     <div class="text-[10px] text-gray-400">Visual mapping of role alignment</div>
                    </div>
                  </a>
                  
-                 <!-- Scan History -->
-                 <a href="{% url 'history' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
+                 <!-- Chrome Extension -->
+                 <a href="{% url 'chrome_extension' %}" class="flex items-center gap-3.5 px-4 py-3 hover:bg-white/5 transition-colors group">
                    <div class="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                      </svg>
                    </div>
                    <div>
-                     <div class="text-xs font-bold text-white">Analysis History</div>
-                     <div class="text-[10px] text-gray-400">View and manage previous reports</div>
+                     <div class="text-xs font-bold text-white">Chrome Extension</div>
+                     <div class="text-[10px] text-gray-400">Scan LinkedIn profiles directly</div>
                    </div>
                  </a>
             </div>
@@ -1051,11 +1147,11 @@
          <a href="{% url 'index' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Home</a>
          <div class="px-3 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Features</div>
          <div class="pl-4 flex flex-col gap-1.5 border-l border-white/10">
-             <a href="{% url 'index' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Resume Scan & Analysis</a>
-             <a href="{% url 'resume_builder' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">AI Resume Builder</a>
-             <a href="{% url 'market_insights' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Market Insights</a>
-             <a href="{% url 'compare_versions' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Resume Comparison</a>
-             <a href="{% url 'history' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Analysis History</a>
+             <a href="{% url 'authenticity_audit' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Authenticity Audit</a>
+             <a href="{% url 'screening_room' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">AI Screening Room</a>
+             <a href="{% url 'auto_vet' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Auto-Vet Agent</a>
+             <a href="{% url 'skills_gap' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Skills Gap Analysis</a>
+             <a href="{% url 'chrome_extension' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Chrome Extension</a>
          </div>
          <a href="{% url 'index' %}#how-it-works" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">How It Works</a>
          <a href="{% url 'pricing' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Pricing</a>

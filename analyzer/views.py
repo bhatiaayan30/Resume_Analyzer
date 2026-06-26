@@ -1629,3 +1629,143 @@ def compare_versions_view(request):
     return render(request, "analyzer/compare.html", context)
 
 
+def authenticity_audit_view(request):
+    """Renders the Authenticity Audit page, supporting interactive simulations for guests and users."""
+    if request.method == "POST":
+        # Handle simulated analysis
+        resume_name = request.FILES.get("resume").name if request.FILES.get("resume") else "uploaded_resume.pdf"
+        
+        # Simulated high-fidelity authenticity response data
+        result = {
+            "status": "success",
+            "filename": resume_name,
+            "authenticity_score": 74,
+            "ai_writing_probability": 38,
+            "red_flags": [
+                {
+                    "type": "Timeline Gap",
+                    "severity": "medium",
+                    "description": "Unexplained 7-month chronological gap between Senior Frontend Developer and Full-Stack Lead roles.",
+                    "mitigation": "Clarify employment gap or add freelance/contract activities if applicable during this time."
+                },
+                {
+                    "type": "Credential Inflation",
+                    "severity": "high",
+                    "description": "AWS Certified Solutions Architect certification lists a verification ID that does not match official registry records.",
+                    "mitigation": "Check the verification code or date format. Ensure ID matches the AWS certification center registry."
+                },
+                {
+                    "type": "Vague Metrics",
+                    "severity": "low",
+                    "description": "Stated 'Spearheaded critical initiatives to improve site performance' without key quantitative metrics (e.g. % speedup).",
+                    "mitigation": "Quantify outcomes (e.g. 'boosted load time by 34% or reduced query latency by 120ms')."
+                }
+            ],
+            "authenticity_checks": {
+                "linkedin_match": "mismatch", # match, mismatch, unverified
+                "employment_history": "80% match (duration mismatch on 1 role)",
+                "education_verification": "verified (Bachelor of Science, Computer Science)",
+                "reference_checks": "2 pending, 1 positive response"
+            }
+        }
+        return JsonResponse(result)
+        
+    return render(request, "analyzer/authenticity_audit.html")
+
+
+def screening_room_view(request):
+    """Renders the interactive AI Screening Room / Mock Interview simulator."""
+    return render(request, "analyzer/screening_room.html")
+
+
+def auto_vet_view(request):
+    """Renders the Auto-Vet Agent bulk candidate screening dashboard."""
+    if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        # Simulated recruiter bulk parse screening results
+        candidates = [
+            {
+                "name": "Jane Smith",
+                "role": "Full-Stack Developer",
+                "fit_score": 87,
+                "authenticity_score": 92,
+                "top_skills": ["React", "Node.js", "PostgreSQL", "Docker"],
+                "flags": 0,
+                "status": "Shortlisted"
+            },
+            {
+                "name": "John Doe",
+                "role": "Backend Engineer",
+                "fit_score": 78,
+                "authenticity_score": 64,
+                "top_skills": ["Python", "Django", "AWS", "Redis"],
+                "flags": 2,
+                "status": "Under Review"
+            },
+            {
+                "name": "Robert Chen",
+                "role": "Lead Architect",
+                "fit_score": 91,
+                "authenticity_score": 96,
+                "top_skills": ["System Design", "Go", "Kubernetes", "gRPC"],
+                "flags": 0,
+                "status": "Shortlisted"
+            },
+            {
+                "name": "Sarah Miller",
+                "role": "Frontend Specialist",
+                "fit_score": 62,
+                "authenticity_score": 81,
+                "top_skills": ["TypeScript", "Next.js", "Tailwind CSS"],
+                "flags": 1,
+                "status": "Rejected"
+            }
+        ]
+        return JsonResponse({"status": "success", "candidates": candidates})
+        
+    return render(request, "analyzer/auto_vet.html")
+
+
+def skills_gap_view(request):
+    """Renders the Skills Gap Analysis visualization and competency mapping page."""
+    if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        # Simulated skills gap matching data
+        data = {
+            "status": "success",
+            "fit_score": 76,
+            "categories": [
+                {
+                    "name": "Core Technical Skills",
+                    "match": 80,
+                    "matched": ["React", "JavaScript", "HTML5/CSS3", "Git"],
+                    "missing": ["TypeScript", "Next.js"]
+                },
+                {
+                    "name": "Backend & Database",
+                    "match": 65,
+                    "matched": ["Node.js", "Express"],
+                    "missing": ["GraphQL", "MongoDB", "Redis"]
+                },
+                {
+                    "name": "DevOps & Cloud",
+                    "match": 40,
+                    "matched": ["Docker"],
+                    "missing": ["AWS", "CI/CD Pipelines", "Terraform"]
+                }
+            ],
+            "learning_resources": [
+                {"skill": "TypeScript", "resource": "Official TypeScript Deep Dive Guide (Free)", "link": "https://www.typescriptlang.org/"},
+                {"skill": "Next.js", "resource": "Next.js Learn Dashboard (Interactive)", "link": "https://nextjs.org/learn"},
+                {"skill": "AWS", "resource": "AWS Cloud Practitioner Essentials (Free 6h Course)", "link": "https://aws.amazon.com/training/"},
+                {"skill": "GraphQL", "resource": "Apollo Odyssey GraphQL Tutorials", "link": "https://odyssey.apollographql.com/"}
+            ]
+        }
+        return JsonResponse(data)
+        
+    return render(request, "analyzer/skills_gap.html")
+
+
+def chrome_extension_view(request):
+    """Renders the Chrome Extension download and product tour page."""
+    return render(request, "analyzer/chrome_extension.html")
+
+
