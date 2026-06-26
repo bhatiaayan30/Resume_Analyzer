@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Resume Analyzer AI - ATS Resume Scanner & Optimizer{% endblock %}</title>
+  <title>{% block title %}Resume Analyzer - ATS Resume Scanner & Optimizer{% endblock %}</title>
 
   <!-- SEO Meta Tags -->
-  <meta name="description" content="{% block meta_description %}Optimize your resume for applicant tracking systems with our AI-powered ATS checker. Identify skill gaps, formatting vulnerabilities, and generate cover letters.{% endblock %}">
-  <meta name="keywords" content="{% block meta_keywords %}resume analyzer, ats checker, ats scanner, resume scorer, resume optimization, career AI{% endblock %}">
+  <meta name="description" content="{% block meta_description %}Optimize your resume for applicant tracking systems with our advanced ATS checker. Identify skill gaps, formatting vulnerabilities, and generate cover letters.{% endblock %}">
+  <meta name="keywords" content="{% block meta_keywords %}resume analyzer, ats checker, ats scanner, resume scorer, resume optimization, career accelerator{% endblock %}">
   <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
   
   <!-- Canonical Link -->
@@ -16,15 +16,15 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
-  <meta property="og:title" content="{% block og_title %}Resume Analyzer AI - ATS Resume Scanner & Optimizer{% endblock %}">
-  <meta property="og:description" content="{% block og_description %}Optimize your resume for applicant tracking systems with our AI-powered ATS checker. Identify skill gaps, formatting vulnerabilities, and generate cover letters.{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}Resume Analyzer - ATS Resume Scanner & Optimizer{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Optimize your resume for applicant tracking systems with our advanced ATS checker. Identify skill gaps, formatting vulnerabilities, and generate cover letters.{% endblock %}">
   <meta property="og:image" content="{% block og_image %}{% if request.is_secure %}https{% else %}http{% endif %}://{{ request.get_host }}/static/images/og-image.png{% endblock %}">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="{% block twitter_url %}{{ request.build_absolute_uri }}{% endblock %}">
-  <meta property="twitter:title" content="{% block twitter_title %}Resume Analyzer AI - ATS Resume Scanner & Optimizer{% endblock %}">
-  <meta property="twitter:description" content="{% block twitter_description %}Optimize your resume for applicant tracking systems with our AI-powered ATS checker. Identify skill gaps, formatting vulnerabilities, and generate cover letters.{% endblock %}">
+  <meta property="twitter:title" content="{% block twitter_title %}Resume Analyzer - ATS Resume Scanner & Optimizer{% endblock %}">
+  <meta property="twitter:description" content="{% block twitter_description %}Optimize your resume for applicant tracking systems with our advanced ATS checker. Identify skill gaps, formatting vulnerabilities, and generate cover letters.{% endblock %}">
   <meta property="twitter:image" content="{% block twitter_image %}{% if request.is_secure %}https{% else %}http{% endif %}://{{ request.get_host }}/static/images/og-image.png{% endblock %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1219,7 +1219,7 @@
       <div class="max-w-[1440px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <div class="font-bold text-gray-300 flex items-center gap-2">
               <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-              Resume Analyzer AI
+              Resume Analyzer
           </div>
           <div class="flex items-center gap-6 text-sm">
               <a href="{% url 'index' %}" class="hover:text-white transition-colors">Home</a>

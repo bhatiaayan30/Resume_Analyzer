@@ -1,8 +1,8 @@
 <div align="center">
-  <img src="templates/analyzer/static/images/logo.png" alt="Resume Analyzer AI Logo" width="120" height="120" style="border-radius: 24px; margin-bottom: 16px;" onerror="this.style.display='none'"/>
-  <h1>Resume Analyzer AI</h1>
+  <img src="templates/analyzer/static/images/logo.png" alt="Resume Analyzer Logo" width="120" height="120" style="border-radius: 24px; margin-bottom: 16px;" onerror="this.style.display='none'"/>
+  <h1>Resume Analyzer</h1>
   <p><strong>Bypass the ATS. Optimise Your Profile. Secure the Interview.</strong></p>
-  <p>An enterprise-ready, AI-driven resume parsing and optimization suite built with Python, Django, Supabase, and Groq's high-throughput Llama-3 models.</p>
+  <p>An enterprise-ready, data-driven resume parsing and optimization suite built with Python, Django, Supabase, and Groq's high-throughput Llama-3 models.</p>
 
   <p>
     <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.12%2B-blue?logo=python&logoColor=white" alt="Python Version"/></a>
@@ -17,9 +17,9 @@
 
 ## 🌟 Executive Summary
 
-**Resume Analyzer AI** is a state-of-the-art career-acceleration application designed to help job candidates align their resumes with modern corporate recruitment systems. By leveraging advanced natural language processing (NLP) and vector keyword models, the platform identifies skill gaps, analyzes formatting syntax, exposes parsing vulnerabilities, and generates immediate upskilling pathways. 
+**Resume Analyzer** is a state-of-the-art career-acceleration application designed to help job candidates align their resumes with modern corporate recruitment systems. By leveraging advanced natural language processing (NLP) and vector keyword models, the platform identifies skill gaps, analyzes formatting syntax, exposes parsing vulnerabilities, and generates immediate upskilling pathways. 
 
-Featuring interactive AI interview simulations, an inline resume editor with live scoring recalculation, and a bespoke cover letter generator, it acts as a private, 24/7 technical recruiter.
+Featuring interactive mock interview simulations, an inline resume editor with live scoring recalculation, and a bespoke cover letter generator, it acts as a private, 24/7 technical recruiter.
 
 ---
 

@@ -63,7 +63,7 @@
     <div class="text-center max-w-2xl mx-auto mb-12">
       <h1 class="page-title leading-tight md:text-5xl font-black">Optimize Your Resume for ATS</h1>
       <p class="text-base md:text-lg text-gray-400 font-light mt-2 leading-relaxed">
-          Upload your resume and the target job description to receive a premium AI-powered alignment score, keyword analysis, and tailored optimization recommendations.
+          Upload your resume and the target job description to receive a premium alignment score, keyword analysis, and tailored optimization recommendations.
       </p>
     </div>
 
@@ -324,7 +324,7 @@
           </div>
           <h3 class="text-lg font-bold text-white mb-2">Input Target Job</h3>
           <p class="text-sm text-gray-400 font-light leading-relaxed">
-            Paste the job description of your target role. This allows our AI to analyze specific keyword alignment.
+            Paste the job description of your target role. This allows our engine to analyze specific keyword alignment.
           </p>
         </div>
 
@@ -333,9 +333,9 @@
           <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-brand font-black text-xl mb-6 border border-purple-500/20 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(139,92,246,0.1)]">
             3
           </div>
-          <h3 class="text-lg font-bold text-white mb-2">AI Scanner Audit</h3>
+          <h3 class="text-lg font-bold text-white mb-2">Scanner Audit</h3>
           <p class="text-sm text-gray-400 font-light leading-relaxed">
-            Our AI scans your resume against the job description to find missing skills, formatting issues, and ATS roadblocks.
+            Our system scans your resume against the job description to find missing skills, formatting issues, and ATS roadblocks.
           </p>
         </div>
 
@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const loadingMessages = [
         "Extracting document text...",
-        "Connecting to AI models...",
+        "Connecting to parser...",
         "Mapping skills to job requirements...",
         "Generating comprehensive report..."
     ];
@@ -568,7 +568,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         clearInterval(msgInterval);
                         window.location.href = `/results/${analysisId}/`;
                     } else if (statusData.status === 'error') {
-                        throw new Error("AI analysis failed during processing.");
+                        throw new Error("Analysis failed during processing.");
                     }
                 } catch (pollErr) {
                     clearInterval(pollInterval);
