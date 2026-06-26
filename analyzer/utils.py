@@ -292,7 +292,7 @@ def send_email_otp(user, otp_code: str):
     from django.template.loader import render_to_string
     from django.utils.html import strip_tags
 
-    subject = "Your AI Resume Analyzer Verification Code"
+    subject = "Your Resume Analyzer Verification Code"
     context = {
         'username': user.username,
         'otp_code': otp_code,
@@ -302,10 +302,41 @@ def send_email_otp(user, otp_code: str):
     html_message = render_to_string('analyzer/emails/otp_email.html', context)
     plain_message = strip_tags(html_message)
     
-    # Use EMAIL_HOST_USER if configured, else default from address
-    from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@resumeanalyzer.com')
-    if not from_email:
-        from_email = 'noreply@resumeanalyzer.com'
+    # Use configured DEFAULT_FROM_EMAIL
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'Resume Analyzer <noreply@resumeanalyzer.com>')
+    
+    send_mail(
+        subject,
+        plain_message,
+        from_email,
+        [user.email],
+        html_message=html_message,
+        fail_silently=False
+    )
+
+def send_welcome_email(user, domain=None):
+    """Send a welcome email to the newly registered user."""
+    if not user.email:
+        return
+    from django.core.mail import send_mail
+    from django.conf import settings
+    from django.template.loader import render_to_string
+    from django.utils.html import strip_tags
+
+    subject = "Welcome to Resume Analyzer – Account Confirmed!"
+    
+    if not domain:
+        domain = "resumeanalyzer.com"
+        
+    context = {
+        'username': user.username,
+        'domain': domain,
+    }
+    
+    html_message = render_to_string('analyzer/emails/welcome_email.html', context)
+    plain_message = strip_tags(html_message)
+    
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'AI Resume Analyzer <noreply@resumeanalyzer.com>')
     
     send_mail(
         subject,

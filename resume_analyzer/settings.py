@@ -121,6 +121,8 @@ LOGOUT_REDIRECT_URL = "/"
 # Gmail, set USE_SMTP=True in your .env and provide EMAIL_HOST_USER and EMAIL_HOST_PASSWORD.
 USE_SMTP = config("USE_SMTP", default=False, cast=bool)
 
+PASSWORD_RESET_TIMEOUT = 900  # 15 minutes validity
+
 if USE_SMTP:
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
@@ -128,11 +130,11 @@ if USE_SMTP:
     EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
     EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="your_email@gmail.com")
     EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="your_app_password")
-    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+    DEFAULT_FROM_EMAIL = f"Resume Analyzer <{EMAIL_HOST_USER}>"
 else:
     # Console backend – useful for local development and debugging
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-    DEFAULT_FROM_EMAIL = "webmaster@localhost"
+    DEFAULT_FROM_EMAIL = "Resume Analyzer <noreply@resumeanalyzer.com>"
 
 
 # ── Internationalisation ───────────────────────────────────────

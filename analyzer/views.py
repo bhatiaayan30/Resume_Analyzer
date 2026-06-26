@@ -31,6 +31,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.views import PasswordResetView
 
 from .ats_knowledge import ATS_FLAG_EXPLANATIONS
 from .models import Coupon, JobDescription, OTP, Persona, ResumeAnalysis, ResumeVersion, UserProfile, InterviewSession, InterviewMessage, LocalizedResume
@@ -38,7 +39,7 @@ from .tasks import process_resume_analysis
 from .utils import (
     analyze_with_ai, extract_text, generate_cover_letter, generate_otp, send_email_otp, send_sms_otp,
     suggest_bullet_rewrites, generate_next_interview_question, evaluate_interview_answer, parse_resume_to_json,
-    get_ai_summary_suggestions, get_ai_experience_bullets, localize_resume_data
+    get_ai_summary_suggestions, get_ai_experience_bullets, localize_resume_data, send_welcome_email
 )
 
 razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -451,6 +452,13 @@ def signup_view(request):
                 from django.db import IntegrityError
 
                 user = form.save()
+                # Send welcome email
+                try:
+                    send_welcome_email(user, request.get_host())
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).error(f"Failed to send welcome email: {e}")
+
                 # Specify the backend since we have multiple
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 return redirect("index")
@@ -1122,6 +1130,8 @@ def send_interview_message_api(request, session_id):
 def suggest_bullet_rewrite_api(request, analysis_id):
     """Returns 3 optimized rewrites and STAR/XYZ validation for a specific resume bullet point."""
     record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
+    if record.user and record.user != request.user:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
     try:
         body = json.loads(request.body)
         bullet_point = body.get("bullet_point", "").strip()
@@ -1147,6 +1157,8 @@ def suggest_bullet_rewrite_api(request, analysis_id):
 def recalculate_score_api(request, analysis_id):
     """Saves edited resume text and recalculates match analytics synchronously."""
     record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
+    if record.user and record.user != request.user:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
     try:
         body = json.loads(request.body)
         new_resume_text = body.get("resume_text", "").strip()
@@ -1767,5 +1779,23 @@ def skills_gap_view(request):
 def chrome_extension_view(request):
     """Renders the Chrome Extension download and product tour page."""
     return render(request, "analyzer/chrome_extension.html")
+
+
+class CustomPasswordResetView(PasswordResetView):
+    def form_valid(self, form):
+        opts = {
+            'use_https': self.request.is_secure(),
+            'token_generator': self.token_generator,
+            'from_email': self.from_email,
+            'email_template_name': self.email_template_name,
+            'subject_template_name': self.subject_template_name,
+            'request': self.request,
+            'html_email_template_name': self.html_email_template_name,
+            'extra_email_context': self.extra_email_context,
+            'domain_override': self.request.get_host(),
+        }
+        form.save(**opts)
+        from django.http import HttpResponseRedirect
+        return HttpResponseRedirect(self.get_success_url())
 
 
