@@ -3,7 +3,7 @@
 {% block title %}Interview Screening Room - Resume Analyzer{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8 relative z-10" x-data="{
+<div class="max-w-7xl mx-auto px-4 py-6 relative z-10" x-data="{
     interviewing: false,
     ended: false,
     role: 'Full-Stack Developer',
@@ -13,24 +13,108 @@
     sessionScore: null,
     evaluation: {},
     
+    // Coding & Editor States
+    editorCode: '',
+    selectedLanguage: 'python',
+    runningCode: false,
+    compilerOutput: '',
+    showTerminal: false,
+    integrityFlagsCount: 0,
+    securityBanner: '',
+    securityBannerTimer: null,
+    
+    // Proctoring & Integrity Logs
+    proctoringLogs: [
+        { time: 'System', text: 'Anti-cheat integrity engines initialized.' },
+        { time: 'System', text: 'Secure browser frame lock active.' }
+    ],
+    aiTips: [
+        'Interviewer: Welcome the candidate and check their microphone/setup.',
+        'Tip: Ask the candidate to read through the coding challenge before starting.'
+    ],
+    
+    // Challenge Boilerplates
+    challenges: {
+        valid_parentheses: {
+            title: 'Valid Parentheses',
+            difficulty: 'Easy',
+            category: 'Data Structures',
+            description: 'Given a string <code>s</code> containing just the characters <code>(</code>, <code>)</code>, <code>{</code>, <code>}</code>, <code>[</code> and <code>]</code>, determine if the input string is valid.<br><br>An input string is valid if:<br>1. Open brackets must be closed by the same type of brackets.<br>2. Open brackets must be closed in the correct order.<br>3. Every close bracket has a corresponding open bracket of the same type.',
+            boilerplates: {
+                python: 'def isValid(s: str) -> bool:\n    # Write your code here\n    stack = []\n    mapping = {')': '(', '}': '{', ']': '['}\n    for char in s:\n        if char in mapping:\n            top_element = stack.pop() if stack else \'#\'\n            if mapping[char] != top_element:\n                return False\n        else:\n            stack.append(char)\n    return not stack',
+                javascript: 'function isValid(s) {\n    // Write your code here\n    const stack = [];\n    const mapping = {\n        \')\': \'(\',\n        \'}\': \'{\',\n        \']\': \'[\'\n    };\n    for (let char of s) {\n        if (char in mapping) {\n            const topElement = stack.length ? stack.pop() : \'#\';\n            if (mapping[char] !== topElement) {\n                return false;\n            }\n        } else {\n            stack.push(char);\n        }\n    }\n    return stack.length === 0;\n}',
+                cpp: 'class Solution {\npublic:\n    bool isValid(string s) {\n        // Write your code here\n        return true;\n    }\n};',
+                java: 'class Solution {\n    public boolean isValid(String s) {\n        // Write your code here\n        return true;\n    }\n}'
+            }
+        },
+        reverse_linked_list: {
+            title: 'Reverse Linked List',
+            difficulty: 'Medium',
+            category: 'Algorithms',
+            description: 'Given the head of a singly linked list, reverse the list, and return the reversed list.<br><br><strong>Example:</strong><br>Input: head = [1,2,3,4,5]<br>Output: [5,4,3,2,1]',
+            boilerplates: {
+                python: '# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\n\ndef reverseList(head: ListNode) -> ListNode:\n    # Write your code here\n    prev = None\n    curr = head\n    while curr:\n        next_node = curr.next\n        curr.next = prev\n        prev = curr\n        curr = next_node\n    return prev',
+                javascript: '/*\n * function ListNode(val, next) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.next = (next===undefined ? null : next)\n * }\n */\nfunction reverseList(head) {\n    // Write your code here\n    let prev = null;\n    let curr = head;\n    while (curr) {\n        let nextNode = curr.next;\n        curr.next = prev;\n        prev = curr;\n        curr = nextNode;\n    }\n    return prev;\n}',
+                cpp: 'ListNode* reverseList(ListNode* head) {\n    // Write your code here\n    return nullptr;\n}',
+                java: 'public ListNode reverseList(ListNode head) {\n    // Write your code here\n    return null;\n}'
+            }
+        },
+        rate_limiter: {
+            title: 'Design a Sliding Window Rate Limiter',
+            difficulty: 'Hard',
+            category: 'System Design',
+            description: 'Implement a sliding window rate limiter that allows up to <code>maxRequests</code> per <code>windowSeconds</code> for a given client identifier.<br><br><strong>Requirements:</strong><br>- Thread-safe execution simulating production loads.<br>- Track client request timestamps dynamically.<br>- Prune obsolete logs to conserve memory footprint.',
+            boilerplates: {
+                python: 'import time\n\nclass RateLimiter:\n    def __init__(self, max_requests: int, window_seconds: int):\n        self.max_requests = max_requests\n        self.window_seconds = window_seconds\n        self.requests = {} # client_id -> list of timestamps\n\n    def is_allowed(self, client_id: str) -> bool:\n        # Write your code here\n        now = time.time()\n        if client_id not in self.requests:\n            self.requests[client_id] = []\n        \n        # Filter timestamps outside window\n        self.requests[client_id] = [t for t in self.requests[client_id] if now - t < self.window_seconds]\n        \n        if len(self.requests[client_id]) < self.max_requests:\n            self.requests[client_id].append(now)\n            return True\n        return False',
+                javascript: 'class RateLimiter {\n    constructor(maxRequests, windowSeconds) {\n        this.maxRequests = maxRequests;\n        this.windowSeconds = windowSeconds;\n        this.requests = new Map(); // clientId -> timestamps[]\n    }\n\n    isAllowed(clientId) {\n        // Write your code here\n        const now = Date.now() / 1000;\n        if (!this.requests.has(clientId)) {\n            this.requests.set(clientId, []);\n        }\n        \n        let times = this.requests.get(clientId);\n        times = times.filter(t => now - t < this.windowSeconds);\n        this.requests.set(clientId, times);\n        \n        if (times.length < this.maxRequests) {\n            times.push(now);\n            return true;\n        }\n        return false;\n    }\n}',
+                cpp: 'class RateLimiter {\npublic:\n    RateLimiter(int maxRequests, int windowSeconds) {}\n    bool isAllowed(string clientId) {\n        return true;\n    }\n};',
+                java: 'public class RateLimiter {\n    public RateLimiter(int maxRequests, int windowSeconds) {}\n    public boolean isAllowed(String clientId) {\n        return true;\n    }\n}'
+            }
+        }
+    },
+    
     // Interviewer Personas
     selectedPersona: 'sarah',
     personas: {
-        sarah: { name: 'Sarah', role: 'Friendly Recruiter', emoji: '👩‍💼', color: 'from-brand to-pink-500', intro: 'Hi there! I am Sarah, your friendly recruiter today. I want to understand your general career journey and how you fit our collaborative culture.', questions: [
-            'Could you tell me about a time you had to resolve a conflict or design disagreement within your project team?',
-            'What values and team dynamics are most important to you when choosing a workplace environment?',
-            'Can you share an experience where you had to quickly adapt to a major shift in project requirements?'
-        ]},
-        marcus: { name: 'Marcus', role: 'Tough Tech Lead', emoji: '🧑‍💻', color: 'from-red-500 to-amber-500', intro: 'Let\'s get straight to business. I am Marcus. I want to see if your technical decisions make solid architectural sense under load.', questions: [
-            'Could you tell me about a time you had to identify and optimize a performance bottleneck in a production database?',
-            'How do you approach structuring application state in a large-scale frontend React app under high state updates?',
-            'Explain how you would design a highly available cache layer with Redis for an API handling 10k requests per second.'
-        ]},
-        viktor: { name: 'Viktor', role: 'Fast-Paced CTO', emoji: '👨‍💼', color: 'from-purple-600 to-indigo-600', intro: 'Welcome. I am Viktor. We are scaling our engineering pipeline rapidly. I want to check your high-level product sense, systems thinking, and execution speed.', questions: [
-            'How do you balance technical debt against the pressure to deliver product features on tight deadlines?',
-            'Describe a situation where you had to build a core feature with minimal requirements and high ambiguity.',
-            'What major architectural decision did you make in your last role that you would do differently today?'
-        ]}
+        sarah: { 
+            name: 'Sarah', 
+            role: 'Friendly Recruiter', 
+            emoji: '👩‍💼', 
+            color: 'from-brand to-pink-500', 
+            intro: 'Hi there! I am Sarah, your friendly recruiter today. I want to understand your general career journey, coding comfort, and how you fit our collaborative culture.', 
+            challengeKey: 'valid_parentheses',
+            questions: [
+                'Excellent! Can you explain your solution for Valid Parentheses? What is its time complexity?',
+                'Could you tell me about a time you had to resolve a conflict or design disagreement within your project team?',
+                'Can you share an experience where you had to quickly adapt to a major shift in project requirements?'
+            ]
+        },
+        marcus: { 
+            name: 'Marcus', 
+            role: 'Tough Tech Lead', 
+            emoji: '🧑‍💻', 
+            color: 'from-red-500 to-amber-500', 
+            intro: 'Let\'s get straight to business. I am Marcus. I want to see if your technical decisions make solid architectural sense under load.', 
+            challengeKey: 'reverse_linked_list',
+            questions: [
+                'Okay, reverse linked list is a standard problem. Why did you choose this implementation, and how would you verify it if the list was extremely large?',
+                'How do you approach structuring application state in a large-scale frontend React app under high state updates?',
+                'Explain how you would design a highly available cache layer with Redis for an API handling 10k requests per second.'
+            ]
+        },
+        viktor: { 
+            name: 'Viktor', 
+            role: 'Fast-Paced CTO', 
+            emoji: '👨‍💼', 
+            color: 'from-purple-600 to-indigo-600', 
+            intro: 'Welcome. I am Viktor. We are scaling our engineering pipeline rapidly. I want to check your high-level product sense, systems thinking, and execution speed.', 
+            challengeKey: 'rate_limiter',
+            questions: [
+                'We design rate limiters to protect critical services. How would you scale this in a distributed cluster with Redis cluster, keeping consistency in mind?',
+                'How do you balance technical debt against the pressure to deliver product features on tight deadlines?',
+                'What major architectural decision did you make in your last role that you would do differently today?'
+            ]
+        }
     },
     currentQuestionIndex: 0,
     
@@ -38,7 +122,7 @@
     fillerCount: 0,
     confidenceLevel: 85,
     speedWPM: 110,
-    eyeContactStatus: 'Excellent',
+    attentionFocus: 'Excellent',
     
     startInterview() {
         this.interviewing = true;
@@ -49,16 +133,149 @@
         this.fillerCount = 0;
         this.confidenceLevel = 85;
         this.speedWPM = 110;
-        this.eyeContactStatus = 'Excellent';
+        this.attentionFocus = 'Excellent';
+        this.integrityFlagsCount = 0;
+        this.showTerminal = false;
+        this.compilerOutput = '';
+        this.proctoringLogs = [
+            { time: this.getLogTime(), text: 'Anti-cheat integrity engines initialized.' },
+            { time: this.getLogTime(), text: 'Secure browser frame lock active.' }
+        ];
         
         let p = this.personas[this.selectedPersona];
+        
+        // Load coding boilerplate
+        this.loadBoilerplate();
+        
+        this.aiTips = [
+            'Interviewer: Welcome the candidate and check their setup.',
+            `Tip: Ask candidate to solve the '${this.challenges[p.challengeKey].title}' challenge on the left.`,
+            'AI Monitor: Watch for immediate copy-pasting or code injection.'
+        ];
+        
         setTimeout(() => {
             this.messages.push({
                 sender: 'ai',
-                text: p.intro + ' Let\'s begin with the first question: ' + p.questions[0]
+                text: p.intro + ' To start, please review the coding problem on the left: **' + this.challenges[p.challengeKey].title + '**. Fill in your solution, run the tests to verify, and write a quick message here explaining your strategy when ready!'
             });
             this.aiThinking = false;
         }, 1500);
+    },
+    
+    loadBoilerplate() {
+        let p = this.personas[this.selectedPersona];
+        let chal = this.challenges[p.challengeKey];
+        this.editorCode = chal.boilerplates[this.selectedLanguage] || '';
+    },
+    
+    getLineNumbers() {
+        const count = this.editorCode.split('\n').length;
+        return Array.from({ length: Math.max(15, count) }, (_, i) => i + 1);
+    },
+    
+    getLogTime() {
+        const now = new Date();
+        return now.toTimeString().split(' ')[0];
+    },
+    
+    triggerSecurityFlag(flagType, logText) {
+        if (!this.interviewing) return;
+        this.integrityFlagsCount++;
+        
+        // Show floating banner
+        this.securityBanner = `SECURITY ALERT: ${flagType} INFRINGEMENT LOGGED`;
+        if (this.securityBannerTimer) clearTimeout(this.securityBannerTimer);
+        this.securityBannerTimer = setTimeout(() => {
+            this.securityBanner = '';
+        }, 4000);
+        
+        // Append log entry
+        this.proctoringLogs.unshift({
+            time: this.getLogTime(),
+            text: `[⚠️ FLAG] ${flagType}: ${logText}`
+        });
+        
+        // Recalculate metrics
+        this.confidenceLevel = Math.max(20, this.confidenceLevel - 15);
+        this.attentionFocus = 'Focus Drifted';
+        
+        // AI Suggestion updates
+        this.aiTips.unshift(`AI Proctor: Flagged candidate for ${flagType.toLowerCase()}. Review integrity report.`);
+    },
+    
+    handlePaste(event) {
+        // Intercept and prevent paste in the editor
+        event.preventDefault();
+        this.triggerSecurityFlag('CLIPBOARD_PASTE', 'Attempted to paste text into code editor canvas.');
+    },
+    
+    handleRightClick() {
+        this.triggerSecurityFlag('CONTEXT_MENU', 'Attempted context menu trigger (right-click) inside code workspace.');
+    },
+    
+    handleBlur() {
+        this.blurTimestamp = Date.now();
+    },
+    
+    handleFocus() {
+        if (this.blurTimestamp) {
+            let durationSeconds = ((Date.now() - this.blurTimestamp) / 1000).toFixed(1);
+            if (durationSeconds > 0.4) {
+                this.triggerSecurityFlag('TAB_SWITCH', `Lost window focus/switched browser tab for ${durationSeconds} seconds.`);
+            }
+            this.blurTimestamp = null;
+        }
+    },
+    
+    runCode() {
+        if (this.runningCode) return;
+        this.runningCode = true;
+        this.showTerminal = true;
+        this.compilerOutput = 'Compiling and linking files...\nRunning structural test suite...';
+        
+        let p = this.personas[this.selectedPersona];
+        let challengeKey = p.challengeKey;
+        
+        setTimeout(() => {
+            this.runningCode = false;
+            if (challengeKey === 'valid_parentheses') {
+                this.compilerOutput = `$ python3 -m unittest test_main.py\n\n` +
+                                     `test_empty (test_main.ValidParenthesesTest) ... ok\n` +
+                                     `test_simple (test_main.ValidParenthesesTest) ... ok\n` +
+                                     `test_nested (test_main.ValidParenthesesTest) ... ok\n` +
+                                     `test_invalid (test_main.ValidParenthesesTest) ... ok\n\n` +
+                                     `----------------------------------------------------------------------\n` +
+                                     `Ran 4 tests in 0.038s\n\n` +
+                                     `OK (All Test Cases Passed!)\n` +
+                                     `Metrics: O(N) Time Complexity, O(N) Space Complexity\n` +
+                                     `Recruiter Tip: Candidate completed code successfully. Move to logic verification.`;
+            } else if (challengeKey === 'reverse_linked_list') {
+                this.compilerOutput = `$ node test.js\n\n` +
+                                     `Test Case 1: head = [1,2,3,4,5] -> Output: [5,4,3,2,1] ... SUCCESS\n` +
+                                     `Test Case 2: head = [1] -> Output: [1] ... SUCCESS\n` +
+                                     `Test Case 3: head = [] -> Output: [] ... SUCCESS\n\n` +
+                                     `All 3 system test validation checks PASSED.\n` +
+                                     `Performance: 42ms execution, O(N) time, O(1) space auxiliary storage.\n` +
+                                     `Proctor Alert: Safe compilation verified.`;
+            } else {
+                this.compilerOutput = `$ g++ -std=c++17 main.cpp && ./a.out\n\n` +
+                                     `[SlidingWindowRateLimiter] Starting system stress simulation...\n` +
+                                     `-> Test Case 1: Multi-threading 100 threads/sec limit 10 -> PASSED\n` +
+                                     `-> Test Case 2: Out of window expiry cleaning -> PASSED\n` +
+                                     `-> Test Case 3: Client discrimination isolation check -> PASSED\n\n` +
+                                     `All tests succeeded!\n` +
+                                     `Performance Metrics: 0.12ms query execution, O(1) decision path, O(U) space scale.`;
+            }
+            
+            // Log successful compiler run in proctoring
+            this.proctoringLogs.unshift({
+                time: this.getLogTime(),
+                text: `[System] Compilation ran successfully. All test cases verified.`
+            });
+            this.confidenceLevel = Math.min(98, this.confidenceLevel + 10);
+            
+            this.aiTips.unshift(`AI Tip: Candidate's code compiled successfully. Prompt them to explain their logic.`);
+        }, 1800);
     },
     
     submitAnswer() {
@@ -81,9 +298,8 @@
         
         // Dynamically adjust confidence and speech speed
         let wordsCount = answer.split(/\s+/).length;
-        this.speedWPM = Math.min(180, Math.max(90, Math.floor(wordsCount * 4 + 80)));
-        this.confidenceLevel = Math.max(40, Math.min(98, 100 - (this.fillerCount * 8) + (wordsCount > 15 ? 10 : -5)));
-        this.eyeContactStatus = matchedFillers > 1 ? 'Focus Drifted' : 'Excellent';
+        this.speedWPM = Math.min(185, Math.max(85, Math.floor(wordsCount * 4.5 + 75)));
+        this.confidenceLevel = Math.max(35, Math.min(98, this.confidenceLevel - (matchedFillers * 6) + (wordsCount > 15 ? 8 : -4)));
         
         // Add user response
         this.messages.push({
@@ -96,91 +312,102 @@
         
         let p = this.personas[this.selectedPersona];
         setTimeout(() => {
-            this.currentQuestionIndex++;
             if (this.currentQuestionIndex < p.questions.length) {
                 this.messages.push({
                     sender: 'ai',
-                    text: 'Thank you. Next question: ' + p.questions[this.currentQuestionIndex]
+                    text: p.questions[this.currentQuestionIndex]
                 });
+                this.currentQuestionIndex++;
                 this.aiThinking = false;
+                
+                // update recruiter AI tip
+                this.aiTips.unshift(`AI Tip: Probe candidate on their previous answer: "${answer.substring(0, 30)}..."`);
             } else {
                 this.finishInterview();
             }
-        }, 2000);
+        }, 2200);
     },
     
     finishInterview() {
         this.messages.push({
             sender: 'ai',
-            text: 'We have completed our screening questions. Generating your evaluation report...'
+            text: 'Thank you for answering our questions. We have concluded the screening session. Generating your comprehensive evaluation and integrity audit report...'
         });
-        
-        let p = this.personas[this.selectedPersona];
         
         setTimeout(() => {
             this.aiThinking = false;
             this.interviewing = false;
             this.ended = true;
             
-            // Adjust end scores based on bio metrics
-            let fillerDeduction = this.fillerCount * 3;
-            let comScore = Math.max(50, 92 - fillerDeduction);
-            let techScore = this.selectedPersona === 'marcus' ? 88 : (this.selectedPersona === 'viktor' ? 84 : 80);
-            this.sessionScore = Math.floor((comScore + techScore + 85) / 3);
+            // Adjust end scores based on bio metrics and integrity flags
+            let fillerDeduction = this.fillerCount * 4;
+            let integrityDeduction = this.integrityFlagsCount * 12;
+            
+            let comScore = Math.max(40, 92 - fillerDeduction);
+            let integrityScore = Math.max(0, 100 - integrityDeduction);
+            let techScore = this.selectedPersona === 'marcus' ? 88 : (this.selectedPersona === 'viktor' ? 90 : 80);
+            if (this.compilerOutput.includes('SUCCESS') || this.compilerOutput.includes('Passed') || this.compilerOutput.includes('succeeded')) {
+                techScore += 8;
+            }
+            
+            this.sessionScore = Math.floor((comScore + techScore + integrityScore) / 3);
             
             this.evaluation = {
                 communication: comScore,
                 technical_depth: techScore,
-                clarity: Math.max(55, 90 - (this.fillerCount * 2)),
+                integrity: integrityScore,
                 strengths: [
-                    'Great clarity on architectural decisions.',
-                    'Structured problem descriptions using the STAR framework.',
-                    this.selectedPersona === 'marcus' ? 'Demonstrated strong understanding of backend scaling/caching.' : 'Exhibited solid adaptability and collaboration skills.'
+                    'Demonstrated working compiler solution with solid complexity characteristics.',
+                    'Exhibited calm articulation on architectural questions.',
+                    this.integrityFlagsCount === 0 ? 'Flawless integrity. Zero focus switches or clipboard violations.' : 'Recovered alignment after security prompts.'
                 ],
                 gaps: [
-                    this.fillerCount > 4 ? 'Frequent usage of verbal filler words (e.g. \"like\", \"um\").' : 'Communication was steady, though voice speed varied.',
-                    this.selectedPersona === 'viktor' ? 'Could focus more on the strategic business impact of design decisions.' : 'Expand details on testing coverage patterns.'
+                    this.fillerCount > 3 ? 'Verbal clutter detected. Work on minimizing placeholder vocalizations.' : 'Ensure consistent speech pace when translating thought patterns to verbal descriptions.',
+                    this.integrityFlagsCount > 0 ? `Integrity Warning: ${this.integrityFlagsCount} security flags logged during simulation.` : 'Expand details on fallback testing coverage configurations.'
                 ]
             };
         }, 2500);
     },
 
     init() {
+        // Set event listeners for focus/blur on window to detect tab switching
+        window.addEventListener('blur', () => this.handleBlur());
+        window.addEventListener('focus', () => this.handleFocus());
+        
         const params = new URLSearchParams(window.location.search);
         const persona = params.get('persona');
         if (persona && this.personas[persona]) {
             this.selectedPersona = persona;
         }
-        const focus = params.get('focus');
-        if (focus) {
-            this.$nextTick(() => {
-                const el = document.getElementById(focus) || document.querySelector(`[name=${focus}]`) || document.querySelector('select, input, button');
-                if (el) {
-                    el.focus();
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            });
-        }
+        
+        // Watch for language changes to update boilerplate
+        this.$watch('selectedLanguage', value => {
+            this.loadBoilerplate();
+        });
     }
 }">
+
     <!-- Page Header -->
-    <div class="text-center max-w-2xl mx-auto mb-12">
+    <div class="text-center max-w-2xl mx-auto mb-8">
         <h1 class="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
-            Screening <span class="bg-gradient-to-r from-brand to-pink-500 bg-clip-text text-transparent font-black">Room</span>
+            Interview <span class="bg-gradient-to-r from-brand to-pink-500 bg-clip-text text-transparent font-black">Co-Pilot</span>
         </h1>
-        <p class="text-base text-gray-400 mt-3 font-light leading-relaxed">
-            Enter the interactive simulated screening room. Experience mock behavioral and technical interviews with real-time scoring.
+        <p class="text-base text-gray-400 mt-2 font-light">
+            Enter the interactive AI-powered screening workspace. Test coding skills while real-time integrity engines audit security.
         </p>
     </div>
 
     <!-- Pre-Interview Settings Panel -->
     <div x-show="!interviewing && !ended" class="max-w-xl mx-auto premium-card p-8 space-y-6">
-        <h2 class="text-xl font-bold text-white text-center">Setup Interview Session</h2>
+        <div class="text-center space-y-2">
+            <h2 class="text-xl font-bold text-white">Setup Screening Session</h2>
+            <p class="text-xs text-gray-400">Select target role and interviewer to generate customized coding assessment challenges.</p>
+        </div>
         
         <div class="space-y-4">
             <div class="space-y-1.5">
                 <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Target Job Role</label>
-                <select x-model="role" class="w-full bg-[#1e1e24] border border-gray-700/60 rounded-xl p-3 text-white focus:border-brand outline-none">
+                <select x-model="role" class="w-full bg-[#111116] border border-white/10 rounded-xl p-3 text-white focus:border-brand outline-none text-sm transition-colors">
                     <option value="Full-Stack Developer">Full-Stack Developer</option>
                     <option value="Backend Engineer">Backend Engineer</option>
                     <option value="Frontend Specialist">Frontend Specialist</option>
@@ -190,166 +417,283 @@
 
             <!-- Interviewer Persona cards selection -->
             <div class="space-y-2">
-                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Select Interviewer Persona</label>
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block font-sans">Select Interviewer Persona</label>
                 <div class="grid grid-cols-3 gap-3">
                     <template x-for="(pData, pKey) in personas" :key="pKey">
                         <div @click="selectedPersona = pKey" 
-                             class="p-3.5 rounded-xl border cursor-pointer text-center transition-all duration-300 relative overflow-hidden flex flex-col items-center justify-between"
-                             :class="selectedPersona === pKey ? 'border-brand bg-brand/10 shadow-[0_0_15px_rgba(139,92,246,0.15)]' : 'border-white/5 bg-white/[0.02] hover:border-white/10'">
+                             class="p-4 rounded-xl border cursor-pointer text-center transition-all duration-300 relative overflow-hidden flex flex-col items-center justify-between h-36"
+                             :class="selectedPersona === pKey ? 'border-brand bg-brand/10 shadow-[0_0_15px_rgba(139,92,246,0.15)] scale-102' : 'border-white/5 bg-white/[0.02] hover:border-white/10'">
                             <span class="text-3xl mb-2" x-text="pData.emoji"></span>
                             <div>
                                 <span class="text-xs font-bold text-white block" x-text="pData.name"></span>
-                                <span class="text-[9px] text-gray-500 block leading-tight mt-0.5" x-text="pData.role"></span>
+                                <span class="text-[9px] text-gray-400 block leading-tight mt-0.5" x-text="pData.role"></span>
                             </div>
+                            <!-- Tiny tag for challenge type -->
+                            <div class="mt-2 text-[8px] px-1.5 py-0.5 rounded bg-white/5 text-gray-400 border border-white/5" x-text="challenges[pData.challengeKey].difficulty"></div>
                         </div>
                     </template>
                 </div>
             </div>
             
             <div class="space-y-1.5">
-                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Interview Mode</label>
-                <div class="grid grid-cols-2 gap-4">
-                    <label class="flex items-center gap-3 p-4 rounded-xl border border-brand bg-brand/5 cursor-pointer">
-                        <input type="radio" name="mode" checked class="text-brand focus:ring-0">
-                        <div class="text-left">
-                            <span class="text-sm font-bold text-white block">Text Chat</span>
-                            <span class="text-[10px] text-gray-400 font-light">Interactive simulator</span>
-                        </div>
-                    </label>
-                    <label class="flex items-center gap-3 p-4 rounded-xl border border-white/5 bg-white/[0.02] cursor-not-allowed opacity-50">
-                        <input type="radio" name="mode" disabled class="text-brand focus:ring-0">
-                        <div class="text-left">
-                            <span class="text-sm font-bold text-white block">Voice Call</span>
-                            <span class="text-[10px] text-gray-400 font-light">Speech-to-text (PRO)</span>
-                        </div>
-                    </label>
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Workspace Language</label>
+                <div class="grid grid-cols-4 gap-2">
+                    <button @click="selectedLanguage = 'python'" class="py-2.5 rounded-lg border text-xs font-medium text-white transition-colors"
+                            :class="selectedLanguage === 'python' ? 'bg-brand/20 border-brand' : 'bg-white/[0.02] border-white/5 hover:border-white/10'">
+                        Python
+                    </button>
+                    <button @click="selectedLanguage = 'javascript'" class="py-2.5 rounded-lg border text-xs font-medium text-white transition-colors"
+                            :class="selectedLanguage === 'javascript' ? 'bg-brand/20 border-brand' : 'bg-white/[0.02] border-white/5 hover:border-white/10'">
+                        JavaScript
+                    </button>
+                    <button @click="selectedLanguage = 'cpp'" class="py-2.5 rounded-lg border text-xs font-medium text-white transition-colors"
+                            :class="selectedLanguage === 'cpp' ? 'bg-brand/20 border-brand' : 'bg-white/[0.02] border-white/5 hover:border-white/10'">
+                        C++
+                    </button>
+                    <button @click="selectedLanguage = 'java'" class="py-2.5 rounded-lg border text-xs font-medium text-white transition-colors"
+                            :class="selectedLanguage === 'java' ? 'bg-brand/20 border-brand' : 'bg-white/[0.02] border-white/5 hover:border-white/10'">
+                        Java
+                    </button>
                 </div>
             </div>
         </div>
 
-        <button @click="startInterview()" class="submit-btn w-full py-4 text-center font-bold">
+        <button @click="startInterview()" class="submit-btn w-full py-4 text-center font-bold mt-2">
             Start Live Simulation
         </button>
     </div>
 
-    <!-- Active Interview Screening Room -->
-    <div x-show="interviewing" class="grid grid-cols-1 lg:grid-cols-3 gap-8" style="display: none;">
+    <!-- Active Interview Screening Room Workspace -->
+    <div x-show="interviewing" class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative" style="display: none;">
         
-        <!-- Interviewer Feed / Waveform -->
-        <div class="lg:col-span-1 space-y-6">
-            <div class="premium-card p-6 text-center space-y-6 relative overflow-hidden">
-                <!-- Glowing Pulsers -->
-                <div class="absolute inset-0 bg-brand/5 pointer-events-none radial-gradient"></div>
-                
-                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest relative z-10">Recruiter Feed</h3>
-                
-                <!-- Recruiter Avatar -->
-                <div class="w-32 h-32 mx-auto rounded-full bg-gradient-to-tr flex items-center justify-center text-white text-5xl relative z-10 shadow-xl border border-white/10 group"
-                     :class="personas[selectedPersona].color">
-                    <span x-text="personas[selectedPersona].emoji"></span>
-                    <div class="absolute -inset-1 rounded-full border border-brand/40 animate-ping opacity-60"></div>
-                </div>
-
-                <div class="space-y-1 relative z-10">
-                    <h4 class="text-white font-bold" x-text="'Interviewer ' + personas[selectedPersona].name"></h4>
-                    <p class="text-xs text-gray-400 font-light" x-text="personas[selectedPersona].role"></p>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                        Streaming
-                    </span>
-                </div>
-
-                <!-- Animated Waveforms -->
-                <div class="flex items-center justify-center gap-1 h-12 relative z-10">
-                    <span class="w-1 rounded-full bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 48px; transform: scaleY(0.7)' : 'height: 12px; transform: scaleY(1)'"></span>
-                    <span class="w-1 rounded-full bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 32px; transform: scaleY(1)' : 'height: 8px; transform: scaleY(1)'"></span>
-                    <span class="w-1 rounded-full bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 44px; transform: scaleY(0.5)' : 'height: 16px; transform: scaleY(1)'"></span>
-                    <span class="w-1 rounded-full bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 36px; transform: scaleY(1.2)' : 'height: 10px; transform: scaleY(1)'"></span>
-                    <span class="w-1 rounded-full bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 24px; transform: scaleY(0.8)' : 'height: 14px; transform: scaleY(1)'"></span>
-                </div>
-            </div>
-
-            <!-- Biometric & Sentiment Analysis Panel -->
-            <div class="premium-card p-5 space-y-4 text-left">
-                <h4 class="text-xs font-bold text-white uppercase tracking-widest border-b border-white/5 pb-2">Real-Time Biometrics</h4>
-                
-                <!-- Confidence Bar -->
-                <div class="space-y-1">
-                    <div class="flex justify-between items-center text-[10px]">
-                        <span class="text-gray-400">Confidence Index</span>
-                        <span class="text-brand font-bold" x-text="confidenceLevel + '%'"></span>
-                    </div>
-                    <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                        <div class="bg-brand h-full rounded-full transition-all duration-300" :style="'width: ' + confidenceLevel + '%'"></div>
-                    </div>
-                </div>
-
-                <!-- Speech Speed WPM -->
-                <div class="space-y-1">
-                    <div class="flex justify-between items-center text-[10px]">
-                        <span class="text-gray-400">Estimated Speed</span>
-                        <span class="text-emerald-400 font-bold" x-text="speedWPM + ' WPM'"></span>
-                    </div>
-                    <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                        <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" :style="'width: ' + (speedWPM / 2) + '%'"></div>
-                    </div>
-                </div>
-
-                <!-- Filler Words Counter -->
-                <div class="flex justify-between items-center text-[10px]">
-                    <span class="text-gray-400">Filler Hesitations</span>
-                    <span class="text-yellow-500 font-bold" x-text="fillerCount + ' matches'"></span>
-                </div>
-
-                <!-- Eye Contact Indicator -->
-                <div class="flex justify-between items-center text-[10px]">
-                    <span class="text-gray-400">Simulated Attention Focus</span>
-                    <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase" 
-                          :class="eyeContactStatus === 'Excellent' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'"
-                          x-text="eyeContactStatus"></span>
-                </div>
-            </div>
-            
-            <button @click="finishInterview()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-xl border border-red-500/20 transition-colors text-center text-sm">
-                End Session Early
-            </button>
+        <!-- Floating Security Infringement Alert -->
+        <div x-show="securityBanner" x-transition.duration.300ms
+             class="absolute top-2 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-red-600 border border-red-500 rounded-xl text-white font-black text-xs tracking-wider uppercase animate-bounce shadow-2xl flex items-center gap-2">
+            <span class="text-base">⚠️</span>
+            <span x-text="securityBanner"></span>
         </div>
 
-        <!-- Transcript Feed & Inputs -->
-        <div class="lg:col-span-2 premium-card p-6 flex flex-col h-[500px]">
-            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">Interview Console</h3>
+        <!-- LEFT SIDE: Interactive Coding Sandbox (7 Columns) -->
+        <div class="lg:col-span-7 flex flex-col premium-card p-0 overflow-hidden border border-white/5 bg-neutral-900/50 backdrop-blur-md rounded-2xl h-[650px] relative">
             
-            <!-- Chat Logs -->
-            <div class="flex-grow overflow-y-auto space-y-4 mb-4 pr-2">
-                <template x-for="(msg, index) in messages" :key="index">
-                    <div class="flex flex-col" :class="msg.sender === 'user' ? 'items-end' : 'items-start'">
-                        <div class="max-w-md p-4 rounded-2xl text-sm leading-relaxed" 
-                             :class="msg.sender === 'user' ? 'bg-brand text-white rounded-br-none' : 'bg-white/5 border border-white/5 text-gray-300 rounded-bl-none'">
-                            <p x-text="msg.text"></p>
-                        </div>
-                        <span class="text-[9px] text-gray-500 font-bold uppercase mt-1 px-1" x-text="msg.sender === 'user' ? 'You' : 'Recruiter'"></span>
-                    </div>
-                </template>
+            <!-- Editor Title bar -->
+            <div class="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-[#141419]/90">
+                <div class="flex items-center gap-2">
+                    <span class="text-emerald-400 font-mono text-xs">⚡ code_sandbox.py</span>
+                    <span class="px-2 py-0.5 text-[9px] font-bold uppercase rounded bg-white/5 border border-white/5 text-gray-400" 
+                          x-text="challenges[personas[selectedPersona].challengeKey].category"></span>
+                </div>
+                <!-- Language drop selection -->
+                <div class="flex items-center gap-3">
+                    <span class="text-[10px] text-gray-500 font-bold uppercase">Language:</span>
+                    <select x-model="selectedLanguage" class="bg-[#1c1c24] border border-white/10 rounded px-2.5 py-1 text-xs text-white outline-none focus:border-brand font-mono">
+                        <option value="python">Python 3</option>
+                        <option value="javascript">JavaScript (ES6)</option>
+                        <option value="cpp">C++ 17</option>
+                        <option value="java">Java 11</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Split View: Problem Description (Top) & Editor (Bottom) -->
+            <div class="flex flex-col flex-grow overflow-hidden">
                 
-                <!-- Thinking State -->
-                <div x-show="aiThinking" class="flex flex-col items-start">
-                    <div class="p-4 bg-white/5 border border-white/5 text-gray-300 rounded-2xl rounded-bl-none flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 0ms"></span>
-                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 150ms"></span>
-                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 300ms"></span>
+                <!-- Problem description pane (Height 35%) -->
+                <div class="h-[32%] border-b border-white/5 overflow-y-auto px-5 py-4 bg-[#111115]/50 select-none">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <h4 class="text-sm font-bold text-white" x-text="challenges[personas[selectedPersona].challengeKey].title"></h4>
+                        <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase"
+                              :class="{
+                                  'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': challenges[personas[selectedPersona].challengeKey].difficulty === 'Easy',
+                                  'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20': challenges[personas[selectedPersona].challengeKey].difficulty === 'Medium',
+                                  'bg-red-500/10 text-red-400 border border-red-500/20': challenges[personas[selectedPersona].challengeKey].difficulty === 'Hard'
+                              }"
+                              x-text="challenges[personas[selectedPersona].challengeKey].difficulty"></span>
+                    </div>
+                    <div class="text-[11px] text-gray-300 leading-relaxed font-sans" x-html="challenges[personas[selectedPersona].challengeKey].description"></div>
+                </div>
+
+                <!-- Coding Canvas Area (Height 68%) -->
+                <div class="flex flex-grow relative overflow-hidden bg-[#0d0d11]">
+                    
+                    <!-- Line Numbers Gutter -->
+                    <div class="w-12 bg-[#09090c] border-r border-white/5 py-4 flex flex-col items-center select-none overflow-hidden text-gray-600 font-mono text-xs leading-6 text-right pr-2">
+                        <template x-for="line in getLineNumbers()" :key="line">
+                            <span x-text="line"></span>
+                        </template>
+                    </div>
+
+                    <!-- Editor canvas element -->
+                    <textarea x-model="editorCode" 
+                              @paste="handlePaste($event)" 
+                              @contextmenu.prevent="handleRightClick()"
+                              class="flex-grow bg-transparent p-4 text-xs font-mono text-emerald-400 leading-6 resize-none outline-none overflow-y-auto w-full caret-brand select-text"
+                              spellcheck="false"
+                              placeholder="# Write your logic here..."></textarea>
+                </div>
+            </div>
+
+            <!-- Terminal Drawer Overlay (Slides up when compiled) -->
+            <div x-show="showTerminal" x-transition.origin.bottom
+                 class="absolute bottom-12 left-0 right-0 h-[220px] bg-[#07070a] border-t border-white/10 flex flex-col z-30 shadow-2xl" style="display: none;">
+                <div class="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-[#0f0f14]">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        <span class="text-[10px] text-gray-400 font-mono ml-2">Sandbox Compiler Console</span>
+                    </div>
+                    <button @click="showTerminal = false" class="text-gray-500 hover:text-white text-xs font-bold font-sans">✕</button>
+                </div>
+                <div class="p-4 overflow-y-auto font-mono text-[10px] text-gray-300 leading-relaxed flex-grow whitespace-pre-wrap selection:bg-brand/20 select-text" x-text="compilerOutput"></div>
+            </div>
+
+            <!-- Bottom Editor Action Bar -->
+            <div class="h-12 border-t border-white/5 bg-[#141419]/90 px-4 flex items-center justify-between relative z-40 select-none">
+                <div class="flex items-center gap-2">
+                    <button @click="showTerminal = !showTerminal" class="text-[10px] font-bold text-gray-400 hover:text-white flex items-center gap-1.5 bg-white/5 border border-white/5 rounded px-2.5 py-1 transition-colors">
+                        <span class="text-xs">🖥️</span> Terminal Logs
+                    </button>
+                </div>
+                <div class="flex gap-2">
+                    <button @click="runCode()" :disabled="runningCode"
+                            class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-md">
+                        <span x-show="!runningCode">▶ Run Code</span>
+                        <span x-show="runningCode" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        <span x-show="runningCode">Compiling...</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDE: AI Interviewer, Live Transcript & Proctoring (5 Columns) -->
+        <div class="lg:col-span-5 flex flex-col gap-5 h-[650px]">
+            
+            <!-- Recruiter Feed Panel -->
+            <div class="premium-card p-4 flex items-center justify-between border border-white/5 bg-neutral-900/50 backdrop-blur-md rounded-2xl relative select-none">
+                <div class="flex items-center gap-3">
+                    <!-- Recruiter Avatar -->
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr flex items-center justify-center text-white text-xl relative shadow border border-white/10 shrink-0"
+                         :class="personas[selectedPersona].color">
+                        <span x-text="personas[selectedPersona].emoji"></span>
+                        <div class="absolute -inset-0.5 rounded-full border border-brand/40 animate-ping opacity-50"></div>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-white" x-text="personas[selectedPersona].name + ' (' + personas[selectedPersona].role + ')'"></h4>
+                        <div class="flex items-center gap-1 mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-[9px] text-emerald-400 font-bold uppercase tracking-wider">Live Simulation Session</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Animated Waves -->
+                <div class="flex items-center gap-0.5 h-6">
+                    <span class="w-0.5 rounded bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 16px; transform: scaleY(0.7)' : 'height: 6px; transform: scaleY(1)'"></span>
+                    <span class="w-0.5 rounded bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 24px; transform: scaleY(1)' : 'height: 4px; transform: scaleY(1)'"></span>
+                    <span class="w-0.5 rounded bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 18px; transform: scaleY(0.5)' : 'height: 8px; transform: scaleY(1)'"></span>
+                    <span class="w-0.5 rounded bg-brand/80 transition-all duration-300" :style="aiThinking ? 'height: 20px; transform: scaleY(1.2)' : 'height: 5px; transform: scaleY(1)'"></span>
+                </div>
+            </div>
+
+            <!-- Middle Tab Panels: (Live Transcript / Proctoring Audit Logs) -->
+            <div class="flex-grow flex flex-col premium-card p-5 border border-white/5 bg-neutral-900/50 backdrop-blur-md rounded-2xl overflow-hidden h-[400px]" x-data="{ activeTab: 'transcript' }">
+                
+                <!-- Tabs Selector -->
+                <div class="flex border-b border-white/5 mb-4 pb-2 justify-between items-center select-none">
+                    <div class="flex gap-4">
+                        <button @click="activeTab = 'transcript'" 
+                                class="text-xs font-bold uppercase tracking-widest pb-1 transition-all"
+                                :class="activeTab === 'transcript' ? 'text-white border-b-2 border-brand' : 'text-gray-500 hover:text-gray-300'">
+                            Live Transcript
+                        </button>
+                        <button @click="activeTab = 'proctor'" 
+                                class="text-xs font-bold uppercase tracking-widest pb-1 transition-all flex items-center gap-1.5"
+                                :class="activeTab === 'proctor' ? 'text-white border-b-2 border-brand' : 'text-gray-500 hover:text-gray-300'">
+                            Proctoring Logs 
+                            <span class="text-[9px] px-1 py-0.2 rounded font-black" 
+                                  :class="integrityFlagsCount > 0 ? 'bg-red-500/20 text-red-400 border border-red-500/20' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20'"
+                                  x-text="integrityFlagsCount"></span>
+                        </button>
+                    </div>
+                    
+                    <span class="text-[9px] text-gray-500 font-bold font-mono">RECORDING ON</span>
+                </div>
+
+                <!-- Tab 1: Live Chat Transcript -->
+                <div x-show="activeTab === 'transcript'" class="flex-grow flex flex-col overflow-hidden">
+                    <div class="flex-grow overflow-y-auto space-y-4 mb-4 pr-1 selection:bg-brand/20 select-text">
+                        <template x-for="(msg, index) in messages" :key="index">
+                            <div class="flex flex-col" :class="msg.sender === 'user' ? 'items-end' : 'items-start'">
+                                <div class="max-w-[280px] p-3 rounded-xl text-xs leading-relaxed" 
+                                     :class="msg.sender === 'user' ? 'bg-brand text-white rounded-br-none' : 'bg-white/5 border border-white/5 text-gray-300 rounded-bl-none'">
+                                    <p x-text="msg.text"></p>
+                                </div>
+                                <span class="text-[8px] text-gray-500 font-bold uppercase mt-1 px-1" x-text="msg.sender === 'user' ? 'You (Candidate)' : 'Interviewer'"></span>
+                            </div>
+                        </template>
+
+                        <!-- Thinking bubble -->
+                        <div x-show="aiThinking" class="flex flex-col items-start">
+                            <div class="p-3 bg-white/5 border border-white/5 text-gray-300 rounded-xl rounded-bl-none flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 0ms"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 150ms"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 300ms"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Form -->
+                    <form @submit.prevent="submitAnswer()" class="flex gap-2 border-t border-white/5 pt-3 select-none">
+                        <input type="text" x-model="inputMessage" placeholder="Explain your approach or reply..." :disabled="aiThinking"
+                               class="flex-grow bg-[#111116] border border-white/10 rounded-xl p-2.5 text-white placeholder-gray-500 focus:border-brand outline-none text-xs transition-colors">
+                        <button type="submit" :disabled="aiThinking"
+                                class="bg-brand hover:bg-brand-hover text-white px-4 py-2.5 rounded-xl font-bold transition-colors disabled:opacity-50 text-xs flex items-center justify-center shrink-0">
+                            Send
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Tab 2: Proctoring Logs & Integrity Info -->
+                <div x-show="activeTab === 'proctor'" class="flex-grow overflow-y-auto space-y-2 pr-1 font-mono text-[9px] leading-relaxed selection:bg-brand/20 select-text" style="display: none;">
+                    <template x-for="(log, idx) in proctoringLogs" :key="idx">
+                        <div class="p-2 bg-black/30 border border-white/5 rounded flex gap-2"
+                             :class="log.text.includes('FLAG') ? 'border-red-500/20 bg-red-950/5' : ''">
+                            <span class="text-gray-500 font-bold shrink-0" x-text="log.time"></span>
+                            <span :class="log.text.includes('FLAG') ? 'text-red-400 font-bold' : 'text-gray-300'" x-text="log.text"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Bottom Stats Metrics Dashboard (WPM / Attention / Integrity summary) -->
+            <div class="grid grid-cols-2 gap-4 select-none">
+                <!-- Speech Metrics -->
+                <div class="premium-card p-3 flex flex-col justify-between border border-white/5 bg-neutral-900/50 backdrop-blur-md rounded-2xl h-18">
+                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Speech Stats</span>
+                    <div class="flex justify-between items-end mt-1">
+                        <span class="text-sm font-bold text-white" x-text="speedWPM + ' WPM'"></span>
+                        <span class="text-[8px] text-gray-400 font-light" x-text="fillerCount + ' filler words'"></span>
+                    </div>
+                </div>
+                
+                <!-- Integrity Summary Status -->
+                <div class="premium-card p-3 flex flex-col justify-between border border-white/5 bg-neutral-900/50 backdrop-blur-md rounded-2xl h-18">
+                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Integrity Level</span>
+                    <div class="flex justify-between items-end mt-1">
+                        <span class="text-sm font-black" 
+                              :class="integrityFlagsCount === 0 ? 'text-emerald-400' : (integrityFlagsCount <= 2 ? 'text-yellow-500' : 'text-red-500')"
+                              x-text="integrityFlagsCount === 0 ? 'Secure (100%)' : (100 - (integrityFlagsCount * 15)) + '%'"></span>
+                        <span class="text-[8px] text-gray-400 font-light" x-text="attentionFocus"></span>
                     </div>
                 </div>
             </div>
-            
-            <!-- Input Form -->
-            <form @submit.prevent="submitAnswer()" class="flex gap-3">
-                <input type="text" x-model="inputMessage" placeholder="Type your response here..." :disabled="aiThinking"
-                       class="flex-grow bg-[#1e1e24] border border-gray-700/60 rounded-xl p-3 text-white placeholder-gray-500 focus:border-brand outline-none text-sm">
-                <button type="submit" :disabled="aiThinking"
-                        class="bg-brand hover:bg-brand-hover text-white px-5 py-3 rounded-xl font-bold transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center">
-                    Send
-                </button>
-            </form>
+
+            <!-- End Session early button -->
+            <button @click="finishInterview()" class="w-full py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-xl border border-red-500/20 transition-colors text-center text-xs select-none">
+                Submit & End Session
+            </button>
         </div>
 
     </div>
@@ -358,26 +702,30 @@
     <div x-show="ended" class="max-w-3xl mx-auto space-y-6" style="display: none;">
         
         <!-- Score Header Card -->
-        <div class="premium-card p-8 text-center space-y-6">
-            <div class="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-4xl mx-auto">
+        <div class="premium-card p-8 text-center space-y-6 select-none">
+            <div class="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-4xl mx-auto shadow-inner">
                 🎓
             </div>
             <div class="space-y-1">
-                <h2 class="text-2xl font-bold text-white">Interview Score: <span class="text-brand font-black" x-text="sessionScore + '%'"></span></h2>
-                <p class="text-sm text-gray-400 font-light">Screening session successfully completed. Great effort!</p>
+                <h2 class="text-2xl font-bold text-white">Interview Evaluation Score: <span class="text-brand font-black" x-text="sessionScore + '%'"></span></h2>
+                <p class="text-xs text-gray-400 font-light">Screening session successfully completed. Great effort!</p>
             </div>
-            <div class="grid grid-cols-3 gap-4 max-w-md mx-auto border-t border-white/5 pt-6">
+            <div class="grid grid-cols-4 gap-4 max-w-lg mx-auto border-t border-white/5 pt-6">
                 <div>
-                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Communication</span>
+                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Communication</span>
                     <span class="text-lg font-black text-white mt-1 block" x-text="evaluation.communication + '%'"></span>
                 </div>
                 <div>
-                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Technical Depth</span>
+                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Technical Depth</span>
                     <span class="text-lg font-black text-white mt-1 block" x-text="evaluation.technical_depth + '%'"></span>
                 </div>
                 <div>
-                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Response Clarity</span>
-                    <span class="text-lg font-black text-white mt-1 block" x-text="evaluation.clarity + '%'"></span>
+                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Response Integrity</span>
+                    <span class="text-lg font-black text-white mt-1 block" x-text="evaluation.integrity + '%'"></span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Proctor Flags</span>
+                    <span class="text-lg font-black text-white mt-1 block" :class="integrityFlagsCount > 0 ? 'text-red-400' : 'text-emerald-400'" x-text="integrityFlagsCount"></span>
                 </div>
             </div>
         </div>
@@ -386,12 +734,12 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Strengths -->
             <div class="premium-card p-6 space-y-4">
-                <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+                <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-2 select-none">
                     <span>🟢 Key Strengths</span>
                 </h3>
-                <ul class="space-y-3">
+                <ul class="space-y-3 select-text">
                     <template x-for="(str, index) in evaluation.strengths" :key="index">
-                        <li class="flex items-start gap-2.5 text-xs text-gray-300 font-light leading-relaxed">
+                        <li class="flex items-start gap-2 text-xs text-gray-300 font-light leading-relaxed">
                             <span class="text-emerald-500 font-bold mt-0.5">•</span>
                             <span x-text="str"></span>
                         </li>
@@ -401,12 +749,12 @@
 
             <!-- Gaps / Next Steps -->
             <div class="premium-card p-6 space-y-4">
-                <h3 class="text-sm font-bold text-yellow-500 uppercase tracking-widest flex items-center gap-2">
+                <h3 class="text-xs font-bold text-yellow-500 uppercase tracking-widest flex items-center gap-2 select-none">
                     <span>🟡 Areas to Refine</span>
                 </h3>
-                <ul class="space-y-3">
+                <ul class="space-y-3 select-text">
                     <template x-for="(gap, index) in evaluation.gaps" :key="index">
-                        <li class="flex items-start gap-2.5 text-xs text-gray-300 font-light leading-relaxed">
+                        <li class="flex items-start gap-2 text-xs text-gray-300 font-light leading-relaxed">
                             <span class="text-yellow-500 font-bold mt-0.5">•</span>
                             <span x-text="gap"></span>
                         </li>
@@ -416,11 +764,11 @@
         </div>
 
         <!-- Action Call -->
-        <div class="flex gap-4">
-            <button @click="startInterview()" class="flex-grow py-3.5 bg-brand hover:bg-brand-hover text-white font-bold rounded-xl transition-colors text-center text-sm">
+        <div class="flex gap-4 select-none">
+            <button @click="startInterview()" class="flex-grow py-3.5 bg-brand hover:bg-brand-hover text-white font-bold rounded-xl transition-colors text-center text-xs">
                 Retake Interview Simulation
             </button>
-            <a href="{% url 'index' %}" class="flex-grow py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-colors text-center text-sm flex items-center justify-center">
+            <a href="{% url 'index' %}" class="flex-grow py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-colors text-center text-xs flex items-center justify-center">
                 Return to Dashboard
             </a>
         </div>
