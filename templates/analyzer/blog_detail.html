@@ -1,0 +1,93 @@
+{% extends "analyzer/base.html" %}
+
+{% block title %}{{ post.title }} - Resume Analyzer AI Blog{% endblock %}
+
+{% block content %}
+<div class="relative overflow-hidden flex flex-col min-h-screen py-16 md:py-24 animate-fade-in">
+    <!-- Background Glow -->
+    <div class="absolute top-[10%] left-1/2 -translate-x-1/2 w-[80vw] h-[80vw] bg-radial-gradient from-brand/10 to-transparent pointer-events-none z-0"></div>
+
+    <div class="relative z-10 max-w-[1200px] mx-auto px-6 w-full">
+        <!-- Back link -->
+        <a href="{% url 'blog_index' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-white transition-colors mb-12">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Back to Articles
+        </a>
+
+        <!-- Layout -->
+        <div class="grid lg:grid-cols-12 gap-12">
+            <!-- Article Body -->
+            <main class="lg:col-span-8 flex flex-col">
+                <header class="mb-10">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="px-3 py-1 text-xs font-semibold text-brand bg-brand/10 border border-brand/20 rounded-full">
+                            {{ post.category }}
+                        </span>
+                        <span class="text-xs text-gray-500 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            {{ post.read_time }} min read
+                        </span>
+                        <span class="text-xs text-gray-500">•</span>
+                        <span class="text-xs text-gray-500">
+                            {{ post.published_at|date:"F d, Y" }}
+                        </span>
+                    </div>
+
+                    <h1 class="text-3xl md:text-5xl font-extrabold text-white leading-tight mb-6">
+                        {{ post.title }}
+                    </h1>
+                    
+                    <p class="text-gray-400 text-lg leading-relaxed italic border-l-2 border-brand/50 pl-4 py-1">
+                        {{ post.summary }}
+                    </p>
+                </header>
+
+                <!-- Article Render -->
+                <div class="prose prose-invert max-w-none text-gray-300 text-base md:text-lg leading-relaxed space-y-6">
+                    {{ post.content|safe }}
+                </div>
+            </main>
+
+            <!-- Sidebar -->
+            <aside class="lg:col-span-4 space-y-8">
+                <!-- Sidebar CTA -->
+                <div class="glass-panel p-8 rounded-3xl border border-brand/20 shadow-[0_0_30px_rgba(139,92,246,0.05)] relative overflow-hidden">
+                    <div class="absolute -right-12 -bottom-12 w-48 h-48 bg-brand/10 rounded-full blur-2xl pointer-events-none"></div>
+                    <h3 class="text-xl font-bold text-white mb-3">Optimize Your Resume</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        Expose formatting errors, identify key skill gaps, and improve your ATS match score instantly.
+                    </p>
+                    <a href="{% url 'index' %}" class="w-full inline-flex items-center justify-center py-3 bg-gradient-to-r from-brand to-pink-500 hover:from-brand-hover hover:to-pink-400 text-white font-bold rounded-xl shadow-[0_0_15px_rgba(139,92,246,0.3)] transition-all">
+                        Scan Resume Now
+                    </a>
+                </div>
+
+                <!-- Recent Articles -->
+                {% if recent_posts %}
+                <div class="glass-panel p-8 rounded-3xl border border-white/5">
+                    <h3 class="text-lg font-bold text-white mb-6">Related Insights</h3>
+                    <div class="space-y-6">
+                        {% for r_post in recent_posts %}
+                        <div>
+                            <span class="text-[10px] font-bold text-brand uppercase tracking-wider block mb-1">
+                                {{ r_post.category }}
+                            </span>
+                            <a href="{% url 'blog_detail' r_post.slug %}" class="text-white hover:text-brand font-semibold text-sm leading-snug transition-colors line-clamp-2 block mb-2">
+                                {{ r_post.title }}
+                            </a>
+                            <span class="text-xs text-gray-500">
+                                {{ r_post.published_at|date:"M d, Y" }}
+                            </span>
+                        </div>
+                        {% if not forloop.last %}
+                        <hr class="border-white/5 my-4">
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </aside>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -34,7 +34,7 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth.views import PasswordResetView
 
 from .ats_knowledge import ATS_FLAG_EXPLANATIONS
-from .models import Coupon, JobDescription, OTP, Persona, ResumeAnalysis, ResumeVersion, UserProfile, InterviewSession, InterviewMessage, LocalizedResume
+from .models import Coupon, JobDescription, OTP, Persona, ResumeAnalysis, ResumeVersion, UserProfile, InterviewSession, InterviewMessage, LocalizedResume, BlogPost
 from .tasks import process_resume_analysis
 from .utils import (
     analyze_with_ai, extract_text, generate_cover_letter, generate_otp, send_email_otp, send_sms_otp,
@@ -1797,5 +1797,19 @@ class CustomPasswordResetView(PasswordResetView):
         form.save(**opts)
         from django.http import HttpResponseRedirect
         return HttpResponseRedirect(self.get_success_url())
+
+
+def blog_index(request):
+    """View to list all published blog posts."""
+    posts = BlogPost.objects.filter(is_published=True).order_by('-published_at')
+    return render(request, "analyzer/blog_index.html", {"posts": posts})
+
+
+def blog_detail(request, slug):
+    """View to render a single blog post."""
+    post = get_object_or_404(BlogPost, slug=slug, is_published=True)
+    recent_posts = BlogPost.objects.filter(is_published=True).exclude(id=post.id).order_by('-published_at')[:3]
+    return render(request, "analyzer/blog_detail.html", {"post": post, "recent_posts": recent_posts})
+
 
 

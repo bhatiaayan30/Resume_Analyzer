@@ -61,6 +61,10 @@ urlpatterns = [
     path("features/auto-vet/", views.auto_vet_view, name="auto_vet"),
     path("features/skills-gap/", views.skills_gap_view, name="skills_gap"),
     path("features/chrome-extension/", views.chrome_extension_view, name="chrome_extension"),
+    
+    # Blog Section
+    path("blog/", views.blog_index, name="blog_index"),
+    path("blog/<slug:slug>/", views.blog_detail, name="blog_detail"),
 ]
 
 

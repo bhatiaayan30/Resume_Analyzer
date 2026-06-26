@@ -198,8 +198,29 @@ class PreWrittenBullet(models.Model):
     category = models.CharField(max_length=100)
     bullet_text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
     def __str__(self):
         return f"{self.job_role} - {self.category}: {self.bullet_text[:40]}"
+
+from django.utils import timezone
+
+class BlogPost(models.Model):
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True)
+    summary = models.TextField(help_text="A short summary of the post shown in list cards.")
+    content = models.TextField(help_text="HTML content of the blog post.")
+    read_time = models.IntegerField(default=5, help_text="Estimated reading time in minutes.")
+    category = models.CharField(max_length=100, default="Career Advice")
+    cover_image = models.URLField(max_length=500, blank=True, help_text="Optional URL of the cover image.")
+    published_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_published = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-published_at']
+
+    def __str__(self):
+        return self.title
+
 
 

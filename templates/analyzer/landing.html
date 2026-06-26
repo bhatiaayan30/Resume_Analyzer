@@ -92,7 +92,9 @@ main {
   stroke-linecap: round;
 }
 @keyframes rotate { 100% { transform: rotate(360deg); } }
+[x-cloak] { display: none !important; }
 </style>
+
 {% endblock %}
 
 {% block content %}
@@ -338,40 +340,91 @@ main {
     </div>
 </div>
 
-    <!-- 6. Founder / Get In Touch -->
-    <div id="contact" class="relative z-10 py-24 bg-black/40 border-t border-white/5">
-        <div class="max-w-[1440px] mx-auto px-6">
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 class="text-3xl md:text-4xl font-bold mb-6">Meet the Founder</h2>
-                    <p class="text-gray-400 text-lg mb-6 leading-relaxed">
-                        Hi, I'm <span class="text-white font-bold">Ayan Bhatia</span>. I built Resume Analyzer AI because I saw how broken the modern hiring system is. Highly qualified candidates are being filtered out by automated ATS systems before a human ever sees their application.
-                    </p>
-                    <p class="text-gray-400 text-lg mb-8 leading-relaxed">
-                        My mission is to level the playing field. With a background in AI and Software Engineering, I'm dedicated to building tools that help you bypass the algorithm and land your dream job.
-                    </p>
-                    
-                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                        <a href="mailto:contact@resumeanalyzer.ai" class="flex items-center justify-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-medium transition-colors w-full sm:w-auto">
-                            <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 00-2-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                            Get in Touch
-                        </a>
-                        <a href="https://linkedin.com/in/ayan-bhatia" target="_blank" class="flex items-center justify-center gap-2 px-6 py-3 bg-brand/20 hover:bg-brand/30 border border-brand/30 text-brand-light rounded-xl font-medium transition-colors w-full sm:w-auto">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                            Connect
-                        </a>
+    <!-- 6. FAQ Section -->
+    <div id="faq" class="relative z-10 py-24 bg-black/20 border-t border-white/5" x-data="{ activeFaq: null }">
+        <div class="max-w-[1000px] mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white">Frequently Asked Questions</h2>
+                <p class="text-gray-400">Everything you need to know about the ATS optimization scanner.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- FAQ 1 -->
+                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+                    <button @click="activeFaq = activeFaq === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
+                        <span class="font-bold text-white text-lg">How does the ATS matching score work?</span>
+                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 1 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="activeFaq === 1" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                        Our advanced engine parses your resume and compares it semantically against the provided job description. We look for key skill alignments, required credentials, job titles, and experience levels, identifying both exact keyword matches and fuzzy semantic gaps.
                     </div>
                 </div>
-                
-                <div class="flex justify-center lg:justify-end">
-                    <div class="relative">
-                        <div class="absolute -inset-1 bg-gradient-to-r from-brand to-pink-500 rounded-full blur opacity-30"></div>
-                        <img src="https://ui-avatars.com/api/?name=Ayan+Bhatia&size=256&background=1e1e24&color=fff" alt="Ayan Bhatia" class="relative rounded-full w-64 h-64 border-4 border-gray-800 shadow-2xl object-cover">
+
+                <!-- FAQ 2 -->
+                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+                    <button @click="activeFaq = activeFaq === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
+                        <span class="font-bold text-white text-lg">Is my resume data safe and private?</span>
+                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 2 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="activeFaq === 2" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                        Yes, completely. We prioritize data protection. Your uploaded resumes are processed securely and are never shared with third parties or used to train public AI models. You have full control over your analysis history and can delete it at any time.
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+                    <button @click="activeFaq = activeFaq === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
+                        <span class="font-bold text-white text-lg">What formatting issues does the scanner detect?</span>
+                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 3 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="activeFaq === 3" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                        It scans for common formatting vulnerabilities that cause parsing errors in Applicant Tracking Systems (ATS). This includes non-standard tables, multi-column layouts, header/footer text isolation, image-based text blocks, and hidden characters that standard ATS parsers fail to extract.
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+                    <button @click="activeFaq = activeFaq === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
+                        <span class="font-bold text-white text-lg">How is this different from a simple keyword checker?</span>
+                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 4 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="activeFaq === 4" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                        Standard tools look only for direct word matching, which is easily bypassed or misleads candidates. We utilize semantic mapping to understand the context of your skills, analyze the credibility of your metrics, flag date overlaps, and identify AI-generated profiles to help you present an authentic, verified application.
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- 7. Bottom CTA Section -->
+    <div class="relative z-10 py-20 bg-black/40 border-t border-white/5">
+        <div class="max-w-[1440px] mx-auto px-6">
+            <div class="relative glass-panel rounded-3xl p-12 md:p-16 overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(139,92,246,0.15)]">
+                <!-- Decorative background glow inside the banner -->
+                <div class="absolute -right-24 -bottom-24 w-96 h-96 bg-brand/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-24 -top-24 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10 max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
+                        Ready to Bypass the ATS and <br/>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-pink-500">Land the Interview?</span>
+                    </h2>
+                    <p class="text-gray-400 text-lg mb-8 leading-relaxed">
+                        Join over 10,000+ job seekers who optimized their resumes, filled critical skill gaps, and generated highly-customized cover letters.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <button @click="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-brand to-pink-500 hover:from-brand-hover hover:to-pink-400 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all transform hover:scale-[1.02]">
+                            Scan Your Resume Now
+                        </button>
+                        <a href="{% url 'signup' %}" class="w-full sm:w-auto px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-xl transition-all">
+                            Create Free Account
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 
 

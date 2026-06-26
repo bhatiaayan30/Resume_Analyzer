@@ -425,7 +425,7 @@
         color: #475569 !important;
     }
 
-    /* Connect & Touch Buttons (Meet the Founder) */
+    /* Glass & Secondary Buttons in Light Mode */
     html.light .bg-white\/5 {
         background-color: rgba(0, 0, 0, 0.05) !important;
     }
@@ -1062,6 +1062,7 @@
           
           <a href="{% url 'index' %}#how-it-works" class="text-sm font-semibold text-gray-300 hover:text-white transition-colors">How It Works</a>
           <a href="{% url 'pricing' %}" class="text-sm font-semibold text-gray-300 hover:text-white transition-colors">Pricing</a>
+          <a href="{% url 'blog_index' %}" class="text-sm font-semibold text-gray-300 hover:text-white transition-colors">Blog</a>
           <a href="{% url 'contact' %}" class="text-sm font-bold text-brand hover:text-brand-hover dark:text-brand dark:hover:text-brand-hover transition-colors">Contact Us</a>
         </nav>
       </div>
@@ -1155,6 +1156,7 @@
          </div>
          <a href="{% url 'index' %}#how-it-works" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">How It Works</a>
          <a href="{% url 'pricing' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Pricing</a>
+         <a href="{% url 'blog_index' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Blog</a>
          <a href="{% url 'contact' %}" class="text-brand font-bold py-2 px-3 rounded-lg hover:bg-white/5">Contact Us</a>
          <a href="{% url 'login' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Sign In</a>
     </div>
@@ -1182,6 +1184,7 @@
           <div class="flex items-center gap-6 text-sm">
               <a href="{% url 'index' %}" class="hover:text-white transition-colors">Home</a>
               <a href="{% url 'pricing' %}" class="hover:text-white transition-colors">Pricing</a>
+              <a href="{% url 'blog_index' %}" class="hover:text-white transition-colors">Blog</a>
               <a href="{% url 'contact' %}" class="hover:text-white transition-colors">Contact Us</a>
           </div>
           <div class="text-sm text-gray-600">© 2026 All rights reserved.</div>

@@ -165,7 +165,54 @@ def test_cloud_import_analysis(factory):
     assert "Python" in analysis_record.resume_text
 
 
+@pytest.mark.django_db
+def test_blog_index_view(factory):
+    """Blog index page should return 200 and list published posts."""
+    from analyzer.views import blog_index
+    from analyzer.models import BlogPost
+    
+    # Check loading empty index
+    request = factory.get(reverse("blog_index"))
+    request.user = AnonymousUser()
+    response = blog_index(request)
+    assert response.status_code == 200
+
+    # Create a post
+    post = BlogPost.objects.create(
+        title="Test Blog Post Title",
+        slug="test-blog-post-title",
+        summary="A summary of test post.",
+        content="<p>Main content of test post.</p>",
+        category="Test Category",
+        is_published=True
+    )
+    
+    response = blog_index(request)
+    assert response.status_code == 200
+    assert b"Test Blog Post Title" in response.content
+    assert b"Test Category" in response.content
 
 
+@pytest.mark.django_db
+def test_blog_detail_view(factory):
+    """Blog detail page should load correctly for published posts."""
+    from analyzer.views import blog_detail
+    from analyzer.models import BlogPost
+    
+    post = BlogPost.objects.create(
+        title="Test Detail Post Title",
+        slug="test-detail-post-title",
+        summary="A summary of detail test post.",
+        content="<p>Main content of detail test post.</p>",
+        category="Test Detail Category",
+        is_published=True
+    )
+    
+    request = factory.get(reverse("blog_detail", args=[post.slug]))
+    request.user = AnonymousUser()
+    response = blog_detail(request, slug=post.slug)
+    assert response.status_code == 200
+    assert b"Test Detail Post Title" in response.content
+    assert b"Main content of detail test post." in response.content
 
 
