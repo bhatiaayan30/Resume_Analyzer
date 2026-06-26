@@ -151,13 +151,13 @@
                 
                 <div class="text-center py-10 border-2 border-dashed border-gray-700/60 bg-slate-950/20 hover:border-brand/60 rounded-2xl cursor-pointer relative transition-colors duration-300"
                      @click="$refs.bulkInput.click()">
-                    <input type="file" x-ref="bulkInput" class="hidden" accept=".pdf,.docx" multiple @change="handleFiles($event)">
+                    <input type="file" x-ref="bulkInput" class="hidden" accept=".pdf,.docx,.jpg,.jpeg,.png" multiple @change="handleFiles($event)">
                     
                     <div class="w-12 h-12 bg-brand/10 border border-brand/20 rounded-full flex items-center justify-center text-brand mx-auto mb-4">
                         📂
                     </div>
                     <p class="text-sm text-white font-bold" x-text="resumeCount > 0 ? resumeCount + ' Resumes Selected' : 'Select Resume Files'"></p>
-                    <p class="text-[10px] text-gray-400 font-light mt-1">Upload multiple PDFs or a ZIP package</p>
+                    <p class="text-[10px] text-gray-400 font-light mt-1">Upload multiple PDFs, DOCX, or Images (JPG, JPEG, PNG)</p>
                 </div>
             </div>
 

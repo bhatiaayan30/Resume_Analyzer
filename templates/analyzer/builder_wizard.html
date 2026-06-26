@@ -1201,13 +1201,13 @@
             
             <div class="mt-2">
               <div class="font-extrabold text-sm group-hover:text-white transition-colors">Upload Existing Resume</div>
-              <div class="text-[9px] text-gray-400 mt-1">Drag & drop your resume file or browse local files. Supports PDF & DOCX (&lt; 2MB).</div>
+              <div class="text-[9px] text-gray-400 mt-1">Drag & drop your resume file or browse local files. Supports PDF, DOCX (Max 2MB) or Image (Max 10MB).</div>
             </div>
 
             <!-- Browse button trigger -->
             <label class="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] font-bold cursor-pointer transition-colors block mt-2">
               Browse Files
-              <input type="file" @change="handleOnboardingUpload($event)" class="hidden" accept=".pdf,.docx">
+              <input type="file" @change="handleOnboardingUpload($event)" class="hidden" accept=".pdf,.docx,.jpg,.jpeg,.png">
             </label>
           </div>
         </div>

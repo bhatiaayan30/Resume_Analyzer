@@ -132,8 +132,8 @@ def analyze(request):
 
         # ── 2. Validate file type (Extension & Magic Numbers) ──────
         ext = os.path.splitext(resume_file.name)[1].lower()
-        if ext not in [".pdf", ".docx"]:
-            return render_error(f'Unsupported file type "{ext}". Please upload a PDF or DOCX.', 400)
+        if ext not in [".pdf", ".docx", ".jpg", ".jpeg", ".png"]:
+            return render_error(f'Unsupported file type "{ext}". Please upload a PDF, DOCX, or image (JPG, JPEG, PNG).', 400)
 
         header = resume_file.read(10)
         resume_file.seek(0)
@@ -142,16 +142,31 @@ def analyze(request):
             return render_error("Invalid PDF file. The file appears to be corrupted or spoofed.", 400)
         if ext == ".docx" and not header.startswith(b"PK\x03\x04"):
             return render_error("Invalid DOCX file. The file appears to be corrupted or spoofed.", 400)
+        if ext in [".jpg", ".jpeg", ".png"] and not (
+            header.startswith(b"\xff\xd8\xff") or          # JPEG
+            header.startswith(b"\x89PNG\r\n\x1a\n")        # PNG
+        ):
+            return render_error("Invalid image file. The file appears to be corrupted or spoofed.", 400)
 
-        # ── 3. Validate file size (2 MB cap) ──────────────────────
-        if resume_file.size > 2 * 1024 * 1024:
-            return render_error("File too large. Maximum size is 2 MB.", 400)
+        # ── 3. Validate file size (2 MB cap for documents, 10 MB for images) ──────
+        max_size = 10 * 1024 * 1024 if ext in [".jpg", ".jpeg", ".png"] else 2 * 1024 * 1024
+        if resume_file.size > max_size:
+            size_label = "10 MB" if ext in [".jpg", ".jpeg", ".png"] else "2 MB"
+            return render_error(f"File too large. Maximum size for this type is {size_label}.", 400)
 
         # ── 4. Extract text ────────────────────────────────────────
         try:
             from .utils import check_searchability
-            resume_text, ats_format_issues, searchability_checks = extract_text(resume_file, ext)
-        except ValueError as exc:
+            if ext in [".jpg", ".jpeg", ".png"]:
+                from .utils import extract_text_from_image
+                image_bytes = resume_file.read()
+                mime_type = "image/png" if ext == ".png" else "image/jpeg"
+                resume_text = extract_text_from_image(image_bytes, mime_type)
+                ats_format_issues = ["image_upload"]
+                searchability_checks = check_searchability(resume_text)
+            else:
+                resume_text, ats_format_issues, searchability_checks = extract_text(resume_file, ext)
+        except Exception as exc:
             return render_error(str(exc), 422)
             
         filename = resume_file.name
@@ -1428,16 +1443,25 @@ def parse_resume_for_builder_api(request):
 
     # Validate file extension
     ext = os.path.splitext(resume_file.name)[1].lower()
-    if ext not in [".pdf", ".docx"]:
-        return JsonResponse({"error": "Unsupported file format. Please upload PDF or DOCX."}, status=400)
+    if ext not in [".pdf", ".docx", ".jpg", ".jpeg", ".png"]:
+        return JsonResponse({"error": "Unsupported file format. Please upload PDF, DOCX, or image (JPG, JPEG, PNG)."}, status=400)
 
-    # Validate file size (2 MB cap)
-    if resume_file.size > 2 * 1024 * 1024:
-        return JsonResponse({"error": "File size exceeds 2 MB limit."}, status=400)
+    # Validate file size (2 MB cap for documents, 10 MB for images)
+    max_size = 10 * 1024 * 1024 if ext in [".jpg", ".jpeg", ".png"] else 2 * 1024 * 1024
+    if resume_file.size > max_size:
+        size_label = "10 MB" if ext in [".jpg", ".jpeg", ".png"] else "2 MB"
+        return JsonResponse({"error": f"File size exceeds {size_label} limit."}, status=400)
 
     try:
         # Extract text using our existing utility function
-        resume_text, _, _ = extract_text(resume_file, ext)
+        if ext in [".jpg", ".jpeg", ".png"]:
+            from .utils import extract_text_from_image
+            image_bytes = resume_file.read()
+            mime_type = "image/png" if ext == ".png" else "image/jpeg"
+            resume_text = extract_text_from_image(image_bytes, mime_type)
+        else:
+            resume_text, _, _ = extract_text(resume_file, ext)
+            
         if not resume_text:
             return JsonResponse({"error": "Could not extract text from this file."}, status=422)
 
