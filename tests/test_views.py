@@ -262,3 +262,133 @@ def test_signup_view_post(factory):
     assert email.to == ["newtestuser@example.com"]
     assert "Welcome to Resume Analyzer" in email.subject
 
+
+@pytest.mark.django_db
+def test_add_secondary_email(factory):
+    """Authenticated users should be able to add a secondary email."""
+    from analyzer.views import add_secondary_email
+    from analyzer.models import SecondaryEmail
+    import json
+    
+    user = User.objects.create_user(username="testuser", email="primary@example.com", password="password")
+    
+    # 1. Valid addition
+    request = factory.post(reverse("add_secondary_email"), json.dumps({"email": "sec@example.com"}), content_type="application/json")
+    request.user = user
+    response = add_secondary_email(request)
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["status"] == "success"
+    assert SecondaryEmail.objects.filter(user=user, email="sec@example.com").exists()
+    
+    # 2. Prevent duplicates (with primary email)
+    request = factory.post(reverse("add_secondary_email"), json.dumps({"email": "primary@example.com"}), content_type="application/json")
+    request.user = user
+    response = add_secondary_email(request)
+    assert response.status_code == 400
+    
+    # 3. Prevent duplicates (with existing secondary email)
+    request = factory.post(reverse("add_secondary_email"), json.dumps({"email": "sec@example.com"}), content_type="application/json")
+    request.user = user
+    response = add_secondary_email(request)
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_delete_secondary_email(factory):
+    """Authenticated users should be able to remove their secondary email."""
+    from analyzer.views import delete_secondary_email
+    from analyzer.models import SecondaryEmail
+    import json
+    
+    user = User.objects.create_user(username="testuser", email="primary@example.com", password="password")
+    sec_email = SecondaryEmail.objects.create(user=user, email="sec@example.com")
+    
+    request = factory.post(reverse("delete_secondary_email"), json.dumps({"secondary_email_id": sec_email.id}), content_type="application/json")
+    request.user = user
+    response = delete_secondary_email(request)
+    
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["status"] == "success"
+    assert not SecondaryEmail.objects.filter(id=sec_email.id).exists()
+
+
+@pytest.mark.django_db
+def test_make_secondary_email_primary(factory):
+    """Swapping secondary and primary emails should swap both email addresses and their verification states."""
+    from analyzer.views import make_secondary_email_primary
+    from analyzer.models import SecondaryEmail
+    import json
+    
+    user = User.objects.create_user(username="testuser", email="primary@example.com", password="password")
+    user.profile.email_verified = True
+    user.profile.save()
+    
+    sec_email = SecondaryEmail.objects.create(user=user, email="sec@example.com", is_verified=False)
+    
+    request = factory.post(reverse("make_secondary_email_primary"), json.dumps({"secondary_email_id": sec_email.id}), content_type="application/json")
+    request.user = user
+    
+    response = make_secondary_email_primary(request)
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["status"] == "success"
+    
+    # Reload from DB
+    user.refresh_from_db()
+    user.profile.refresh_from_db()
+    
+    # The primary email should now be "sec@example.com" (which was unverified)
+    assert user.email == "sec@example.com"
+    assert user.profile.email_verified is False
+    
+    # The secondary email should now be "primary@example.com" (which was verified)
+    assert SecondaryEmail.objects.filter(user=user, email="primary@example.com", is_verified=True).exists()
+    assert not SecondaryEmail.objects.filter(email="sec@example.com").exists()
+
+
+@pytest.mark.django_db
+def test_request_and_verify_secondary_otp(factory):
+    """Users should be able to request and verify OTP for secondary emails."""
+    from analyzer.views import request_secondary_otp, verify_secondary_otp
+    from analyzer.models import SecondaryEmail, OTP
+    from django.core import mail
+    import json
+    
+    user = User.objects.create_user(username="testuser", email="primary@example.com", password="password")
+    sec_email = SecondaryEmail.objects.create(user=user, email="sec@example.com", is_verified=False)
+    
+    # Request OTP
+    mail.outbox = []
+    request = factory.post(reverse("request_secondary_otp"), json.dumps({"secondary_email_id": sec_email.id}), content_type="application/json")
+    request.user = user
+    
+    response = request_secondary_otp(request)
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["status"] == "success"
+    
+    # Check mail sent
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].to == ["sec@example.com"]
+    
+    # Find OTP
+    otp_record = OTP.objects.get(user=user, purpose="sec_email")
+    
+    # Verify OTP
+    request = factory.post(reverse("verify_secondary_otp"), json.dumps({
+        "secondary_email_id": sec_email.id,
+        "code": otp_record.code
+    }), content_type="application/json")
+    request.user = user
+    
+    response = verify_secondary_otp(request)
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["status"] == "success"
+    
+    sec_email.refresh_from_db()
+    assert sec_email.is_verified is True
+
+

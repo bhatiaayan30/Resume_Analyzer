@@ -34,7 +34,7 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth.views import PasswordResetView
 
 from .ats_knowledge import ATS_FLAG_EXPLANATIONS
-from .models import Coupon, JobDescription, OTP, Persona, ResumeAnalysis, ResumeVersion, UserProfile, InterviewSession, InterviewMessage, LocalizedResume, BlogPost
+from .models import Coupon, JobDescription, OTP, Persona, ResumeAnalysis, ResumeVersion, UserProfile, InterviewSession, InterviewMessage, LocalizedResume, BlogPost, SecondaryEmail
 from .tasks import process_resume_analysis
 from .utils import (
     analyze_with_ai, extract_text, generate_cover_letter, generate_otp, send_email_otp, send_sms_otp,
@@ -402,12 +402,13 @@ def settings_view(request):
     """
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     total_scans = ResumeAnalysis.objects.filter(user=request.user).count()
+    secondary_emails = request.user.secondary_emails.all()
     error = None
     success = None
 
     if request.method == "POST":
         username = request.POST.get("username", "").strip()
-        email = request.POST.get("email", "").strip()
+        email = request.POST.get("email", "").strip().lower()
         phone_number = request.POST.get("phone_number", "").strip()
 
         if not username:
@@ -418,21 +419,33 @@ def settings_view(request):
                 error = "Username is already taken."
             else:
                 try:
-                    # Update User
-                    request.user.username = username
-                    request.user.email = email
-                    request.user.save()
+                    # Reset primary verification if email changes
+                    if request.user.email != email:
+                        # Make sure new email is not used as primary or secondary by others
+                        if User.objects.filter(email=email).exclude(id=request.user.id).exists() or SecondaryEmail.objects.filter(email=email).exists():
+                            error = "This email address is already in use."
+                        else:
+                            request.user.email = email
+                            profile.email_verified = False
+                    
+                    if not error:
+                        # Update User
+                        request.user.username = username
+                        request.user.save()
 
-                    # Update UserProfile
-                    profile.phone_number = phone_number
-                    profile.save()
-                    success = "Profile updated successfully!"
+                        # Update UserProfile
+                        if profile.phone_number != phone_number:
+                            profile.phone_number = phone_number
+                            profile.phone_verified = False
+                        profile.save()
+                        success = "Profile updated successfully!"
                 except Exception as e:
                     error = f"An error occurred: {str(e)}"
 
     return render(request, "analyzer/settings.html", {
         "profile": profile,
         "total_scans": total_scans,
+        "secondary_emails": secondary_emails,
         "error": error,
         "success": success
     })
@@ -995,6 +1008,144 @@ def verify_otp(request):
         request.user.profile.save()
         
         return JsonResponse({"status": "success", "message": f"{purpose.capitalize()} verified successfully!"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def add_secondary_email(request):
+    import json
+    try:
+        data = json.loads(request.body)
+        email = data.get('email', '').strip().lower()
+        if not email:
+            return JsonResponse({"status": "error", "message": "Email is required"}, status=400)
+            
+        # Check if already exists in User model (primary email) or SecondaryEmail model
+        from django.contrib.auth.models import User
+        if User.objects.filter(email=email).exists() or SecondaryEmail.objects.filter(email=email).exists():
+            return JsonResponse({"status": "error", "message": "This email address is already in use."}, status=400)
+            
+        # Create
+        SecondaryEmail.objects.create(user=request.user, email=email)
+        return JsonResponse({"status": "success", "message": "Secondary email added successfully."})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+@login_required
+@require_http_methods(["POST"])
+def delete_secondary_email(request):
+    import json
+    try:
+        data = json.loads(request.body)
+        email_id = data.get('secondary_email_id')
+        sec_email = get_object_or_404(SecondaryEmail, id=email_id, user=request.user)
+        sec_email.delete()
+        return JsonResponse({"status": "success", "message": "Secondary email removed successfully."})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+@login_required
+@require_http_methods(["POST"])
+def make_secondary_email_primary(request):
+    import json
+    try:
+        data = json.loads(request.body)
+        email_id = data.get('secondary_email_id')
+        sec_email = get_object_or_404(SecondaryEmail, id=email_id, user=request.user)
+        
+        old_primary_email = request.user.email
+        old_primary_verified = request.user.profile.email_verified
+        
+        # Store secondary email details before we overwrite them
+        new_primary_email = sec_email.email
+        new_primary_verified = sec_email.is_verified
+        
+        # Check if old primary email is empty or needs to be moved to secondary
+        if old_primary_email:
+            # Swap: move old primary to secondary
+            sec_email.email = old_primary_email
+            sec_email.is_verified = old_primary_verified
+            sec_email.save()
+        else:
+            # Just delete the secondary record since primary was empty
+            sec_email.delete()
+            
+        # Set new primary
+        request.user.email = new_primary_email
+        request.user.save()
+        
+        request.user.profile.email_verified = new_primary_verified
+        request.user.profile.save()
+        
+        return JsonResponse({"status": "success", "message": "Primary email updated successfully."})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def request_secondary_otp(request):
+    import json
+    from datetime import timedelta
+    from django.utils import timezone
+    try:
+        data = json.loads(request.body)
+        email_id = data.get('secondary_email_id')
+        sec_email = get_object_or_404(SecondaryEmail, id=email_id, user=request.user)
+        
+        # Invalidate old OTPs for this user's secondary_email purpose
+        purpose = "sec_email"
+        OTP.objects.filter(user=request.user, purpose=purpose, is_used=False).update(is_used=True)
+        
+        code = generate_otp()
+        expires_at = timezone.now() + timedelta(minutes=10)
+        OTP.objects.create(user=request.user, code=code, purpose=purpose, expires_at=expires_at)
+        
+        # Send email OTP (resusing send_email_otp but targeting secondary email)
+        from django.core.mail import send_mail
+        from django.conf import settings
+        
+        subject = "Verify your secondary email address"
+        message = f"Your verification code is: {code}"
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@resumeanalyzer.com')
+        send_mail(subject, message, from_email, [sec_email.email], fail_silently=False)
+        
+        return JsonResponse({"status": "success", "message": "OTP sent to secondary email."})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+@login_required
+@require_http_methods(["POST"])
+def verify_secondary_otp(request):
+    import json
+    from django.utils import timezone
+    try:
+        data = json.loads(request.body)
+        email_id = data.get('secondary_email_id')
+        code = data.get('code')
+        sec_email = get_object_or_404(SecondaryEmail, id=email_id, user=request.user)
+        
+        purpose = "sec_email"
+        otp_obj = OTP.objects.filter(
+            user=request.user,
+            purpose=purpose,
+            code=code,
+            is_used=False,
+            expires_at__gt=timezone.now()
+        ).first()
+        
+        if not otp_obj:
+            return JsonResponse({"status": "error", "message": "Invalid or expired OTP"}, status=400)
+            
+        otp_obj.is_used = True
+        otp_obj.save()
+        
+        sec_email.is_verified = True
+        sec_email.save()
+        
+        return JsonResponse({"status": "success", "message": "Secondary email verified successfully!"})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 

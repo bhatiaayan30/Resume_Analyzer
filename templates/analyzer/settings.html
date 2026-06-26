@@ -100,6 +100,138 @@
                 }
             },
 
+            secondaryEmailId: null,
+
+            async requestSecondaryOTP(id) {
+                this.otpPurpose = 'secondary_email';
+                this.secondaryEmailId = id;
+                this.otpError = '';
+                this.otpSuccess = '';
+                this.otpCode = '';
+                this.isLoading = true;
+                
+                const csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+                const csrfToken = csrfEl ? csrfEl.value : '{{ csrf_token }}';
+                
+                try {
+                    const res = await fetch('{% url "request_secondary_otp" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({ secondary_email_id: id })
+                    });
+                    
+                    let data = {};
+                    const contentType = res.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await res.json();
+                    }
+                    
+                    if (res.ok) {
+                        this.otpModalOpen = true;
+                        this.otpSuccess = data.message || 'OTP sent successfully.';
+                        this.resendAttempt = 0;
+                        this.startCooldownTimer();
+                    } else {
+                        alert(data.message || 'Server returned an error. Please try again.');
+                    }
+                } catch (e) {
+                    alert('An error occurred: ' + e.message);
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
+            async addSecondary(email) {
+                if (!email) return;
+                this.isLoading = true;
+                const csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+                const csrfToken = csrfEl ? csrfEl.value : '{{ csrf_token }}';
+                
+                try {
+                    const res = await fetch('{% url "add_secondary_email" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({ email: email })
+                    });
+                    
+                    let data = {};
+                    if (res.headers.get('content-type')?.includes('application/json')) {
+                        data = await res.json();
+                    }
+                    
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Error adding secondary email.');
+                    }
+                } catch (e) {
+                    alert('An error occurred: ' + e.message);
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
+            async deleteSecondary(id) {
+                if (!confirm('Are you sure you want to remove this secondary email?')) return;
+                this.isLoading = true;
+                const csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+                const csrfToken = csrfEl ? csrfEl.value : '{{ csrf_token }}';
+                
+                try {
+                    const res = await fetch('{% url "delete_secondary_email" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({ secondary_email_id: id })
+                    });
+                    
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Error deleting secondary email.');
+                    }
+                } catch (e) {
+                    alert('An error occurred: ' + e.message);
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
+            async makePrimary(id) {
+                this.isLoading = true;
+                const csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+                const csrfToken = csrfEl ? csrfEl.value : '{{ csrf_token }}';
+                
+                try {
+                    const res = await fetch('{% url "make_secondary_email_primary" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({ secondary_email_id: id })
+                    });
+                    
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Error updating primary email.');
+                    }
+                } catch (e) {
+                    alert('An error occurred: ' + e.message);
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
             async resendOTP() {
                 if (this.resendCooldown > 0) return;
                 this.isLoading = true;
@@ -109,14 +241,21 @@
                 const csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
                 const csrfToken = csrfEl ? csrfEl.value : '{{ csrf_token }}';
                 
+                let url = '{% url "request_otp" %}';
+                let body = { purpose: this.otpPurpose };
+                if (this.otpPurpose === 'secondary_email') {
+                    url = '{% url "request_secondary_otp" %}';
+                    body = { secondary_email_id: this.secondaryEmailId };
+                }
+                
                 try {
-                    const res = await fetch('{% url "request_otp" %}', {
+                    const res = await fetch(url, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRFToken': csrfToken
                         },
-                        body: JSON.stringify({ purpose: this.otpPurpose })
+                        body: JSON.stringify(body)
                     });
                     
                     let data = {};
@@ -148,6 +287,7 @@
                 }
                 this.resendCooldown = 0;
                 this.resendAttempt = 0;
+                this.secondaryEmailId = null;
             },
             
             async verifyOTP() {
@@ -157,14 +297,21 @@
                 const csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
                 const csrfToken = csrfEl ? csrfEl.value : '{{ csrf_token }}';
                 
+                let url = '{% url "verify_otp" %}';
+                let body = { purpose: this.otpPurpose, code: this.otpCode };
+                if (this.otpPurpose === 'secondary_email') {
+                    url = '{% url "verify_secondary_otp" %}';
+                    body = { secondary_email_id: this.secondaryEmailId, code: this.otpCode };
+                }
+                
                 try {
-                    const res = await fetch('{% url "verify_otp" %}', {
+                    const res = await fetch(url, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRFToken': csrfToken
                         },
-                        body: JSON.stringify({ purpose: this.otpPurpose, code: this.otpCode })
+                        body: JSON.stringify(body)
                     });
                     
                     let data = {};
@@ -285,6 +432,45 @@
                             </div>
                             <input x-show="isEditing" type="email" name="email" value="{{ user.email }}"
                                    class="w-full bg-black/40 border border-gray-700 rounded-lg p-3.5 text-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all" style="display:none;">
+                            
+                            <!-- Secondary Emails Management (Visible only when not editing) -->
+                            <div x-show="!isEditing" class="mt-4 pl-4 border-l-2 border-brand/20 space-y-3">
+                                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Secondary Emails</h4>
+                                <div class="space-y-2">
+                                    {% for sec in secondary_emails %}
+                                        <div class="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg p-2.5">
+                                            <span class="text-sm text-gray-300">{{ sec.email }}</span>
+                                            <div class="flex items-center gap-3">
+                                                <!-- Verification Status badge/button -->
+                                                {% if sec.is_verified %}
+                                                    <span class="text-green-400 text-xs font-semibold flex items-center gap-0.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>Verified</span>
+                                                {% else %}
+                                                    <button type="button" @click="requestSecondaryOTP('{{ sec.id }}')" :disabled="isLoading" class="text-brand-light hover:text-white text-xs font-semibold underline cursor-pointer">Verify</button>
+                                                {% endif %}
+                                                
+                                                <!-- Make Primary button -->
+                                                <button type="button" @click="makePrimary('{{ sec.id }}')" :disabled="isLoading" class="px-2 py-1 bg-brand/20 hover:bg-brand/30 border border-brand/30 text-brand-light rounded text-xs font-bold transition-colors cursor-pointer">Make Primary</button>
+                                                
+                                                <!-- Remove button -->
+                                                <button type="button" @click="deleteSecondary('{{ sec.id }}')" :disabled="isLoading" class="text-rose-400 hover:text-rose-300 text-xs font-bold cursor-pointer">Remove</button>
+                                            </div>
+                                        </div>
+                                    {% empty %}
+                                        <p class="text-xs text-gray-500 italic">No secondary emails added.</p>
+                                    {% endfor %}
+                                </div>
+                                
+                                <!-- Add Secondary Email -->
+                                <div class="flex items-center gap-3 mt-2" x-data="{ newSecEmail: '' }">
+                                    <input type="email" x-model="newSecEmail" placeholder="secondary@example.com" 
+                                           class="bg-black/40 border border-gray-700 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-brand w-64"
+                                           @keyup.enter="addSecondary(newSecEmail); newSecEmail = ''">
+                                    <button type="button" @click="addSecondary(newSecEmail); newSecEmail = ''" :disabled="isLoading" 
+                                            class="px-3.5 py-2 bg-brand hover:bg-brand-hover rounded-lg text-xs text-white font-bold transition-all cursor-pointer">
+                                        Add Email
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <div>

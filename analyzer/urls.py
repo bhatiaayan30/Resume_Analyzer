@@ -38,6 +38,13 @@ urlpatterns = [
     path("payment-failed/", views.payment_failed, name="payment_failed"),
     path("contact/", views.contact_view, name="contact"),
     
+    # Secondary Email management paths
+    path("api/secondary-email/add/", views.add_secondary_email, name="add_secondary_email"),
+    path("api/secondary-email/delete/", views.delete_secondary_email, name="delete_secondary_email"),
+    path("api/secondary-email/make-primary/", views.make_secondary_email_primary, name="make_secondary_email_primary"),
+    path("api/secondary-email/request-otp/", views.request_secondary_otp, name="request_secondary_otp"),
+    path("api/secondary-email/verify-otp/", views.verify_secondary_otp, name="verify_secondary_otp"),
+    
     # New Premium Features
     path("interview/start/<uuid:analysis_id>/", views.start_interview_api, name="start_interview_api"),
     path("interview/send/<int:session_id>/", views.send_interview_message_api, name="send_interview_message_api"),
