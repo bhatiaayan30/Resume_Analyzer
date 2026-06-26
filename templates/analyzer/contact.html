@@ -121,7 +121,31 @@
     </div>
 
     <!-- Contact Form (Alpine.js powered interactive mockup) -->
-    <div class="w-full max-w-4xl contact-card relative" x-data="{ name: '', email: '', subject: 'support', message: '', sent: false, loading: false }">
+    <div class="w-full max-w-4xl contact-card relative" x-data="{ 
+        name: '', 
+        email: '', 
+        subject: 'support', 
+        message: '', 
+        sent: false, 
+        loading: false,
+        init() {
+            const params = new URLSearchParams(window.location.search);
+            const focus = params.get('focus');
+            const subjectParam = params.get('subject');
+            if (subjectParam) {
+                this.subject = subjectParam;
+            }
+            if (focus) {
+                this.$nextTick(() => {
+                    const el = document.getElementById(focus) || document.querySelector(`input[name='${focus}'], textarea[name='${focus}'], select[name='${focus}']`) || document.querySelector('input, textarea, select');
+                    if (el) {
+                        el.focus();
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+            }
+        }
+    }">
         <div x-show="!sent">
             <h3 class="text-xl font-bold text-white mb-2">Send a Message Directly</h3>
             <p class="text-sm text-gray-400 mb-8">Fill out the quick form below and we will route your inquiry to the right support channel immediately.</p>

@@ -1184,14 +1184,14 @@
             <span class="text-sm font-medium">
               <strong>Account Verification:</strong>
               {% if not user.profile.email_verified %}
-                Please <a href="{% url 'settings' %}" class="underline hover:text-white font-semibold">verify your email address</a>.
+                Please <a href="{% url 'settings' %}?focus=email&verify=1" class="underline hover:text-white font-semibold">verify your email address</a>.
               {% endif %}
               {% if not user.profile.phone_number %}
                 {% if not user.profile.email_verified %} and {% endif %}
-                please <a href="{% url 'settings' %}" class="underline hover:text-white font-semibold">add your phone number</a>.
+                please <a href="{% url 'settings' %}?focus=phone" class="underline hover:text-white font-semibold">add your phone number</a>.
               {% elif not user.profile.phone_verified %}
                 {% if not user.profile.email_verified %} and {% endif %}
-                please <a href="{% url 'settings' %}" class="underline hover:text-white font-semibold">verify your phone number</a>.
+                please <a href="{% url 'settings' %}?focus=phone&verify=1" class="underline hover:text-white font-semibold">verify your phone number</a>.
               {% endif %}
             </span>
           </div>

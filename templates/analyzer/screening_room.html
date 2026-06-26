@@ -143,6 +143,24 @@
                 ]
             };
         }, 2500);
+    },
+
+    init() {
+        const params = new URLSearchParams(window.location.search);
+        const persona = params.get('persona');
+        if (persona && this.personas[persona]) {
+            this.selectedPersona = persona;
+        }
+        const focus = params.get('focus');
+        if (focus) {
+            this.$nextTick(() => {
+                const el = document.getElementById(focus) || document.querySelector(`[name=${focus}]`) || document.querySelector('select, input, button');
+                if (el) {
+                    el.focus();
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
     }
 }">
     <!-- Page Header -->

@@ -1377,6 +1377,26 @@
           this.fontChoice = 'font-times';
         }
 
+        // Deep linking parameters
+        const stepParam = urlParams.get('step');
+        if (stepParam) {
+          const stepNum = parseInt(stepParam);
+          if (stepNum >= 1 && stepNum <= this.maxSteps) {
+            this.step = stepNum;
+          }
+        }
+
+        const focus = urlParams.get('focus');
+        if (focus) {
+          this.$nextTick(() => {
+            const input = document.getElementById(focus) || document.querySelector(`input[name=${focus}], [name=${focus}]`) || document.querySelector(`.${focus}`);
+            if (input) {
+              input.focus();
+              input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          });
+        }
+
         // Deep watch state to autosave and auto-update drafts
         this.$watch('form', (value) => {
           localStorage.setItem('resume_builder_draft', JSON.stringify(value));

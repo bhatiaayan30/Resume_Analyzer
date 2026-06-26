@@ -122,6 +122,20 @@
                 { field: 'Senior Developer', resume: 'AWS Certified Cloud Practitioner', linkedin: 'No matching certificate records found' }
             ];
         }, 2200);
+    },
+
+    init() {
+        const params = new URLSearchParams(window.location.search);
+        const focus = params.get('focus');
+        if (focus) {
+            this.$nextTick(() => {
+                const el = document.getElementById(focus) || document.querySelector(`input[name=${focus}], select[name=${focus}]`) || document.querySelector('input, select');
+                if (el) {
+                    el.focus();
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
     }
 }">
     <!-- Page Header -->

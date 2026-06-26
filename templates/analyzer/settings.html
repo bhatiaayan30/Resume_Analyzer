@@ -34,6 +34,64 @@
             otpError: '',
             otpSuccess: '',
             isLoading: false,
+
+            init() {
+                // If backend flags suggest phone or email was just updated, trigger OTP request automatically.
+                {% if phone_updated %}
+                    this.requestOTP('phone');
+                {% elif email_updated %}
+                    this.requestOTP('email');
+                {% endif %}
+
+                const params = new URLSearchParams(window.location.search);
+                const tab = params.get('tab');
+                if (tab && ['personal', 'security', 'billing', 'preferences', 'danger'].includes(tab)) {
+                    this.activeTab = tab;
+                }
+
+                const focus = params.get('focus');
+                const verify = params.get('verify');
+                
+                if (focus === 'phone') {
+                    this.activeTab = 'personal';
+                    if (verify) {
+                        this.requestOTP('phone');
+                    } else {
+                        this.isEditing = true;
+                        this.$nextTick(() => {
+                            const phoneInput = document.querySelector('input[name=phone_number]');
+                            if (phoneInput) {
+                                phoneInput.focus();
+                                phoneInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        });
+                    }
+                } else if (focus === 'email') {
+                    this.activeTab = 'personal';
+                    if (verify) {
+                        this.requestOTP('email');
+                    } else {
+                        this.isEditing = true;
+                        this.$nextTick(() => {
+                            const emailInput = document.querySelector('input[name=email]');
+                            if (emailInput) {
+                                emailInput.focus();
+                                emailInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        });
+                    }
+                } else if (focus) {
+                    this.activeTab = 'personal';
+                    this.isEditing = true;
+                    this.$nextTick(() => {
+                        const el = document.querySelector(`input[name=${focus}], [name=${focus}]`) || document.getElementById(focus);
+                        if (el) {
+                            el.focus();
+                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    });
+                }
+            },
             
             // Cooldown & Resend state
             resendCooldown: 0,

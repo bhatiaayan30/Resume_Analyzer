@@ -392,6 +392,61 @@ main {
                         Standard tools look only for direct word matching, which is easily bypassed or misleads candidates. We utilize semantic mapping to understand the context of your skills, analyze the credibility of your metrics, flag date overlaps, and identify AI-generated profiles to help you present an authentic, verified application.
                     </div>
                 </div>
+
+                <!-- FAQ 5 -->
+                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+                    <button @click="activeFaq = activeFaq === 5 ? null : 5" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
+                        <span class="font-bold text-white text-lg">What file formats does the scanner accept?</span>
+                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 5 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="activeFaq === 5" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                        We support PDF, DOCX, and DOC resume formats. PDF is the most widely recommended format for ATS submissions. Our parser is optimised for all three, though we always flag any layout structures within those files that may cause parsing issues in real ATS systems.
+                    </div>
+                </div>
+
+                <!-- FAQ 6 -->
+                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+                    <button @click="activeFaq = activeFaq === 6 ? null : 6" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
+                        <span class="font-bold text-white text-lg">Can I analyze multiple job descriptions with the same resume?</span>
+                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 6 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="activeFaq === 6" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                        Absolutely. Each analysis run is independent, so you can paste a different job description each time and get a tailored score and keyword gap report for every role you're targeting. Registered users also get access to their full analysis history so they can compare results across multiple applications.
+                    </div>
+                </div>
+
+                <!-- FAQ 7 -->
+                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+                    <button @click="activeFaq = activeFaq === 7 ? null : 7" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
+                        <span class="font-bold text-white text-lg">How does the Resume Builder Wizard work?</span>
+                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 7 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="activeFaq === 7" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                        The Builder Wizard guides you step-by-step through crafting each section of your resume — from professional summary to work experience and skills. It uses your target job description to suggest the right keywords and phrases to include, then outputs a clean, ATS-friendly document ready to download or copy.
+                    </div>
+                </div>
+
+                <!-- FAQ 8 -->
+                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+                    <button @click="activeFaq = activeFaq === 8 ? null : 8" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
+                        <span class="font-bold text-white text-lg">What does the Authenticity Audit check for?</span>
+                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 8 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="activeFaq === 8" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                        The Authenticity Audit scans your resume for red flags that recruiters and hiring managers commonly scrutinise. This includes inconsistent employment date overlaps, vague or unquantified achievement metrics, skill claims that are disproportionate to stated experience, and patterns commonly associated with auto-generated content. It gives you an honest credibility score before a recruiter does.
+                    </div>
+                </div>
+
+                <!-- FAQ 9 -->
+                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+                    <button @click="activeFaq = activeFaq === 9 ? null : 9" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
+                        <span class="font-bold text-white text-lg">Do I need an account to use the scanner?</span>
+                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 9 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="activeFaq === 9" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                        No account is required to run a basic ATS scan. You can upload your resume and paste a job description right away. However, creating a free account unlocks your full analysis history, the Resume Builder Wizard, the Auto-Vet screener, the Authenticity Audit, and cover letter generation — all in one dashboard.
+                    </div>
+                </div>
             </div>
         </div>
     </div>

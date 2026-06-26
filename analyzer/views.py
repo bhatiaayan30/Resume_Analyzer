@@ -421,6 +421,9 @@ def settings_view(request):
     error = None
     success = None
 
+    phone_updated = False
+    email_updated = False
+
     if request.method == "POST":
         username = request.POST.get("username", "").strip()
         email = request.POST.get("email", "").strip().lower()
@@ -442,6 +445,7 @@ def settings_view(request):
                         else:
                             request.user.email = email
                             profile.email_verified = False
+                            email_updated = True
                     
                     if not error:
                         # Update User
@@ -452,6 +456,7 @@ def settings_view(request):
                         if profile.phone_number != phone_number:
                             profile.phone_number = phone_number
                             profile.phone_verified = False
+                            phone_updated = True
                         profile.save()
                         success = "Profile updated successfully!"
                 except Exception as e:
@@ -462,7 +467,9 @@ def settings_view(request):
         "total_scans": total_scans,
         "secondary_emails": secondary_emails,
         "error": error,
-        "success": success
+        "success": success,
+        "phone_updated": phone_updated,
+        "email_updated": email_updated
     })
 
 
