@@ -37,6 +37,7 @@ urlpatterns = [
     path("api/verify-otp/", views.verify_otp, name="verify_otp"),
     path("payment-failed/", views.payment_failed, name="payment_failed"),
     path("contact/", views.contact_view, name="contact"),
+    path("support/", views.support_view, name="support"),
     
     # Secondary Email management paths
     path("api/secondary-email/add/", views.add_secondary_email, name="add_secondary_email"),

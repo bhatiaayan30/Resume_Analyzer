@@ -2077,5 +2077,36 @@ def why_us_view(request):
     return render(request, "analyzer/why_us.html")
 
 
+@login_required
+def support_view(request):
+    """View for authenticated users to submit a support ticket."""
+    if request.method == "POST":
+        subject = request.POST.get("subject", "").strip()
+        message = request.POST.get("message", "").strip()
+        
+        if not subject or not message:
+            return render(request, "analyzer/support.html", {"error": "Subject and message are required."})
+            
+        from django.core.mail import send_mail
+        from django.conf import settings
+        
+        email_subject = f"[Support Ticket] {subject}"
+        email_body = f"User: {request.user.username} ({request.user.email})\n\nSubject: {subject}\n\nMessage:\n{message}"
+        
+        try:
+            send_mail(
+                subject=email_subject,
+                message=email_body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=["bhatiaayan30@gmail.com"],
+                fail_silently=False,
+            )
+            return render(request, "analyzer/support.html", {"success": True})
+        except Exception as e:
+            return render(request, "analyzer/support.html", {"error": f"Failed to send ticket: {str(e)}"})
+            
+    return render(request, "analyzer/support.html")
+
+
 
 

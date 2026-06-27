@@ -842,7 +842,6 @@
           </div>
           
           <a href="{% url 'history' %}">History</a>
-          <a href="{% url 'why_us' %}">Why Us</a>
           <a href="{% url 'resume_builder' %}" class="{% if request.resolver_match.url_name == 'resume_builder' %}active{% endif %}">Build Resume</a>
           {% if user.profile.is_premium %}
               <a href="{% url 'market_insights' %}">Insights</a>
@@ -852,7 +851,7 @@
                   <span class="text-[8px] font-black bg-pink-500/20 text-pink-400 px-1 py-0.2 rounded border border-pink-500/30 uppercase tracking-wider">PRO</span>
               </a>
           {% endif %}
-          <a href="{% url 'contact' %}">Contact Us</a>
+          <a href="{% url 'support' %}">Support</a>
         </nav>
       </div>
       <div class="hidden md:flex items-center gap-3">
@@ -940,7 +939,6 @@
               <a href="{% url 'skills_gap' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Skills Gap Analysis</a>
               <a href="{% url 'chrome_extension' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Chrome Extension</a>
          </div>
-         <a href="{% url 'why_us' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Why Us</a>
          <a href="{% url 'history' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">History</a>
          <a href="{% url 'resume_builder' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Build Resume</a>
          {% if user.profile.is_premium %}
@@ -950,7 +948,7 @@
              <a href="{% url 'market_insights' %}" class="text-gray-400 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Insights <span class="text-[10px] bg-pink-500/20 text-pink-400 px-1 py-0.5 rounded border border-pink-500/30 font-bold uppercase tracking-wide">PRO</span></a>
              <a href="{% url 'pricing' %}" class="text-brand font-bold py-2 px-3 rounded-lg hover:bg-white/5">Upgrade to Premium</a>
          {% endif %}
-         <a href="{% url 'contact' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Contact Us</a>
+         <a href="{% url 'support' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Support</a>
          <a href="{% url 'settings' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2 font-semibold">
              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
              Settings
@@ -1227,9 +1225,15 @@
           </div>
           <div class="flex items-center gap-6 text-sm">
               <a href="{% url 'index' %}" class="hover:text-white transition-colors">Home</a>
-              <a href="{% url 'why_us' %}" class="hover:text-white transition-colors">Why Us</a>
+              {% if not user.is_authenticated %}
+                  <a href="{% url 'why_us' %}" class="hover:text-white transition-colors">Why Us</a>
+              {% endif %}
               <a href="{% url 'blog_index' %}" class="hover:text-white transition-colors">Blogs</a>
-              <a href="{% url 'contact' %}" class="hover:text-white transition-colors">Contact Us</a>
+              {% if user.is_authenticated %}
+                  <a href="{% url 'support' %}" class="hover:text-white transition-colors">Support</a>
+              {% else %}
+                  <a href="{% url 'contact' %}" class="hover:text-white transition-colors">Contact Us</a>
+              {% endif %}
           </div>
           <div class="text-sm text-gray-600">© 2026 All rights reserved.</div>
       </div>
