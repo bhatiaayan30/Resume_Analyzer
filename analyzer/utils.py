@@ -361,6 +361,7 @@ def send_sms_otp(user, otp_code: str, phone_number: str):
 
     if not account_sid or not auth_token or not twilio_number:
         logger.warning(f"Twilio credentials missing. SMS OTP for {user.username} could not be sent.")
+        print(f"\n{'='*50}\n[DEV MODE] MOCK SMS OTP for {phone_number}:\nYour Verification Code is: {otp_code}\n{'='*50}\n")
         return
 
     try:

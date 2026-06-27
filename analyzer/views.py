@@ -1066,24 +1066,15 @@ def market_insights(request):
 @login_required
 @require_http_methods(["POST"])
 def request_otp(request):
-    """Generate and send OTP for email or phone."""
+    """Generate and send OTP for email."""
     import json
     from datetime import timedelta
     from django.utils import timezone
     try:
         data = json.loads(request.body)
         purpose = data.get('purpose')
-        if purpose not in ['email', 'phone']:
+        if purpose != 'email':
             return JsonResponse({"status": "error", "message": "Invalid purpose"}, status=400)
-        if purpose == 'phone':
-            phone_number = data.get('phone_number')
-            if not phone_number:
-                # Use existing phone number from profile if available
-                phone_number = getattr(request.user.profile, 'phone_number', None)
-                if not phone_number:
-                    return JsonResponse({"status": "error", "message": "Phone number required"}, status=400)
-            request.user.profile.phone_number = phone_number
-            request.user.profile.save()
             
         # Invalidate old OTPs
         OTP.objects.filter(user=request.user, purpose=purpose, is_used=False).update(is_used=True)
@@ -1094,10 +1085,7 @@ def request_otp(request):
         OTP.objects.create(user=request.user, code=code, purpose=purpose, expires_at=expires_at)
         
         # Send OTP
-        if purpose == 'email':
-            send_email_otp(request.user, code)
-        else:
-            send_sms_otp(request.user, code, request.user.profile.phone_number)
+        send_email_otp(request.user, code)
             
         return JsonResponse({"status": "success", "message": f"OTP sent to {purpose}"})
     except Exception as e:
@@ -1113,7 +1101,7 @@ def verify_otp(request):
     try:
         data = json.loads(request.body)
         purpose = data.get('purpose')
-        if purpose not in ['email', 'phone']:
+        if purpose != 'email':
             return JsonResponse({"status": "error", "message": "Invalid purpose"}, status=400)
         code = data.get('code')
         
@@ -1136,13 +1124,10 @@ def verify_otp(request):
         otp_obj.save()
         
         # Update user profile
-        if purpose == 'email':
-            request.user.profile.email_verified = True
-        elif purpose == 'phone':
-            request.user.profile.phone_verified = True
+        request.user.profile.email_verified = True
         request.user.profile.save()
         
-        return JsonResponse({"status": "success", "message": f"{purpose.capitalize()} verified successfully!"})
+        return JsonResponse({"status": "success", "message": f"Email verified successfully!"})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 

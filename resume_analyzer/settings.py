@@ -26,6 +26,7 @@ else:
     ENCRYPTION_KEY = config("ENCRYPTION_KEY", default="m4XLU7wYoDxNunv7YahZPCmja_ryje0JiOYL5LBK1s0=")
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=Csv())
 ALLOWED_HOSTS.append(".vercel.app")
+ALLOWED_HOSTS.append(".onrender.com")
 
 SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=False, cast=bool)
 SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=False, cast=bool)
@@ -33,6 +34,8 @@ CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=False, cast=bool)
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
 if "https://*.vercel.app" not in CSRF_TRUSTED_ORIGINS:
     CSRF_TRUSTED_ORIGINS.append("https://*.vercel.app")
+if "https://*.onrender.com" not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append("https://*.onrender.com")
 
 
 
