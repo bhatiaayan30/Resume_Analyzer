@@ -342,108 +342,231 @@ main {
 
     <!-- 6. FAQ Section -->
     <div id="faq" class="relative z-10 py-24 bg-black/20 border-t border-white/5" x-data="{ activeFaq: null }">
-        <div class="max-w-[1000px] mx-auto px-6">
+        <div class="max-w-[1400px] mx-auto px-6">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white">Frequently Asked Questions</h2>
-                <p class="text-gray-400">Everything you need to know about the ATS optimization scanner.</p>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand/10 text-brand border border-brand/20 mb-4 uppercase tracking-wider">
+                    F.A.Q.
+                </span>
+                <h2 class="text-3xl md:text-5xl font-extrabold mb-4 text-white tracking-tight">
+                    Frequently Asked <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-pink-500">Questions</span>
+                </h2>
+                <p class="text-gray-400 max-w-xl mx-auto">Everything you need to know about the ATS optimization scanner, security, and features.</p>
             </div>
             
-            <div class="space-y-4">
+            <!-- 3-Column Interactive Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
                 <!-- FAQ 1 -->
-                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
-                    <button @click="activeFaq = activeFaq === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
-                        <span class="font-bold text-white text-lg">How does the ATS matching score work?</span>
-                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 1 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="activeFaq === 1" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                <div class="glass-panel p-5 rounded-2xl border border-white/5 transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                     :class="{ 'border-brand/40 bg-brand/5 shadow-[0_0_30px_rgba(139,92,246,0.15)]': activeFaq === 1, 'hover:border-white/15 hover:bg-white/[0.02]': activeFaq !== 1 }"
+                     @click="activeFaq = activeFaq === 1 ? null : 1">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="space-y-2">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-brand/10 text-brand-hover border border-brand/20">
+                                Scanner
+                            </span>
+                            <h3 class="font-bold text-white text-base leading-snug group-hover:text-brand-hover transition-colors duration-200">
+                                How does the ATS matching score work?
+                            </h3>
+                        </div>
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-brand/30 transition-colors duration-300">
+                            <svg class="w-4 h-4 text-gray-400 transition-transform duration-300" :class="{ 'rotate-45 text-brand': activeFaq === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div x-show="activeFaq === 1" x-collapse x-cloak class="mt-4 text-gray-400 leading-relaxed text-sm">
                         Our advanced engine parses your resume and compares it semantically against the provided job description. We look for key skill alignments, required credentials, job titles, and experience levels, identifying both exact keyword matches and fuzzy semantic gaps.
                     </div>
                 </div>
 
                 <!-- FAQ 2 -->
-                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
-                    <button @click="activeFaq = activeFaq === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
-                        <span class="font-bold text-white text-lg">Is my resume data safe and private?</span>
-                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 2 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="activeFaq === 2" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                <div class="glass-panel p-5 rounded-2xl border border-white/5 transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                     :class="{ 'border-brand/40 bg-brand/5 shadow-[0_0_30px_rgba(139,92,246,0.15)]': activeFaq === 2, 'hover:border-white/15 hover:bg-white/[0.02]': activeFaq !== 2 }"
+                     @click="activeFaq = activeFaq === 2 ? null : 2">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="space-y-2">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                Security
+                            </span>
+                            <h3 class="font-bold text-white text-base leading-snug group-hover:text-brand-hover transition-colors duration-200">
+                                Is my resume data safe and private?
+                            </h3>
+                        </div>
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-brand/30 transition-colors duration-300">
+                            <svg class="w-4 h-4 text-gray-400 transition-transform duration-300" :class="{ 'rotate-45 text-brand': activeFaq === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div x-show="activeFaq === 2" x-collapse x-cloak class="mt-4 text-gray-400 leading-relaxed text-sm">
                         Yes, completely. We prioritize data protection. Your uploaded resumes are processed securely and are never shared with third parties or used to train public AI models. You have full control over your analysis history and can delete it at any time.
                     </div>
                 </div>
 
                 <!-- FAQ 3 -->
-                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
-                    <button @click="activeFaq = activeFaq === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
-                        <span class="font-bold text-white text-lg">What formatting issues does the scanner detect?</span>
-                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 3 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="activeFaq === 3" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                <div class="glass-panel p-5 rounded-2xl border border-white/5 transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                     :class="{ 'border-brand/40 bg-brand/5 shadow-[0_0_30px_rgba(139,92,246,0.15)]': activeFaq === 3, 'hover:border-white/15 hover:bg-white/[0.02]': activeFaq !== 3 }"
+                     @click="activeFaq = activeFaq === 3 ? null : 3">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="space-y-2">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-brand/10 text-brand-hover border border-brand/20">
+                                Scanner
+                            </span>
+                            <h3 class="font-bold text-white text-base leading-snug group-hover:text-brand-hover transition-colors duration-200">
+                                What formatting issues does the scanner detect?
+                            </h3>
+                        </div>
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-brand/30 transition-colors duration-300">
+                            <svg class="w-4 h-4 text-gray-400 transition-transform duration-300" :class="{ 'rotate-45 text-brand': activeFaq === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div x-show="activeFaq === 3" x-collapse x-cloak class="mt-4 text-gray-400 leading-relaxed text-sm">
                         It scans for common formatting vulnerabilities that cause parsing errors in Applicant Tracking Systems (ATS). This includes non-standard tables, multi-column layouts, header/footer text isolation, image-based text blocks, and hidden characters that standard ATS parsers fail to extract.
                     </div>
                 </div>
 
                 <!-- FAQ 4 -->
-                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
-                    <button @click="activeFaq = activeFaq === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
-                        <span class="font-bold text-white text-lg">How is this different from a simple keyword checker?</span>
-                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 4 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="activeFaq === 4" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                <div class="glass-panel p-5 rounded-2xl border border-white/5 transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                     :class="{ 'border-brand/40 bg-brand/5 shadow-[0_0_30px_rgba(139,92,246,0.15)]': activeFaq === 4, 'hover:border-white/15 hover:bg-white/[0.02]': activeFaq !== 4 }"
+                     @click="activeFaq = activeFaq === 4 ? null : 4">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="space-y-2">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-brand/10 text-brand-hover border border-brand/20">
+                                Scanner
+                            </span>
+                            <h3 class="font-bold text-white text-base leading-snug group-hover:text-brand-hover transition-colors duration-200">
+                                How is this different from a simple keyword checker?
+                            </h3>
+                        </div>
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-brand/30 transition-colors duration-300">
+                            <svg class="w-4 h-4 text-gray-400 transition-transform duration-300" :class="{ 'rotate-45 text-brand': activeFaq === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div x-show="activeFaq === 4" x-collapse x-cloak class="mt-4 text-gray-400 leading-relaxed text-sm">
                         Standard tools look only for direct word matching, which is easily bypassed or misleads candidates. We utilize semantic mapping to understand the context of your skills, analyze the credibility of your metrics, flag date overlaps, and identify AI-generated profiles to help you present an authentic, verified application.
                     </div>
                 </div>
 
                 <!-- FAQ 5 -->
-                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
-                    <button @click="activeFaq = activeFaq === 5 ? null : 5" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
-                        <span class="font-bold text-white text-lg">What file formats does the scanner accept?</span>
-                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 5 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="activeFaq === 5" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                <div class="glass-panel p-5 rounded-2xl border border-white/5 transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                     :class="{ 'border-brand/40 bg-brand/5 shadow-[0_0_30px_rgba(139,92,246,0.15)]': activeFaq === 5, 'hover:border-white/15 hover:bg-white/[0.02]': activeFaq !== 5 }"
+                     @click="activeFaq = activeFaq === 5 ? null : 5">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="space-y-2">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-brand/10 text-brand-hover border border-brand/20">
+                                Scanner
+                            </span>
+                            <h3 class="font-bold text-white text-base leading-snug group-hover:text-brand-hover transition-colors duration-200">
+                                What file formats does the scanner accept?
+                            </h3>
+                        </div>
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-brand/30 transition-colors duration-300">
+                            <svg class="w-4 h-4 text-gray-400 transition-transform duration-300" :class="{ 'rotate-45 text-brand': activeFaq === 5 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div x-show="activeFaq === 5" x-collapse x-cloak class="mt-4 text-gray-400 leading-relaxed text-sm">
                         We support PDF, DOCX, and DOC resume formats. PDF is the most widely recommended format for ATS submissions. Our parser is optimised for all three, though we always flag any layout structures within those files that may cause parsing issues in real ATS systems.
                     </div>
                 </div>
 
                 <!-- FAQ 6 -->
-                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
-                    <button @click="activeFaq = activeFaq === 6 ? null : 6" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
-                        <span class="font-bold text-white text-lg">Can I analyze multiple job descriptions with the same resume?</span>
-                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 6 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="activeFaq === 6" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                <div class="glass-panel p-5 rounded-2xl border border-white/5 transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                     :class="{ 'border-brand/40 bg-brand/5 shadow-[0_0_30px_rgba(139,92,246,0.15)]': activeFaq === 6, 'hover:border-white/15 hover:bg-white/[0.02]': activeFaq !== 6 }"
+                     @click="activeFaq = activeFaq === 6 ? null : 6">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="space-y-2">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-brand/10 text-brand-hover border border-brand/20">
+                                Scanner
+                            </span>
+                            <h3 class="font-bold text-white text-base leading-snug group-hover:text-brand-hover transition-colors duration-200">
+                                Can I analyze multiple job descriptions with the same resume?
+                            </h3>
+                        </div>
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-brand/30 transition-colors duration-300">
+                            <svg class="w-4 h-4 text-gray-400 transition-transform duration-300" :class="{ 'rotate-45 text-brand': activeFaq === 6 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div x-show="activeFaq === 6" x-collapse x-cloak class="mt-4 text-gray-400 leading-relaxed text-sm">
                         Absolutely. Each analysis run is independent, so you can paste a different job description each time and get a tailored score and keyword gap report for every role you're targeting. Registered users also get access to their full analysis history so they can compare results across multiple applications.
                     </div>
                 </div>
 
                 <!-- FAQ 7 -->
-                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
-                    <button @click="activeFaq = activeFaq === 7 ? null : 7" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
-                        <span class="font-bold text-white text-lg">How does the Resume Builder Wizard work?</span>
-                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 7 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="activeFaq === 7" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                <div class="glass-panel p-5 rounded-2xl border border-white/5 transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                     :class="{ 'border-brand/40 bg-brand/5 shadow-[0_0_30px_rgba(139,92,246,0.15)]': activeFaq === 7, 'hover:border-white/15 hover:bg-white/[0.02]': activeFaq !== 7 }"
+                     @click="activeFaq = activeFaq === 7 ? null : 7">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="space-y-2">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                Builder
+                            </span>
+                            <h3 class="font-bold text-white text-base leading-snug group-hover:text-brand-hover transition-colors duration-200">
+                                How does the Resume Builder Wizard work?
+                            </h3>
+                        </div>
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-brand/30 transition-colors duration-300">
+                            <svg class="w-4 h-4 text-gray-400 transition-transform duration-300" :class="{ 'rotate-45 text-brand': activeFaq === 7 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div x-show="activeFaq === 7" x-collapse x-cloak class="mt-4 text-gray-400 leading-relaxed text-sm">
                         The Builder Wizard guides you step-by-step through crafting each section of your resume — from professional summary to work experience and skills. It uses your target job description to suggest the right keywords and phrases to include, then outputs a clean, ATS-friendly document ready to download or copy.
                     </div>
                 </div>
 
                 <!-- FAQ 8 -->
-                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
-                    <button @click="activeFaq = activeFaq === 8 ? null : 8" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
-                        <span class="font-bold text-white text-lg">What does the Authenticity Audit check for?</span>
-                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 8 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="activeFaq === 8" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                <div class="glass-panel p-5 rounded-2xl border border-white/5 transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                     :class="{ 'border-brand/40 bg-brand/5 shadow-[0_0_30px_rgba(139,92,246,0.15)]': activeFaq === 8, 'hover:border-white/15 hover:bg-white/[0.02]': activeFaq !== 8 }"
+                     @click="activeFaq = activeFaq === 8 ? null : 8">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="space-y-2">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                                Audit
+                            </span>
+                            <h3 class="font-bold text-white text-base leading-snug group-hover:text-brand-hover transition-colors duration-200">
+                                What does the Authenticity Audit check for?
+                            </h3>
+                        </div>
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-brand/30 transition-colors duration-300">
+                            <svg class="w-4 h-4 text-gray-400 transition-transform duration-300" :class="{ 'rotate-45 text-brand': activeFaq === 8 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div x-show="activeFaq === 8" x-collapse x-cloak class="mt-4 text-gray-400 leading-relaxed text-sm">
                         The Authenticity Audit scans your resume for red flags that recruiters and hiring managers commonly scrutinise. This includes inconsistent employment date overlaps, vague or unquantified achievement metrics, skill claims that are disproportionate to stated experience, and patterns commonly associated with auto-generated content. It gives you an honest credibility score before a recruiter does.
                     </div>
                 </div>
 
                 <!-- FAQ 9 -->
-                <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
-                    <button @click="activeFaq = activeFaq === 9 ? null : 9" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
-                        <span class="font-bold text-white text-lg">Do I need an account to use the scanner?</span>
-                        <svg class="w-5 h-5 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 9 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="activeFaq === 9" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                <div class="glass-panel p-5 rounded-2xl border border-white/5 transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                     :class="{ 'border-brand/40 bg-brand/5 shadow-[0_0_30px_rgba(139,92,246,0.15)]': activeFaq === 9, 'hover:border-white/15 hover:bg-white/[0.02]': activeFaq !== 9 }"
+                     @click="activeFaq = activeFaq === 9 ? null : 9">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="space-y-2">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                                Account
+                            </span>
+                            <h3 class="font-bold text-white text-base leading-snug group-hover:text-brand-hover transition-colors duration-200">
+                                Do I need an account to use the scanner?
+                            </h3>
+                        </div>
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-brand/30 transition-colors duration-300">
+                            <svg class="w-4 h-4 text-gray-400 transition-transform duration-300" :class="{ 'rotate-45 text-brand': activeFaq === 9 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div x-show="activeFaq === 9" x-collapse x-cloak class="mt-4 text-gray-400 leading-relaxed text-sm">
                         No account is required to run a basic ATS scan. You can upload your resume and paste a job description right away. However, creating a free account unlocks your full analysis history, the Resume Builder Wizard, the Auto-Vet screener, the Authenticity Audit, and cover letter generation — all in one dashboard.
                     </div>
                 </div>

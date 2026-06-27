@@ -1994,4 +1994,10 @@ def blog_detail(request, slug):
     return render(request, "analyzer/blog_detail.html", {"post": post, "recent_posts": recent_posts})
 
 
+def why_us_view(request):
+    """View to render the 'Why Us' value proposition page."""
+    return render(request, "analyzer/why_us.html")
+
+
+
 

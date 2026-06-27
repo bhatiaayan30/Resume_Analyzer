@@ -1,84 +1,261 @@
 {% extends "analyzer/base.html" %}
+{% load static %}
 
 {% block title %}Resume Optimization & Career Blog - Resume Analyzer{% endblock %}
 
 {% block content %}
-<div class="relative overflow-hidden flex flex-col min-h-screen py-16 md:py-24">
+<div class="relative overflow-hidden flex flex-col min-h-screen py-16 md:py-24"
+     x-data="{
+         searchQuery: '',
+         activeCategory: 'All',
+         posts: [
+             {% for post in posts %}
+             {
+                 id: {{ post.id }},
+                 title: `{{ post.title|escapejs }}`,
+                 slug: `{{ post.slug|escapejs }}`,
+                 summary: `{{ post.summary|escapejs }}`,
+                 category: `{{ post.category|escapejs }}`,
+                 readTime: {{ post.read_time }},
+                 date: `{{ post.published_at|date:'F d, Y' }}`,
+                 url: `{% url 'blog_detail' post.slug %}`,
+                 isFeatured: {% if forloop.first %}true{% else %}false{% endif %}
+             },
+             {% endfor %}
+         ],
+         get filteredPosts() {
+             return this.posts.filter(post => {
+                 const matchesSearch = post.title.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
+                                       post.summary.toLowerCase().includes(this.searchQuery.toLowerCase());
+                 const matchesCategory = this.activeCategory === 'All' || post.category === this.activeCategory;
+                 return matchesSearch && matchesCategory;
+             });
+         },
+         get featuredPost() {
+             // Return first published article as featured, or null
+             return this.posts[0] || null;
+         },
+         get latestPosts() {
+             // Return posts except the featured one
+             return this.filteredPosts.filter((p, index) => {
+                 if (this.searchQuery || this.activeCategory !== 'All') return true;
+                 return index > 0;
+             });
+         }
+     }">
     <!-- Background Glow -->
     <div class="absolute top-[20%] left-1/2 -translate-x-1/2 w-[80vw] h-[80vw] bg-radial-gradient from-brand/10 to-transparent pointer-events-none z-0"></div>
 
     <div class="relative z-10 max-w-[1440px] mx-auto px-6 w-full">
+        
         <!-- Header -->
         <div class="text-center max-w-3xl mx-auto mb-16">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 border border-brand/20 text-brand text-sm font-semibold mb-6">
-                📚 Product & Career Blog
-            </div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand/10 text-brand border border-brand/20 mb-6 uppercase tracking-wider">
+                Insights & Updates
+            </span>
             <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight">
-                Unlock the Secrets of the <br/>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-pink-500">Applicant Tracking System</span>
+                The Screening <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-pink-500">Intelligence Blog</span>
             </h1>
             <p class="text-lg text-gray-400 leading-relaxed">
-                Expert insights, step-by-step guides, and engineering deep-dives to help you optimize your resume, prepare for mock interviews, and land your dream role.
+                Expert insights, formatting secrets, and career guidelines to help you optimize your resume and bypass modern ATS systems.
             </p>
         </div>
 
-        <!-- Blog Grid -->
-        {% if posts %}
+        <!-- Filter & Search Bar Section -->
+        <div class="flex flex-col md:flex-row gap-6 justify-between items-center mb-12 pb-6 border-b border-white/5">
+            <!-- Category Pills -->
+            <div class="flex flex-wrap gap-2.5">
+                <template x-for="cat in ['All', 'ATS Insights', 'Formatting Guide', 'Authenticity & AI', 'Portfolio Strategy', 'Interview Prep']">
+                    <button @click="activeCategory = cat"
+                            class="px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 border"
+                            :class="activeCategory === cat ? 'bg-brand/10 border-brand/30 text-brand' : 'bg-white/5 border-white/5 text-gray-400 hover:text-white hover:border-white/10'">
+                        <span x-text="cat"></span>
+                    </button>
+                </template>
+            </div>
+            
+            <!-- Search Box -->
+            <div class="relative w-full md:w-80">
+                <input type="text" 
+                       x-model="searchQuery" 
+                       placeholder="Search articles..." 
+                       class="w-full bg-white/5 border border-white/10 rounded-full px-5 py-2.5 text-sm text-white focus:outline-none focus:border-brand transition-colors placeholder-gray-500" />
+                <span class="absolute right-4 top-3 text-gray-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </span>
+            </div>
+        </div>
+
+        <!-- Featured Article (Only show when search/filters are empty) -->
+        <div x-show="!searchQuery && activeCategory === 'All' && featuredPost" x-cloak class="mb-16">
+            <template x-if="featuredPost">
+                <div class="glass-panel rounded-3xl overflow-hidden border border-white/5 flex flex-col lg:flex-row min-h-[400px] hover:border-brand/30 hover:shadow-[0_0_40px_rgba(139,92,246,0.1)] transition-all duration-300 group cursor-pointer"
+                     @click="window.location.href = featuredPost.url">
+                    
+                    <!-- Featured Image / SVG container -->
+                    <div class="lg:w-1/2 bg-gradient-to-br from-brand/25 to-pink-500/10 flex items-center justify-center border-r border-white/5 p-8 min-h-[300px]">
+                        <!-- Render SVG illustration based on category -->
+                        <div class="w-full max-w-[360px] h-auto transform group-hover:scale-105 transition-transform duration-500">
+                            <template x-if="featuredPost.category === 'ATS Insights'">
+                                <svg viewBox="0 0 200 150" class="w-full h-full text-brand">
+                                    <rect x="40" y="20" width="120" height="110" rx="8" fill="rgba(139, 92, 246, 0.05)" stroke="currentColor" stroke-width="2" />
+                                    <line x1="60" y1="50" x2="140" y2="50" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                                    <line x1="60" y1="70" x2="110" y2="70" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    <line x1="60" y1="90" x2="130" y2="90" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    <circle cx="140" cy="80" r="16" fill="rgba(236, 72, 153, 0.2)" stroke="#ec4899" stroke-width="2" />
+                                    <path d="M135 80l4 4 6-6" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                                    <path d="M20 75h160" stroke="#ec4899" stroke-width="1.5" stroke-dasharray="4 4" class="animate-pulse" />
+                                </svg>
+                            </template>
+                            <template x-if="featuredPost.category === 'Formatting Guide'">
+                                <svg viewBox="0 0 200 150" class="w-full h-full text-amber-400">
+                                    <rect x="30" y="20" width="60" height="110" rx="6" fill="rgba(251, 191, 36, 0.05)" stroke="currentColor" stroke-width="2" />
+                                    <rect x="110" y="20" width="60" height="110" rx="6" fill="rgba(251, 191, 36, 0.05)" stroke="currentColor" stroke-width="2" />
+                                    <path d="M50 40h20m-20 20h20m-20 20h20m40-40h20m-20 20h20m-20 20h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                                    <path d="M98 75l4-15 8 30 4-15" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                                </svg>
+                            </template>
+                            <template x-if="featuredPost.category === 'Authenticity & AI'">
+                                <svg viewBox="0 0 200 150" class="w-full h-full text-rose-400">
+                                    <rect x="50" y="25" width="100" height="100" rx="8" fill="rgba(248, 113, 113, 0.05)" stroke="currentColor" stroke-width="2" />
+                                    <circle cx="90" cy="65" r="14" stroke="#8b5cf6" stroke-width="2.5" fill="none" />
+                                    <line x1="100" y1="75" x2="115" y2="90" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round" />
+                                    <path d="M65 45h20m-20 70h70" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                </svg>
+                            </template>
+                            <template x-if="featuredPost.category === 'Portfolio Strategy'">
+                                <svg viewBox="0 0 200 150" class="w-full h-full text-cyan-400">
+                                    <rect x="30" y="30" width="140" height="90" rx="6" fill="rgba(34, 211, 238, 0.05)" stroke="currentColor" stroke-width="2" />
+                                    <circle cx="50" cy="45" r="3" fill="currentColor" />
+                                    <circle cx="60" cy="45" r="3" fill="currentColor" />
+                                    <circle cx="70" cy="45" r="3" fill="currentColor" />
+                                    <path d="M50 70h40m-40 20h60" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                                    <rect x="110" y="60" width="40" height="40" rx="4" fill="rgba(236, 72, 153, 0.2)" stroke="#ec4899" stroke-width="1.5" />
+                                </svg>
+                            </template>
+                            <template x-if="featuredPost.category === 'Interview Prep' || featuredPost.category === 'Career Advice'">
+                                <svg viewBox="0 0 200 150" class="w-full h-full text-emerald-400">
+                                    <path d="M40 85c0-20 18-35 40-35h40c22 0 40 15 40 35 0 12-7 22-18 29l4 16-16-10h-10c-22 0-40-15-40-35z" fill="rgba(52, 211, 153, 0.05)" stroke="currentColor" stroke-width="2" />
+                                    <path d="M70 70h60M80 85h40" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                                </svg>
+                            </template>
+                        </div>
+                    </div>
+                    
+                    <!-- Featured Details -->
+                    <div class="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-3 py-1 text-xs font-bold text-brand bg-brand/10 border border-brand/20 rounded-full" x-text="featuredPost.category"></span>
+                                <span class="px-2.5 py-0.5 text-[10px] font-bold text-pink-500 bg-pink-500/10 border border-pink-500/20 rounded-full uppercase tracking-wider">Featured</span>
+                                <span class="text-xs text-gray-500" x-text="featuredPost.readTime + ' min read'"></span>
+                            </div>
+                            
+                            <h2 class="text-2xl md:text-4xl font-extrabold text-white group-hover:text-brand-hover transition-colors leading-tight" x-text="featuredPost.title"></h2>
+                            
+                            <p class="text-gray-400 text-sm leading-relaxed" x-text="featuredPost.summary"></p>
+                        </div>
+                        
+                        <div class="pt-6 border-t border-white/5 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-brand/20 flex items-center justify-center text-brand font-bold text-sm">RA</div>
+                                <div>
+                                    <div class="text-xs font-bold text-white">Resume Analyzer Team</div>
+                                    <div class="text-[10px] text-gray-500" x-text="featuredPost.date"></div>
+                                </div>
+                            </div>
+                            
+                            <a :href="featuredPost.url" class="inline-flex items-center gap-1.5 text-sm font-bold text-brand group-hover:text-brand-hover transition-colors">
+                                Read article
+                                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Latest Articles Header -->
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-white tracking-tight">Latest Articles</h2>
+            <div class="text-xs text-gray-500" x-text="filteredPosts.length + ' articles found'"></div>
+        </div>
+
+        <!-- Grid of Latest Articles -->
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {% for post in posts %}
-            <article class="glass-panel rounded-3xl overflow-hidden border border-white/5 hover:border-brand/30 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
-                <!-- Cover Image/Placeholder -->
-                <div class="relative h-48 bg-gradient-to-br from-brand/25 to-pink-500/10 flex items-center justify-center border-b border-white/5">
-                    <span class="text-5xl opacity-80">
-                        {% if post.category == "ATS Insights" %}🤖
-                        {% elif post.category == "Formatting Guide" %}📄
-                        {% elif post.category == "Authenticity & AI" %}🔍
-                        {% elif post.category == "Portfolio Strategy" %}💼
-                        {% elif post.category == "Interview Prep" %}💬
-                        {% else %}💡{% endif %}
-                    </span>
-                </div>
-                
-                <!-- Content -->
-                <div class="p-8 flex flex-col flex-grow">
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="px-3 py-1 text-xs font-semibold text-brand bg-brand/10 border border-brand/20 rounded-full">
-                            {{ post.category }}
-                        </span>
-                        <span class="text-xs text-gray-500 flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            {{ post.read_time }} min read
-                        </span>
+            <template x-for="post in latestPosts" :key="post.id">
+                <article class="glass-panel rounded-3xl overflow-hidden border border-white/5 hover:border-brand/30 hover:shadow-[0_0_30px_rgba(139,92,246,0.12)] hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group cursor-pointer"
+                         @click="window.location.href = post.url">
+                    
+                    <!-- Cover SVG illustration -->
+                    <div class="relative h-48 bg-gradient-to-br from-brand/20 to-pink-500/5 flex items-center justify-center border-b border-white/5 p-6 overflow-hidden">
+                        <div class="w-28 h-28 transform group-hover:scale-105 transition-transform duration-500 text-brand">
+                            <template x-if="post.category === 'ATS Insights'">
+                                <svg viewBox="0 0 200 150" class="w-full h-full text-brand">
+                                    <rect x="40" y="20" width="120" height="110" rx="8" fill="rgba(139, 92, 246, 0.05)" stroke="currentColor" stroke-width="2" />
+                                    <line x1="60" y1="50" x2="140" y2="50" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                                    <line x1="60" y1="70" x2="110" y2="70" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    <circle cx="140" cy="80" r="16" fill="rgba(236, 72, 153, 0.2)" stroke="#ec4899" stroke-width="2" />
+                                </svg>
+                            </template>
+                            <template x-if="post.category === 'Formatting Guide'">
+                                <svg viewBox="0 0 200 150" class="w-full h-full text-amber-400">
+                                    <rect x="30" y="20" width="60" height="110" rx="6" fill="rgba(251, 191, 36, 0.05)" stroke="currentColor" stroke-width="2" />
+                                    <rect x="110" y="20" width="60" height="110" rx="6" fill="rgba(251, 191, 36, 0.05)" stroke="currentColor" stroke-width="2" />
+                                    <path d="M50 40h20m-20 20h20m40-40h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                                </svg>
+                            </template>
+                            <template x-if="post.category === 'Authenticity & AI'">
+                                <svg viewBox="0 0 200 150" class="w-full h-full text-rose-400">
+                                    <rect x="50" y="25" width="100" height="100" rx="8" fill="rgba(248, 113, 113, 0.05)" stroke="currentColor" stroke-width="2" />
+                                    <circle cx="90" cy="65" r="14" stroke="#8b5cf6" stroke-width="2.5" fill="none" />
+                                    <line x1="100" y1="75" x2="115" y2="90" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round" />
+                                </svg>
+                            </template>
+                            <template x-if="post.category === 'Portfolio Strategy'">
+                                <svg viewBox="0 0 200 150" class="w-full h-full text-cyan-400">
+                                    <rect x="30" y="30" width="140" height="90" rx="6" fill="rgba(34, 211, 238, 0.05)" stroke="currentColor" stroke-width="2" />
+                                    <circle cx="50" cy="45" r="3" fill="currentColor" />
+                                    <rect x="110" y="60" width="40" height="40" rx="4" fill="rgba(236, 72, 153, 0.2)" stroke="#ec4899" stroke-width="1.5" />
+                                </svg>
+                            </template>
+                            <template x-if="post.category === 'Interview Prep' || post.category === 'Career Advice'">
+                                <svg viewBox="0 0 200 150" class="w-full h-full text-emerald-400">
+                                    <path d="M40 85c0-20 18-35 40-35h40c22 0 40 15 40 35 0 12-7 22-18 29l4 16-16-10h-10c-22 0-40-15-40-35z" fill="rgba(52, 211, 153, 0.05)" stroke="currentColor" stroke-width="2" />
+                                </svg>
+                            </template>
+                        </div>
                     </div>
                     
-                    <h3 class="text-xl font-bold text-white mb-3 hover:text-brand transition-colors line-clamp-2">
-                        <a href="{% url 'blog_detail' post.slug %}">{{ post.title }}</a>
-                    </h3>
-                    
-                    <p class="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3">
-                        {{ post.summary }}
-                    </p>
-                    
-                    <div class="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
-                        <span class="text-xs text-gray-500">
-                            {{ post.published_at|date:"F d, Y" }}
-                        </span>
-                        <a href="{% url 'blog_detail' post.slug %}" class="inline-flex items-center gap-1.5 text-sm font-bold text-brand hover:text-brand-hover transition-colors">
-                            Read Article
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        </a>
+                    <!-- Content -->
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="px-2.5 py-0.5 text-[10px] font-bold text-brand bg-brand/10 border border-brand/20 rounded-full" x-text="post.category"></span>
+                            <span class="text-xs text-gray-500" x-text="post.readTime + ' min read'"></span>
+                        </div>
+                        
+                        <h3 class="text-lg font-bold text-white mb-2 group-hover:text-brand-hover transition-colors line-clamp-2" x-text="post.title"></h3>
+                        
+                        <p class="text-gray-400 text-xs leading-relaxed mb-6 line-clamp-3" x-text="post.summary"></p>
+                        
+                        <div class="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
+                            <span class="text-[10px] text-gray-500" x-text="post.date"></span>
+                            <a :href="post.url" class="inline-flex items-center gap-1 text-xs font-bold text-brand group-hover:text-brand-hover transition-colors">
+                                Read Article
+                                <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </a>
+                        </div>
                     </div>
-                </div>
-            </article>
-            {% endfor %}
+                </article>
+            </template>
         </div>
-        {% else %}
-        <div class="text-center py-20 glass-panel rounded-3xl border border-white/5">
+
+        <!-- Empty State -->
+        <div x-show="filteredPosts.length === 0" x-cloak class="text-center py-20 glass-panel rounded-3xl border border-white/5">
             <span class="text-5xl mb-4 block">📭</span>
-            <h3 class="text-xl font-bold text-white mb-2">No articles published yet</h3>
-            <p class="text-gray-400 text-sm">Check back soon for new insights!</p>
+            <h3 class="text-xl font-bold text-white mb-2">No matching articles found</h3>
+            <p class="text-gray-400 text-sm">Try broadening your search term or checking another category pill.</p>
         </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -842,6 +842,7 @@
           </div>
           
           <a href="{% url 'history' %}">History</a>
+          <a href="{% url 'why_us' %}">Why Us</a>
           <a href="{% url 'resume_builder' %}" class="{% if request.resolver_match.url_name == 'resume_builder' %}active{% endif %}">Build Resume</a>
           {% if user.profile.is_premium %}
               <a href="{% url 'market_insights' %}">Insights</a>
@@ -939,6 +940,7 @@
               <a href="{% url 'skills_gap' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Skills Gap Analysis</a>
               <a href="{% url 'chrome_extension' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Chrome Extension</a>
          </div>
+         <a href="{% url 'why_us' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Why Us</a>
          <a href="{% url 'history' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">History</a>
          <a href="{% url 'resume_builder' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Build Resume</a>
          {% if user.profile.is_premium %}
@@ -1068,6 +1070,7 @@
           </div>
           
           <a href="{% url 'index' %}#how-it-works" class="text-sm font-semibold text-gray-300 hover:text-white transition-colors">How It Works</a>
+          <a href="{% url 'why_us' %}" class="text-sm font-semibold text-gray-300 hover:text-white transition-colors">Why Us</a>
           <a href="{% url 'blog_index' %}" class="text-sm font-semibold text-gray-300 hover:text-white transition-colors">Blogs</a>
           <a href="{% url 'contact' %}" class="text-sm font-bold text-brand hover:text-brand-hover dark:text-brand dark:hover:text-brand-hover transition-colors">Contact Us</a>
         </nav>
@@ -1161,6 +1164,7 @@
              <a href="{% url 'chrome_extension' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Chrome Extension</a>
          </div>
          <a href="{% url 'index' %}#how-it-works" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">How It Works</a>
+         <a href="{% url 'why_us' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Why Us</a>
          <a href="{% url 'blog_index' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Blogs</a>
          <a href="{% url 'contact' %}" class="text-brand font-bold py-2 px-3 rounded-lg hover:bg-white/5">Contact Us</a>
          <a href="{% url 'login' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Sign In</a>
@@ -1223,6 +1227,7 @@
           </div>
           <div class="flex items-center gap-6 text-sm">
               <a href="{% url 'index' %}" class="hover:text-white transition-colors">Home</a>
+              <a href="{% url 'why_us' %}" class="hover:text-white transition-colors">Why Us</a>
               <a href="{% url 'blog_index' %}" class="hover:text-white transition-colors">Blogs</a>
               <a href="{% url 'contact' %}" class="hover:text-white transition-colors">Contact Us</a>
           </div>

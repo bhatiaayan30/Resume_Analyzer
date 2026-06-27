@@ -72,6 +72,7 @@ urlpatterns = [
     # Blog Section
     path("blog/", views.blog_index, name="blog_index"),
     path("blog/<slug:slug>/", views.blog_detail, name="blog_detail"),
+    path("why-us/", views.why_us_view, name="why_us"),
 ]
 
 
