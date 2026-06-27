@@ -235,6 +235,8 @@ def analyze(request):
                     ext = ".jpg"
                 elif "image/png" in content_type:
                     ext = ".png"
+                elif "linkedin.com" in resume_url or "text/html" in content_type:
+                    ext = ".html"
                 else:
                     from urllib.parse import urlparse
                     parsed_path = urlparse(resume_url).path
@@ -254,23 +256,47 @@ def analyze(request):
                     else:
                         return render_error("Unable to determine file type. Please make sure the URL points to a public PDF, DOCX or Image file.", 400)
                 
-                virtual_file = io.BytesIO(file_content)
-                virtual_file.name = "cloud_file" + ext
-                
                 from .utils import check_searchability
-                if ext in [".jpg", ".jpeg", ".png"]:
-                    from .utils import extract_text_from_image
-                    resume_text = extract_text_from_image(file_content, "image/png" if ext == ".png" else "image/jpeg")
-                    ats_format_issues = ["image_upload"]
+                if ext == ".html":
+                    if "linkedin.com" not in resume_url:
+                        return render_error("The provided cloud URL returned a webpage instead of a document. Please ensure the link is publicly accessible (set to 'Anyone with the link can view') and not restricted.", 400)
+                    
+                    # Process public LinkedIn HTML
+                    html_content = file_content.decode('utf-8', errors='ignore')
+                    if "authwall" in response.url or "login" in response.url or "sign in" in html_content.lower() or len(html_content) < 1000:
+                        return render_error("Unable to parse LinkedIn profile directly due to LinkedIn's private account settings or login requirements. Please make sure the link is fully public and accessible, or export your LinkedIn profile as a PDF and upload the PDF file instead.", 400)
+                    
+                    import re
+                    # Remove script & style content
+                    clean_content = re.sub(r'<(script|style)\b[^>]*>([\s\S]*?)<\/\1>', '', html_content)
+                    # Strip other HTML tags
+                    clean_content = re.sub(r'<[^>]+>', ' ', clean_content)
+                    # Normalize whitespace
+                    resume_text = '\n'.join([line.strip() for line in clean_content.splitlines() if line.strip()])
+                    
+                    if len(resume_text) < 100:
+                        return render_error("The public LinkedIn profile contains insufficient visible text to parse. Please make sure the profile is fully public and not restricted, or export your LinkedIn profile as a PDF and upload the PDF file instead.", 400)
+                        
+                    ats_format_issues = []
                     searchability_checks = check_searchability(resume_text)
+                    filename = "LinkedIn Profile URL"
                 else:
-                    resume_text, ats_format_issues, searchability_checks = extract_text(virtual_file, ext)
-                
-                filename = request.POST.get("cloud_filename", "").strip() or f"Cloud Import ({ext[1:].upper()})"
+                    virtual_file = io.BytesIO(file_content)
+                    virtual_file.name = "cloud_file" + ext
+                    
+                    if ext in [".jpg", ".jpeg", ".png"]:
+                        from .utils import extract_text_from_image
+                        resume_text = extract_text_from_image(file_content, "image/png" if ext == ".png" else "image/jpeg")
+                        ats_format_issues = ["image_upload"]
+                        searchability_checks = check_searchability(resume_text)
+                    else:
+                        resume_text, ats_format_issues, searchability_checks = extract_text(virtual_file, ext)
+                    
+                    filename = request.POST.get("cloud_filename", "").strip() or f"Cloud Import ({ext[1:].upper()})"
             except requests.RequestException as e:
-                return render_error(f"Failed to download resume from cloud URL: {str(e)}", 400)
+                return render_error(f"Failed to download resume from cloud URL: {str(e)}. Please check your link and ensure it is available to everyone (publicly shared).", 400)
             except Exception as e:
-                return render_error(f"Failed to process downloaded cloud file: {str(e)}", 422)
+                return render_error(f"Failed to process or parse the downloaded cloud file: {str(e)}. Please make sure the link is available to everyone and points directly to a valid PDF, DOCX, or Image file.", 422)
         else:
             resume_text = resume_url
             ats_format_issues = []
@@ -395,6 +421,13 @@ def analysis_results(request, analysis_id):
             "hard_missing": hard_missing,
             "soft_missing": soft_missing,
             "diff_data": diff_data,
+            # Additional premium insights
+            "impact_critiques": record.impact_critiques,
+            "interview_questions": record.interview_questions,
+            "fraud_audit": record.fraud_audit,
+            "searchability_checks": record.searchability_checks,
+            "upskill_paths": record.upskill_paths,
+            "suggestions": record.suggestions,
             "perms": get_premium_permissions(request.user, record),
         },
     )
@@ -505,7 +538,9 @@ def settings_view(request):
     if request.method == "POST":
         username = request.POST.get("username", "").strip()
         email = request.POST.get("email", "").strip().lower()
-        phone_number = request.POST.get("phone_number", "").strip()
+        phone_number = request.POST.get("phone_number")
+        if phone_number is not None:
+            phone_number = phone_number.strip()
 
         if not username:
             error = "Username cannot be empty."
@@ -530,8 +565,8 @@ def settings_view(request):
                         request.user.username = username
                         request.user.save()
 
-                        # Update UserProfile
-                        if profile.phone_number != phone_number:
+                        # Update UserProfile if phone is submitted
+                        if phone_number is not None and profile.phone_number != phone_number:
                             profile.phone_number = phone_number
                             profile.phone_verified = False
                             phone_updated = True
@@ -1588,8 +1623,33 @@ def save_builder_resume_api(request):
         lines.append(f"\n{exp.get('role', '')} at {exp.get('company', '')} | {exp.get('duration', '')}")
         for b in exp.get("bullets", []):
             lines.append(f"• {b}")
+    for proj in data.get("projects", []):
+        lines.append(f"\nPROJECT: {proj.get('title', '')} | {proj.get('duration', '')}")
+        for b in proj.get("bullets", []):
+            lines.append(f"• {b}")
     for edu in data.get("education", []):
         lines.append(f"\n{edu.get('degree', '')} — {edu.get('institution', '')} | {edu.get('duration', '')}")
+    
+    certs = data.get("certifications", [])
+    if certs:
+        lines.append("\nCERTIFICATIONS")
+        for cert in certs:
+            if isinstance(cert, dict):
+                lines.append(f"• {cert.get('name', '')} — {cert.get('authority', '')} | {cert.get('duration', '')}")
+            else:
+                lines.append(f"• {cert}")
+                
+    extras = data.get("extracurriculars", [])
+    if extras:
+        lines.append("\nLEADERSHIP & EXTRACURRICULAR ACTIVITIES")
+        for ex in extras:
+            if isinstance(ex, dict):
+                lines.append(f"• {ex.get('role', '')} — {ex.get('organization', '')} | {ex.get('duration', '')}")
+                for b in ex.get("bullets", []):
+                    lines.append(f"  • {b}")
+            else:
+                lines.append(f"• {ex}")
+
     skills = data.get("skills", {})
     all_skills = []
     for cat in ["languages", "frameworks", "tools", "other"]:
@@ -2081,6 +2141,7 @@ def why_us_view(request):
 def support_view(request):
     """View for authenticated users to submit a support ticket."""
     if request.method == "POST":
+        ticket_type = request.POST.get("ticket_type", "General").capitalize()
         subject = request.POST.get("subject", "").strip()
         message = request.POST.get("message", "").strip()
         
@@ -2090,8 +2151,8 @@ def support_view(request):
         from django.core.mail import send_mail
         from django.conf import settings
         
-        email_subject = f"[Support Ticket] {subject}"
-        email_body = f"User: {request.user.username} ({request.user.email})\n\nSubject: {subject}\n\nMessage:\n{message}"
+        email_subject = f"[Support Ticket - {ticket_type}] {subject}"
+        email_body = f"User: {request.user.username} ({request.user.email})\nCategory: {ticket_type}\n\nSubject: {subject}\n\nMessage:\n{message}"
         
         try:
             send_mail(

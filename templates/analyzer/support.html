@@ -48,7 +48,21 @@
         <div class="glass-panel p-8 md:p-10 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden">
             <form action="{% url 'support' %}" method="post" class="space-y-6">
                 {% csrf_token %}
-                
+                <!-- Ticket Category -->
+                <div class="space-y-2">
+                    <label for="ticket_type" class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Ticket Category</label>
+                    <select name="ticket_type" 
+                            id="ticket_type" 
+                            required 
+                            class="w-full px-4 py-3 bg-gray-900/40 border border-white/5 rounded-xl text-sm text-white focus:outline-none focus:border-brand transition-colors">
+                        <option value="technical" class="bg-gray-950">Technical Support (Resume Analyzer/Builder/Extension)</option>
+                        <option value="billing" class="bg-gray-950">Billing & Subscription (Payments, Invoices, Upgrades)</option>
+                        <option value="account" class="bg-gray-950">Account & Authentication (Password, Email Verification)</option>
+                        <option value="feedback" class="bg-gray-950">Feedback & Feature Requests</option>
+                        <option value="other" class="bg-gray-950">General Inquiry / Other</option>
+                    </select>
+                </div>
+
                 <!-- Subject / Topic -->
                 <div class="space-y-2">
                     <label for="subject" class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Subject / Issue Topic</label>

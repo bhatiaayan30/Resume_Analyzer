@@ -207,22 +207,25 @@
                             
                             <!-- URL Input Box -->
                             <div id="cloud-url-box" class="space-y-2">
-                                <p class="text-xs text-gray-400">Make sure your file is shared as <strong>Public / Anyone with the link</strong> so our parser can securely download and analyze it.</p>
+                                <p id="cloud-url-instructions" class="text-xs text-gray-400">Make sure your file is shared as <strong>Public / Anyone with the link</strong> so our parser can securely download and analyze it.</p>
                                 <div class="flex gap-2">
                                     <input type="text" id="cloud-url-input" class="flex-grow bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand" placeholder="Paste your public file URL...">
                                     <button type="button" id="btn-cloud-link-confirm" class="px-4 py-2 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-xl transition-all whitespace-nowrap shadow-md shadow-brand/20">Link File</button>
                                 </div>
-                            </div>
-
-                            <!-- LinkedIn Info Box -->
-                            <div id="cloud-linkedin-box" class="hidden space-y-2.5 text-xs text-gray-400 leading-relaxed">
-                                <p class="font-semibold text-white">To import your LinkedIn Profile directly, please export it as a PDF:</p>
-                                <ol class="list-decimal pl-4 space-y-1">
-                                    <li>Navigate to your LinkedIn Profile page.</li>
-                                    <li>Click the <strong>More</strong> button in your introduction section.</li>
-                                    <li>Select <strong>Save to PDF</strong> from the dropdown.</li>
-                                    <li>Switch back to the <strong class="text-brand hover:underline cursor-pointer" onclick="document.getElementById('tab-upload').click();">Upload File</strong> tab above and select the saved PDF.</li>
-                                </ol>
+                                
+                                <!-- LinkedIn Fallback Collapsible -->
+                                <details id="cloud-linkedin-details" class="hidden text-[10px] text-gray-400 cursor-pointer mt-1 group">
+                                    <summary class="font-medium text-brand hover:underline">Trouble importing? Click to view PDF Export instructions</summary>
+                                    <div class="mt-2 pl-3 border-l border-white/10 space-y-1 text-gray-500 leading-relaxed">
+                                        <p>LinkedIn requires your profile to be set to public. If it fails, follow these steps:</p>
+                                        <ol class="list-decimal pl-4 space-y-0.5">
+                                            <li>Go to your LinkedIn Profile page.</li>
+                                            <li>Click the <strong>More</strong> button in your intro section.</li>
+                                            <li>Select <strong>Save to PDF</strong>.</li>
+                                            <li>Go to the <strong class="text-brand hover:underline cursor-pointer" onclick="document.getElementById('tab-upload').click();">Upload File</strong> tab above and select the saved PDF.</li>
+                                        </ol>
+                                    </div>
+                                </details>
                             </div>
                         </div>
                     </div>
@@ -484,7 +487,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const cloudImporterContainer = document.getElementById('cloud-importer-container');
     const cloudImporterTitle = document.getElementById('cloud-importer-title');
     const cloudUrlBox = document.getElementById('cloud-url-box');
-    const cloudLinkedinBox = document.getElementById('cloud-linkedin-box');
+    const cloudUrlInstructions = document.getElementById('cloud-url-instructions');
+    const cloudLinkedinDetails = document.getElementById('cloud-linkedin-details');
     const cloudUrlInput = document.getElementById('cloud-url-input');
     const btnCloudLinkConfirm = document.getElementById('btn-cloud-link-confirm');
     const btnCloudCancel = document.getElementById('btn-cloud-cancel');
@@ -497,14 +501,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentCloudService = '';
 
-    function showImporter(serviceName, isUrlRequired) {
+    function showImporter(serviceName) {
         currentCloudService = serviceName;
         cloudImporterContainer.classList.remove('hidden');
         cloudImporterTitle.textContent = "Import from " + serviceName;
+        cloudUrlBox.classList.remove('hidden');
         
-        if (isUrlRequired) {
-            cloudUrlBox.classList.remove('hidden');
-            cloudLinkedinBox.classList.add('hidden');
+        if (serviceName === 'LinkedIn') {
+            cloudUrlInput.placeholder = "e.g., https://www.linkedin.com/in/username/";
+            cloudUrlInstructions.innerHTML = "Paste the URL of your <strong>public</strong> LinkedIn profile. Ensure your profile visibility settings are set to public.";
+            cloudLinkedinDetails.classList.remove('hidden');
+        } else {
+            cloudLinkedinDetails.classList.add('hidden');
+            cloudUrlInstructions.innerHTML = "Make sure your file is shared as <strong>Public / Anyone with the link</strong> so our parser can securely download and analyze it.";
             if (serviceName === 'Google Drive') {
                 cloudUrlInput.placeholder = "e.g., https://drive.google.com/file/d/FILE_ID/view?usp=sharing";
             } else if (serviceName === 'Dropbox') {
@@ -512,16 +521,13 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 cloudUrlInput.placeholder = "e.g., https://onedrive.live.com/download?id=...";
             }
-        } else {
-            cloudUrlBox.classList.add('hidden');
-            cloudLinkedinBox.classList.remove('hidden');
         }
     }
 
-    btnGDrive.addEventListener('click', () => showImporter('Google Drive', true));
-    btnDropbox.addEventListener('click', () => showImporter('Dropbox', true));
-    btnOneDrive.addEventListener('click', () => showImporter('OneDrive', true));
-    btnLinkedIn.addEventListener('click', () => showImporter('LinkedIn', false));
+    btnGDrive.addEventListener('click', () => showImporter('Google Drive'));
+    btnDropbox.addEventListener('click', () => showImporter('Dropbox'));
+    btnOneDrive.addEventListener('click', () => showImporter('OneDrive'));
+    btnLinkedIn.addEventListener('click', () => showImporter('LinkedIn'));
 
     btnCloudCancel.addEventListener('click', () => {
         cloudImporterContainer.classList.add('hidden');

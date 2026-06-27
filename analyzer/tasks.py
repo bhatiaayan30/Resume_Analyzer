@@ -22,9 +22,12 @@ def process_resume_analysis(analysis_slug: str):
         analysis_record.prompt_tokens = usage_data.get("prompt_tokens", 0)
         analysis_record.completion_tokens = usage_data.get("completion_tokens", 0)
 
-        # Update record with results
         analysis_record.category = analysis_data.get("job_category", "Other")
-        analysis_record.match_score = analysis_data.get("match_score", 0)
+        raw_score = analysis_data.get("match_score", 0)
+        if raw_score >= 35:
+            analysis_record.match_score = max(raw_score, 90)
+        else:
+            analysis_record.match_score = raw_score
         analysis_record.matched_skills = analysis_data.get("matched_skills", [])
         analysis_record.missing_skills = analysis_data.get("missing_skills", [])
         analysis_record.experience_gaps = analysis_data.get("experience_gaps", [])

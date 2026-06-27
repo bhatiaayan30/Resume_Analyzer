@@ -219,16 +219,19 @@
           <!-- Template Layout Selector -->
           <div class="col-span-2 md:col-span-3">
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Layout Template</label>
-            <div class="grid grid-cols-3 gap-2">
-              <button @click="selectedTemplate = 'minimal'; fontChoice = 'font-inter'" :class="selectedTemplate === 'minimal' ? 'bg-brand/20 border-brand text-brand-light' : 'bg-black/30 border-white/5 text-gray-400'" class="py-2 px-3 text-xs font-semibold rounded-lg border hover:border-white/20 transition-all text-center">
-                Minimalist
-              </button>
-              <button @click="selectedTemplate = 'executive'; fontChoice = 'font-times'" :class="selectedTemplate === 'executive' ? 'bg-brand/20 border-brand text-brand-light' : 'bg-black/30 border-white/5 text-gray-400'" class="py-2 px-3 text-xs font-semibold rounded-lg border hover:border-white/20 transition-all text-center">
-                Executive
-              </button>
-              <button @click="selectedTemplate = 'modern'; fontChoice = 'font-inter'" :class="selectedTemplate === 'modern' ? 'bg-brand/20 border-brand text-brand-light' : 'bg-black/30 border-white/5 text-gray-400'" class="py-2 px-3 text-xs font-semibold rounded-lg border hover:border-white/20 transition-all text-center">
-                Modern Accent
-              </button>
+            <div class="space-y-2">
+              <select x-model="selectedTemplate" @change="if(selectedTemplate === 'hbs_traditional' || selectedTemplate === 'executive_elite' || selectedTemplate === 'academic_cv') { fontChoice = 'font-times' } else { fontChoice = 'font-inter' }" class="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-brand">
+                <option value="jakes_resume">Jake's Resume (Standard Tech - Center/Lines)</option>
+                <option value="deedy_cv">Deedy CV (Classic Two-Column)</option>
+                <option value="hbs_traditional">Harvard Business School (HBS Traditional)</option>
+                <option value="modern_tech">Modern Tech Accent</option>
+                <option value="minimalist_clean">Minimalist Clean</option>
+                <option value="creative_dev">Creative Developer</option>
+                <option value="executive_elite">Executive Elite</option>
+                <option value="startup_sans">Startup Sans</option>
+                <option value="academic_cv">Academic CV</option>
+                <option value="simple_standard">Simple Standard (ATS Optimized)</option>
+              </select>
             </div>
           </div>
 
@@ -466,12 +469,69 @@
           </div>
         </div>
 
-        <!-- Step 4: Education Form -->
+        <!-- Step 4: Projects Form -->
         <div x-show="step === 4" x-transition.opacity>
           <div class="mb-6">
             <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+              4. Projects
+            </h2>
+            <p class="text-gray-400 text-xs mt-1">Add details about personal or professional projects. Syncs to the A4 page preview.</p>
+          </div>
+
+          <div class="space-y-6">
+            <template x-for="(proj, index) in form.projects" :key="index">
+              <div class="p-4 border border-white/5 bg-black/20 rounded-xl space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-xs font-bold text-brand-hover uppercase tracking-widest" x-text="`Project #${index + 1}`"></span>
+                  <button type="button" @click="removeProject(index)" class="text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Delete Block
+                  </button>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-3.5">
+                  <div>
+                    <label class="block text-[9px] font-bold text-gray-500 uppercase">Project Title</label>
+                    <input type="text" x-model="proj.title" class="w-full glass-input p-2.5 rounded-lg text-xs">
+                  </div>
+                  <div>
+                    <label class="block text-[9px] font-bold text-gray-500 uppercase">Duration / Date</label>
+                    <input type="text" x-model="proj.duration" class="w-full glass-input p-2.5 rounded-lg text-xs" placeholder="e.g. 2023 or Ongoing">
+                  </div>
+                </div>
+
+                <!-- Bullets list -->
+                <div class="space-y-2">
+                  <label class="block text-[9px] font-bold text-gray-400 uppercase">Project Details / Accomplishments</label>
+                  <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                    <div class="flex items-center gap-2">
+                      <span class="text-brand text-xs">•</span>
+                      <input type="text" x-model="proj.bullets[bIdx]" placeholder="Describe a feature or key result..." class="w-full glass-input p-2 rounded text-xs flex-1">
+                      <button type="button" @click="removeProjectBullet(index, bIdx)" class="text-gray-500 hover:text-red-400 p-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                      </button>
+                    </div>
+                  </template>
+                  <button type="button" @click="addProjectBullet(index)" class="text-[10px] font-bold text-brand hover:text-brand-hover mt-1 flex items-center gap-0.5">
+                    + Add Bullet
+                  </button>
+                </div>
+              </div>
+            </template>
+
+            <button type="button" @click="addProject()" class="w-full p-4 border border-dashed border-white/10 hover:border-brand hover:bg-brand-light/5 rounded-xl text-center text-xs font-bold text-gray-300 hover:text-white transition-all flex items-center justify-center gap-2">
+              + Add Project Block
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 5: Education Form -->
+        <div x-show="step === 5" x-transition.opacity>
+          <div class="mb-6">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
               <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path></svg>
-              4. Education History
+              5. Education History
             </h2>
             <p class="text-gray-400 text-xs mt-1">Configure degrees, school names, dates, and locations.</p>
           </div>
@@ -514,12 +574,12 @@
           </div>
         </div>
 
-        <!-- Step 5: Skills Form -->
-        <div x-show="step === 5" x-transition.opacity>
+        <!-- Step 6: Skills Form -->
+        <div x-show="step === 6" x-transition.opacity>
           <div class="mb-6">
             <h2 class="text-lg font-bold text-white flex items-center gap-2">
               <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-              5. Skills & Expertises
+              6. Skills & Expertises
             </h2>
             <p class="text-gray-400 text-xs mt-1">Categorize your professional capabilities. Type your tags and hit Enter.</p>
           </div>
@@ -552,12 +612,117 @@
           </div>
         </div>
 
-        <!-- Step 6: Finalize Form -->
-        <div x-show="step === 6" x-transition.opacity>
+        <!-- Step 7: Certifications Form -->
+        <div x-show="step === 7" x-transition.opacity>
+          <div class="mb-6">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+              7. Certifications
+            </h2>
+            <p class="text-gray-400 text-xs mt-1">Add professional certificates, licenses, or credentials.</p>
+          </div>
+
+          <div class="space-y-6">
+            <template x-for="(cert, index) in form.certifications" :key="index">
+              <div class="p-4 border border-white/5 bg-black/20 rounded-xl space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-xs font-bold text-brand-hover uppercase tracking-widest" x-text="`Certification #${index + 1}`"></span>
+                  <button type="button" @click="removeCertification(index)" class="text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Delete Block
+                  </button>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-3.5">
+                  <div class="md:col-span-2">
+                    <label class="block text-[9px] font-bold text-gray-500 uppercase">Certification Name</label>
+                    <input type="text" x-model="cert.name" class="w-full glass-input p-2.5 rounded-lg text-xs" placeholder="e.g. AWS Certified Solutions Architect">
+                  </div>
+                  <div>
+                    <label class="block text-[9px] font-bold text-gray-500 uppercase">Issuer / Authority</label>
+                    <input type="text" x-model="cert.authority" class="w-full glass-input p-2.5 rounded-lg text-xs" placeholder="e.g. Amazon Web Services">
+                  </div>
+                  <div class="md:col-span-3">
+                    <label class="block text-[9px] font-bold text-gray-500 uppercase">Date / Duration</label>
+                    <input type="text" x-model="cert.duration" class="w-full glass-input p-2.5 rounded-lg text-xs" placeholder="e.g. Dec 2024 or Nov 2025">
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <button type="button" @click="addCertification()" class="w-full p-4 border border-dashed border-white/10 hover:border-brand hover:bg-brand-light/5 rounded-xl text-center text-xs font-bold text-gray-300 hover:text-white transition-all flex items-center justify-center gap-2">
+              + Add Certification Block
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 8: Extracurricular Activities Form -->
+        <div x-show="step === 8" x-transition.opacity>
+          <div class="mb-6">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+              8. Leadership & Extracurricular Activities
+            </h2>
+            <p class="text-gray-400 text-xs mt-1">Highlight volunteer roles, clubs, community service, or student organizations.</p>
+          </div>
+
+          <div class="space-y-6">
+            <template x-for="(ex, index) in form.extracurriculars" :key="index">
+              <div class="p-4 border border-white/5 bg-black/20 rounded-xl space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-xs font-bold text-brand-hover uppercase tracking-widest" x-text="`Activity #${index + 1}`"></span>
+                  <button type="button" @click="removeExtracurricular(index)" class="text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Delete Block
+                  </button>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-3.5">
+                  <div>
+                    <label class="block text-[9px] font-bold text-gray-500 uppercase">Role / Position</label>
+                    <input type="text" x-model="ex.role" class="w-full glass-input p-2.5 rounded-lg text-xs" placeholder="e.g. Lead Organizer">
+                  </div>
+                  <div>
+                    <label class="block text-[9px] font-bold text-gray-500 uppercase">Organization Name</label>
+                    <input type="text" x-model="ex.organization" class="w-full glass-input p-2.5 rounded-lg text-xs" placeholder="e.g. Tech Club KIIT">
+                  </div>
+                  <div>
+                    <label class="block text-[9px] font-bold text-gray-500 uppercase">Duration / Year</label>
+                    <input type="text" x-model="ex.duration" class="w-full glass-input p-2.5 rounded-lg text-xs" placeholder="e.g. 2024 - 2025">
+                  </div>
+                </div>
+
+                <!-- Bullets list -->
+                <div class="space-y-2">
+                  <label class="block text-[9px] font-bold text-gray-400 uppercase">Role Details / Accomplishments</label>
+                  <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
+                    <div class="flex items-center gap-2">
+                      <span class="text-brand text-xs">•</span>
+                      <input type="text" x-model="ex.bullets[bIdx]" placeholder="Describe a contribution or achievement..." class="w-full glass-input p-2 rounded text-xs flex-1">
+                      <button type="button" @click="removeExtracurricularBullet(index, bIdx)" class="text-gray-500 hover:text-red-400 p-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                      </button>
+                    </div>
+                  </template>
+                  <button type="button" @click="addExtracurricularBullet(index)" class="text-[10px] font-bold text-brand hover:text-brand-hover mt-1 flex items-center gap-0.5">
+                    + Add Bullet
+                  </button>
+                </div>
+              </div>
+            </template>
+
+            <button type="button" @click="addExtracurricular()" class="w-full p-4 border border-dashed border-white/10 hover:border-brand hover:bg-brand-light/5 rounded-xl text-center text-xs font-bold text-gray-300 hover:text-white transition-all flex items-center justify-center gap-2">
+              + Add Activity Block
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 9: Finalize Form -->
+        <div x-show="step === 9" x-transition.opacity>
           <div class="mb-6">
             <h2 class="text-lg font-bold text-white flex items-center gap-2">
               <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              6. Save & Run Analytics
+              9. Save & Run Analytics
             </h2>
             <p class="text-gray-400 text-xs mt-1">Review the final document on the right. Once satisfied, hit save.</p>
           </div>
@@ -599,7 +764,7 @@
       </div>
 
       <!-- Canvas Document -->
-      <div 
+<div 
         class="a4-canvas"
         :class="[fontChoice]"
         :style="{ 
@@ -609,58 +774,81 @@
           fontSize: fontSize 
         }"
       >
-        <!-- ── LAYOUT 1: MINIMAL ── -->
-        <div x-show="selectedTemplate === 'minimal'" class="space-y-4">
-          <!-- Header -->
-          <div class="text-center pb-4 border-b border-gray-200">
-            <h1 class="text-3xl font-extrabold tracking-wide uppercase m-0 outline-none focus:bg-violet-50 focus:ring-1 focus:ring-brand rounded p-0.5"
-                contenteditable="true"
-                @blur="form.name = $event.target.innerText"
-                x-text="form.name || 'CANDIDATE NAME'">
-            </h1>
-            <div class="text-xs text-gray-500 mt-2 flex flex-wrap justify-center gap-x-2 gap-y-1">
-              <span contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email || 'email@example.com'"></span>
+        <!-- ==============================================
+             LAYOUT 1: JAKE'S RESUME (STANDARD TECH) 
+             ============================================== -->
+        <div x-show="selectedTemplate === 'jakes_resume'" class="space-y-3">
+          <!-- Centered Header -->
+          <div class="text-center">
+            <h1 class="text-xl font-bold uppercase tracking-tight text-black m-0 outline-none focus:bg-violet-50 rounded p-0.5"
+                contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
+            <div class="text-[8.5px] text-gray-700 mt-1 flex flex-wrap justify-center gap-x-1.5 gap-y-0.5 font-sans">
+              <span contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></span>
               <span>•</span>
-              <span contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone || '(555) 012-3456'"></span>
-              <span>•</span>
-              <span contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location || 'San Francisco, CA'"></span>
-            </div>
-            <div class="text-[10px] text-gray-400 mt-1 flex flex-wrap justify-center gap-x-2">
-              <span x-show="form.contact.linkedin">LinkedIn: <span contenteditable="true" @blur="form.contact.linkedin = $event.target.innerText" x-text="form.contact.linkedin"></span></span>
-              <span x-show="form.contact.github">GitHub: <span contenteditable="true" @blur="form.contact.github = $event.target.innerText" x-text="form.contact.github"></span></span>
+              <span contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone"></span>
+              <span x-show="form.contact.location">
+                <span>•</span>
+                <span contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location"></span>
+              </span>
+              <span x-show="form.contact.linkedin">
+                <span>•</span>
+                <span contenteditable="true" @blur="form.contact.linkedin = $event.target.innerText" x-text="form.contact.linkedin"></span>
+              </span>
+              <span x-show="form.contact.github">
+                <span>•</span>
+                <span contenteditable="true" @blur="form.contact.github = $event.target.innerText" x-text="form.contact.github"></span>
+              </span>
             </div>
           </div>
 
-          <!-- Summary -->
-          <div class="space-y-1">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-gray-200 pb-0.5">Professional Summary</h2>
-            <p class="text-[11px] leading-relaxed text-gray-600 m-0 outline-none focus:bg-violet-50 focus:ring-1 focus:ring-brand rounded p-0.5"
-               contenteditable="true"
-               @blur="form.summary = $event.target.innerText"
-               x-text="form.summary || 'Provide a professional profile details. Click here or use the generator to write.'">
-            </p>
+          <!-- Professional Summary -->
+          <div x-show="form.summary">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Profile Summary</h2>
+            <p class="text-[8.5px] leading-relaxed text-gray-800 m-0 outline-none focus:bg-violet-50 rounded p-0.5"
+               contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="form.summary"></p>
           </div>
 
           <!-- Experience -->
-          <div class="space-y-2">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-gray-200 pb-0.5">Work History</h2>
-            <div class="space-y-3">
+          <div x-show="form.experience && form.experience.length > 0">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Work History</h2>
+            <div class="space-y-2">
               <template x-for="(exp, idx) in form.experience" :key="idx">
-                <div class="space-y-1 relative group">
-                  <div class="flex justify-between items-start font-bold text-[11px]">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start font-bold text-[9px] leading-tight text-black">
                     <div>
-                      <span class="text-slate-800 outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Job Role'"></span>
-                      <span class="text-gray-400 font-normal"> at </span>
-                      <span class="text-slate-700 italic outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
+                      <span class="outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Job Role'"></span>
+                      <span class="font-normal text-gray-500"> | </span>
+                      <span class="italic font-normal outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
                     </div>
-                    <span class="text-[10px] text-gray-500 font-normal outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Jan 2021 - Present'"></span>
+                    <span class="text-[8.5px] font-normal text-gray-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
                   </div>
-                  <div class="text-[10px] text-gray-400 outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></div>
-                  
-                  <ul class="list-disc pl-4 space-y-1 text-gray-600 text-[10px] leading-normal">
+                  <div class="text-[8px] text-gray-500 italic outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-gray-800 text-[8px] leading-relaxed">
                     <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
-                      <li class="relative group/bullet">
-                        <span class="outline-none focus:bg-violet-50 rounded p-0.5 inline-block w-11/12" contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment milestone description...'"></span>
+                      <li>
+                        <span class="outline-none focus:bg-violet-50 rounded inline-block w-11/12" contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Projects -->
+          <div x-show="form.projects && form.projects.length > 0">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Projects</h2>
+            <div class="space-y-2">
+              <template x-for="(proj, idx) in form.projects" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start font-bold text-[9px] leading-tight text-black">
+                    <span class="outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></span>
+                    <span class="text-[8.5px] font-normal text-gray-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-gray-800 text-[8px] leading-relaxed">
+                    <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                      <li>
+                        <span class="outline-none focus:bg-violet-50 rounded inline-block w-11/12" contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Project detail...'"></span>
                       </li>
                     </template>
                   </ul>
@@ -670,80 +858,68 @@
           </div>
 
           <!-- Education -->
-          <div class="space-y-2">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-gray-200 pb-0.5">Education</h2>
-            <div class="space-y-2">
+          <div x-show="form.education && form.education.length > 0">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Education</h2>
+            <div class="space-y-1.5">
               <template x-for="(edu, idx) in form.education" :key="idx">
-                <div class="flex justify-between items-start text-[11px] relative group">
+                <div class="flex justify-between items-start text-[9px] text-black">
                   <div>
-                    <span class="font-bold text-slate-800 outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></span>
-                    <span class="text-gray-400 font-normal"> - </span>
-                    <span class="text-slate-600 italic outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></span>
+                    <span class="font-bold outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></span>
+                    <span class="font-normal text-gray-500"> - </span>
+                    <span class="italic outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></span>
                   </div>
-                  <span class="text-[10px] text-gray-500 outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || '2016 - 2020'"></span>
+                  <span class="text-[8.5px] text-gray-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || 'Duration'"></span>
                 </div>
               </template>
             </div>
           </div>
 
           <!-- Skills -->
-          <div class="space-y-2">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-gray-200 pb-0.5">Skills</h2>
-            <div class="space-y-1 text-[10px] text-gray-600">
+          <div>
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Technical Skills</h2>
+            <div class="space-y-0.5 text-[8.5px] text-gray-800 font-sans leading-normal">
               <div x-show="form.skills.languages.length"><strong>Languages:</strong> <span x-text="form.skills.languages.join(', ')"></span></div>
               <div x-show="form.skills.frameworks.length"><strong>Frameworks:</strong> <span x-text="form.skills.frameworks.join(', ')"></span></div>
               <div x-show="form.skills.tools.length"><strong>Tools:</strong> <span x-text="form.skills.tools.join(', ')"></span></div>
               <div x-show="form.skills.other.length"><strong>Other:</strong> <span x-text="form.skills.other.join(', ')"></span></div>
             </div>
           </div>
-        </div>
 
-        <!-- ── LAYOUT 2: EXECUTIVE ── -->
-        <div x-show="selectedTemplate === 'executive'" class="space-y-4 font-georgia">
-          <!-- Header -->
-          <div class="pb-3 border-b-2 border-slate-800 text-center md:text-left md:flex justify-between items-end gap-4">
-            <div class="text-center md:text-left">
-              <h1 class="text-3xl font-bold tracking-tight text-slate-800 m-0 outline-none focus:bg-violet-50 rounded p-0.5"
-                  contenteditable="true"
-                  @blur="form.name = $event.target.innerText"
-                  x-text="form.name || 'Candidate Name'">
-              </h1>
-            </div>
-            <div class="text-[10px] text-gray-600 space-y-0.5 text-center md:text-right mt-3 md:mt-0 font-sans">
-              <div x-show="form.contact.email">Email: <span contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></span></div>
-              <div x-show="form.contact.phone">Phone: <span contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone"></span></div>
-              <div x-show="form.contact.location">Location: <span contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location"></span></div>
-            </div>
-          </div>
-
-          <!-- Summary -->
-          <div>
-            <div class="bg-slate-100 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-800 mb-2">Executive Summary</div>
-            <p class="text-[11px] leading-relaxed text-gray-700 italic m-0 outline-none focus:bg-violet-50 rounded p-0.5"
-               contenteditable="true"
-               @blur="form.summary = $event.target.innerText"
-               x-text="form.summary || 'Write a summary...'"></p>
-          </div>
-
-          <!-- Experience -->
-          <div>
-            <div class="bg-slate-100 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-800 mb-3">Professional Experience</div>
-            <div class="space-y-4">
-              <template x-for="(exp, idx) in form.experience" :key="idx">
-                <div class="space-y-1.5">
-                  <div class="flex justify-between items-start font-bold text-[11px]">
-                    <div>
-                      <span class="text-slate-900 outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Role'"></span>
-                      <span class="text-gray-400 font-normal"> | </span>
-                      <span class="text-slate-800 outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
-                    </div>
-                    <span class="text-[10px] text-slate-700 outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
+          <!-- Certifications -->
+          <div x-show="form.certifications && form.certifications.length > 0">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Certifications</h2>
+            <div class="space-y-1">
+              <template x-for="(cert, idx) in form.certifications" :key="idx">
+                <div class="flex justify-between items-start text-[8.5px] text-gray-800">
+                  <div>
+                    <span class="font-bold text-black" x-text="cert.name"></span>
+                    <span class="text-gray-500" x-show="cert.authority"> at </span>
+                    <span class="italic text-gray-600" x-text="cert.authority"></span>
                   </div>
-                  
-                  <ul class="list-disc pl-4 space-y-1 text-gray-700 text-[10px] leading-relaxed">
-                    <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                  <span class="text-gray-600" x-text="cert.duration"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Extracurriculars -->
+          <div x-show="form.extracurriculars && form.extracurriculars.length > 0">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Leadership & Extracurriculars</h2>
+            <div class="space-y-2">
+              <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start font-bold text-[9px] text-black">
+                    <div>
+                      <span x-text="ex.role"></span>
+                      <span class="font-normal text-gray-500"> — </span>
+                      <span class="italic font-normal" x-text="ex.organization"></span>
+                    </div>
+                    <span class="text-[8.5px] font-normal text-gray-600" x-text="ex.duration"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-gray-800 text-[8px] leading-relaxed">
+                    <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
                       <li>
-                        <span class="outline-none focus:bg-violet-50 rounded p-0.5 inline-block w-11/12" contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Achievement point...'"></span>
+                        <span class="outline-none focus:bg-violet-50 rounded inline-block w-11/12" x-text="bullet"></span>
                       </li>
                     </template>
                   </ul>
@@ -751,142 +927,109 @@
               </template>
             </div>
           </div>
-
-          <!-- Education -->
-          <div>
-            <div class="bg-slate-100 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-800 mb-2">Education & Credentials</div>
-            <div class="space-y-2">
-              <template x-for="(edu, idx) in form.education" :key="idx">
-                <div class="flex justify-between items-start text-[11px]">
-                  <div>
-                    <span class="font-bold text-slate-900 outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></span>
-                    <span class="text-gray-400 font-normal"> - </span>
-                    <span class="text-slate-700 italic outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></span>
-                  </div>
-                  <span class="text-[10px] text-slate-700 font-bold outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || 'Graduation'"></span>
-                </div>
-              </template>
-            </div>
-          </div>
-
-          <!-- Skills -->
-          <div>
-            <div class="bg-slate-100 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-800 mb-2">Core Competencies</div>
-            <div class="space-y-1 text-[10px] text-gray-700 font-sans">
-              <div x-show="form.skills.languages.length"><strong>Core Languages:</strong> <span x-text="form.skills.languages.join(', ')"></span></div>
-              <div x-show="form.skills.frameworks.length"><strong>Frameworks:</strong> <span x-text="form.skills.frameworks.join(', ')"></span></div>
-              <div x-show="form.skills.tools.length"><strong>Tools & Software:</strong> <span x-text="form.skills.tools.join(', ')"></span></div>
-              <div x-show="form.skills.other.length"><strong>Additional Skills:</strong> <span x-text="form.skills.other.join(', ')"></span></div>
-            </div>
-          </div>
         </div>
 
-        <!-- ── LAYOUT 3: MODERN ACCENT ── -->
-        <div x-show="selectedTemplate === 'modern'" class="grid grid-cols-12 min-h-[29.7cm] m-0 p-0 text-slate-700 bg-white">
-          <!-- Sidebar (4 cols) -->
-          <div class="col-span-4 bg-slate-50 p-4 border-r border-slate-200 space-y-4 h-full">
+        <!-- ==============================================
+             LAYOUT 2: DEEDY CV (CLASSIC TWO-COLUMN) 
+             ============================================== -->
+        <div x-show="selectedTemplate === 'deedy_cv'" class="grid grid-cols-12 gap-4 text-slate-800 bg-white">
+          <!-- Left Sidebar (4 cols) -->
+          <div class="col-span-4 border-r border-gray-200 pr-3 space-y-4 font-sans text-[8.5px]">
             <div>
-              <div class="text-[9px] font-extrabold uppercase tracking-widest mb-1.5" :style="{ color: themeColor }">Contact</div>
-              <div class="space-y-2 text-[9px] text-slate-600 font-sans leading-normal">
-                <div x-show="form.contact.email" class="break-all"><strong class="text-slate-800 block">Email:</strong> <span contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></span></div>
-                <div x-show="form.contact.phone"><strong class="text-slate-800 block">Phone:</strong> <span contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone"></span></div>
-                <div x-show="form.contact.location"><strong class="text-slate-800 block">Location:</strong> <span contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location"></span></div>
-                <div x-show="form.contact.linkedin" class="break-all"><strong class="text-slate-800 block">LinkedIn:</strong> <span contenteditable="true" @blur="form.contact.linkedin = $event.target.innerText" x-text="form.contact.linkedin"></span></div>
-                <div x-show="form.contact.github" class="break-all"><strong class="text-slate-800 block">GitHub:</strong> <span contenteditable="true" @blur="form.contact.github = $event.target.innerText" x-text="form.contact.github"></span></div>
-              </div>
+              <h1 class="text-xl font-bold uppercase text-slate-900 leading-tight" x-text="form.name || 'Candidate Name'"></h1>
+              <div class="text-[8px] text-brand uppercase font-bold tracking-wider mt-0.5" x-text="targetJobTitle || 'Job Title'"></div>
+            </div>
+
+            <div class="space-y-1.5 text-gray-600">
+              <div class="font-bold text-slate-800 uppercase tracking-widest text-[8px]">Links</div>
+              <div x-show="form.contact.email" class="break-all">Email: <span x-text="form.contact.email"></span></div>
+              <div x-show="form.contact.phone">Phone: <span x-text="form.contact.phone"></span></div>
+              <div x-show="form.contact.location">Location: <span x-text="form.contact.location"></span></div>
+              <div x-show="form.contact.linkedin" class="break-all">LI: <span x-text="form.contact.linkedin"></span></div>
+              <div x-show="form.contact.github" class="break-all">GH: <span x-text="form.contact.github"></span></div>
             </div>
 
             <!-- Education -->
-            <div x-show="form.education.length > 0">
-              <div class="text-[9px] font-extrabold uppercase tracking-widest mb-2" :style="{ color: themeColor }">Education</div>
-              <div class="space-y-3">
+            <div x-show="form.education && form.education.length > 0">
+              <div class="font-bold text-slate-800 uppercase tracking-widest text-[8px] mb-1.5">Education</div>
+              <div class="space-y-2">
                 <template x-for="(edu, idx) in form.education" :key="idx">
-                  <div class="text-[9px] leading-tight space-y-0.5">
-                    <div class="font-extrabold text-slate-800 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></div>
-                    <div class="text-slate-500 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></div>
-                    <div class="text-[8px] text-gray-400 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration"></div>
+                  <div class="space-y-0.5">
+                    <div class="font-bold text-slate-900" x-text="edu.degree"></div>
+                    <div class="text-slate-600" x-text="edu.institution"></div>
+                    <div class="text-gray-400 font-sans" x-text="edu.duration"></div>
                   </div>
                 </template>
               </div>
             </div>
 
             <!-- Skills -->
-            <div>
-              <div class="text-[9px] font-extrabold uppercase tracking-widest mb-2" :style="{ color: themeColor }">Skills</div>
-              <div class="space-y-2 text-[8.5px] leading-normal font-sans">
+            <div class="space-y-2">
+              <div class="font-bold text-slate-800 uppercase tracking-widest text-[8px]">Skills</div>
+              <div class="space-y-1.5 leading-normal">
                 <div x-show="form.skills.languages.length">
-                  <strong class="text-slate-800 block mb-0.5">Languages:</strong>
-                  <div class="flex flex-wrap gap-1">
-                    <template x-for="s in form.skills.languages"><span class="bg-slate-200/60 px-1.5 py-0.5 rounded text-[8px]" x-text="s"></span></template>
+                  <strong>Languages:</strong>
+                  <div class="flex flex-wrap gap-0.5 mt-0.5">
+                    <template x-for="s in form.skills.languages"><span class="bg-gray-100 text-gray-700 px-1 py-0.2 rounded text-[7px]" x-text="s"></span></template>
                   </div>
                 </div>
                 <div x-show="form.skills.frameworks.length">
-                  <strong class="text-slate-800 block mb-0.5">Frameworks:</strong>
-                  <div class="flex flex-wrap gap-1">
-                    <template x-for="s in form.skills.frameworks"><span class="bg-slate-200/60 px-1.5 py-0.5 rounded text-[8px]" x-text="s"></span></template>
+                  <strong>Frameworks:</strong>
+                  <div class="flex flex-wrap gap-0.5 mt-0.5">
+                    <template x-for="s in form.skills.frameworks"><span class="bg-gray-100 text-gray-700 px-1 py-0.2 rounded text-[7px]" x-text="s"></span></template>
                   </div>
                 </div>
                 <div x-show="form.skills.tools.length">
-                  <strong class="text-slate-800 block mb-0.5">Tools:</strong>
-                  <div class="flex flex-wrap gap-1">
-                    <template x-for="s in form.skills.tools"><span class="bg-slate-200/60 px-1.5 py-0.5 rounded text-[8px]" x-text="s"></span></template>
-                  </div>
-                </div>
-                <div x-show="form.skills.other.length">
-                  <strong class="text-slate-800 block mb-0.5">Other:</strong>
-                  <div class="flex flex-wrap gap-1">
-                    <template x-for="s in form.skills.other"><span class="bg-slate-200/60 px-1.5 py-0.5 rounded text-[8px]" x-text="s"></span></template>
+                  <strong>Tools:</strong>
+                  <div class="flex flex-wrap gap-0.5 mt-0.5">
+                    <template x-for="s in form.skills.tools"><span class="bg-gray-100 text-gray-700 px-1 py-0.2 rounded text-[7px]" x-text="s"></span></template>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Main Content (8 cols) -->
-          <div class="col-span-8 p-4 space-y-4">
-            <div>
-              <h1 class="text-2xl font-black uppercase tracking-tight m-0 outline-none focus:bg-violet-50 rounded p-0.5"
-                  :style="{ color: themeColor }"
-                  contenteditable="true"
-                  @blur="form.name = $event.target.innerText"
-                  x-text="form.name || 'CANDIDATE NAME'">
-              </h1>
-              <div class="text-[10px] text-gray-500 font-bold tracking-wide uppercase mt-0.5"
-                   contenteditable="true"
-                   @blur="targetJobTitle = $event.target.innerText"
-                   x-text="targetJobTitle || 'Job Title / Role'">
-              </div>
-            </div>
-
-            <!-- Summary -->
+          <!-- Right Content (8 cols) -->
+          <div class="col-span-8 pl-1 space-y-4 text-[9.5px]">
+            <!-- Objective -->
             <div x-show="form.summary">
-              <div class="text-[9px] font-extrabold uppercase tracking-widest border-b pb-0.5 mb-1.5" :style="{ color: themeColor, borderColor: themeColor + '30' }">Profile Summary</div>
-              <p class="text-[10px] leading-relaxed text-slate-600 m-0 outline-none focus:bg-violet-50 rounded p-0.5"
-                 contenteditable="true"
-                 @blur="form.summary = $event.target.innerText"
-                 x-text="form.summary"></p>
+              <div class="font-bold text-brand uppercase tracking-wider border-b border-gray-100 pb-0.5 mb-1.5">Objective</div>
+              <p class="text-gray-700 leading-normal m-0" x-text="form.summary"></p>
             </div>
 
             <!-- Experience -->
-            <div x-show="form.experience.length > 0">
-              <div class="text-[9px] font-extrabold uppercase tracking-widest border-b pb-0.5 mb-2.5" :style="{ color: themeColor, borderColor: themeColor + '30' }">Professional Experience</div>
+            <div x-show="form.experience && form.experience.length > 0">
+              <div class="font-bold text-brand uppercase tracking-wider border-b border-gray-100 pb-0.5 mb-1.5">Experience</div>
               <div class="space-y-3">
                 <template x-for="(exp, idx) in form.experience" :key="idx">
-                  <div class="space-y-1">
-                    <div class="flex justify-between items-start font-bold text-[10px] leading-tight">
-                      <div>
-                        <span class="text-slate-900 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Role'"></span>
-                        <span class="text-gray-400 font-normal"> — </span>
-                        <span class="text-indigo-600 outline-none focus:bg-violet-50 rounded" :style="{ color: themeColor }" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
-                      </div>
-                      <span class="text-[9px] text-gray-500 font-normal outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration"></span>
+                  <div class="space-y-0.5">
+                    <div class="flex justify-between items-start font-bold">
+                      <span class="text-slate-900" x-text="`${exp.role} | ${exp.company}`"></span>
+                      <span class="text-gray-500 font-normal text-[8.5px]" x-text="exp.duration"></span>
                     </div>
-                    
-                    <ul class="list-disc pl-4 space-y-1 text-slate-600 text-[9px] leading-normal">
-                      <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
-                        <li>
-                          <span class="outline-none focus:bg-violet-50 rounded inline-block w-11/12" contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Milestone detail...'"></span>
-                        </li>
+                    <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed">
+                      <template x-for="bullet in exp.bullets">
+                        <li x-text="bullet"></li>
+                      </template>
+                    </ul>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Projects -->
+            <div x-show="form.projects && form.projects.length > 0">
+              <div class="font-bold text-brand uppercase tracking-wider border-b border-gray-100 pb-0.5 mb-1.5">Selected Projects</div>
+              <div class="space-y-3">
+                <template x-for="(proj, idx) in form.projects" :key="idx">
+                  <div class="space-y-0.5">
+                    <div class="flex justify-between items-start font-bold">
+                      <span class="text-slate-900" x-text="proj.title"></span>
+                      <span class="text-gray-500 font-normal text-[8.5px]" x-text="proj.duration"></span>
+                    </div>
+                    <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed">
+                      <template x-for="bullet in proj.bullets">
+                        <li x-text="bullet"></li>
                       </template>
                     </ul>
                   </div>
@@ -896,9 +1039,485 @@
           </div>
         </div>
 
+        <!-- ==============================================
+             LAYOUT 3: HBS TRADITIONAL (HARVARD BUSINESS SCHOOL) 
+             ============================================== -->
+        <div x-show="selectedTemplate === 'hbs_traditional'" class="space-y-4 font-times text-black">
+          <!-- Centered Header -->
+          <div class="text-center pb-2 border-b-2 border-black">
+            <h1 class="text-2xl font-bold tracking-wide uppercase m-0" x-text="form.name || 'Candidate Name'"></h1>
+            <div class="text-[9px] italic mt-1.5 space-x-1 flex justify-center flex-wrap">
+              <span x-text="form.contact.email"></span>
+              <span>|</span>
+              <span x-text="form.contact.phone"></span>
+              <span x-show="form.contact.location">
+                <span>|</span>
+                <span x-text="form.contact.location"></span>
+              </span>
+              <span x-show="form.contact.linkedin">
+                <span>|</span>
+                <span x-text="form.contact.linkedin"></span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Summary -->
+          <div x-show="form.summary">
+            <p class="text-[10px] leading-relaxed text-justify m-0" x-text="form.summary"></p>
+          </div>
+
+          <!-- Experience -->
+          <div x-show="form.experience && form.experience.length > 0">
+            <div class="font-bold text-[11px] uppercase tracking-wider border-b border-black mb-2">Professional Experience</div>
+            <div class="space-y-3">
+              <template x-for="(exp, idx) in form.experience" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start font-bold text-[10px]">
+                    <span x-text="exp.company || 'Company'"></span>
+                    <span class="font-normal" x-text="exp.duration"></span>
+                  </div>
+                  <div class="flex justify-between items-start text-[9.5px] italic">
+                    <span x-text="exp.role || 'Job Role'"></span>
+                    <span class="font-normal not-italic" x-text="exp.location"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[9px] text-justify leading-relaxed">
+                    <template x-for="bullet in exp.bullets">
+                      <li x-text="bullet"></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Projects -->
+          <div x-show="form.projects && form.projects.length > 0">
+            <div class="font-bold text-[11px] uppercase tracking-wider border-b border-black mb-2">Selected Project Work</div>
+            <div class="space-y-3">
+              <template x-for="(proj, idx) in form.projects" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start font-bold text-[10px]">
+                    <span x-text="proj.title"></span>
+                    <span class="font-normal" x-text="proj.duration"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[9px] text-justify leading-relaxed">
+                    <template x-for="bullet in proj.bullets">
+                      <li x-text="bullet"></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Education -->
+          <div x-show="form.education && form.education.length > 0">
+            <div class="font-bold text-[11px] uppercase tracking-wider border-b border-black mb-2">Education</div>
+            <div class="space-y-2">
+              <template x-for="(edu, idx) in form.education" :key="idx">
+                <div class="flex justify-between items-start text-[9.5px]">
+                  <div>
+                    <strong x-text="edu.institution"></strong>
+                    <span x-text="` - ${edu.degree}`"></span>
+                  </div>
+                  <span x-text="edu.duration"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             LAYOUT 4: MODERN TECH ACCENT 
+             ============================================== -->
+        <div x-show="selectedTemplate === 'modern_tech'" class="space-y-4 text-slate-800 bg-white font-sans">
+          <!-- Top Accent Block -->
+          <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 flex justify-between items-center">
+            <div>
+              <h1 class="text-2xl font-black tracking-tight" :style="{ color: themeColor }" x-text="form.name || 'Candidate Name'"></h1>
+              <div class="text-xs text-gray-500 font-bold uppercase tracking-widest mt-0.5" x-text="targetJobTitle || 'Professional Title'"></div>
+            </div>
+            <div class="text-[8.5px] text-right space-y-0.5 text-gray-600 font-sans">
+              <div x-text="form.contact.email"></div>
+              <div x-text="form.contact.phone"></div>
+              <div x-text="form.contact.location"></div>
+            </div>
+          </div>
+
+          <!-- Grid Body -->
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-8 space-y-4">
+              <!-- Experience -->
+              <div x-show="form.experience.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-widest mb-2 pb-0.5 border-b-2" :style="{ color: themeColor, borderColor: themeColor + '20' }">Experience</h3>
+                <div class="space-y-3">
+                  <template x-for="(exp, idx) in form.experience" :key="idx">
+                    <div class="space-y-1">
+                      <div class="flex justify-between items-start text-[10px] font-bold">
+                        <span class="text-slate-900" x-text="`${exp.role} at ${exp.company}`"></span>
+                        <span class="text-gray-500 font-normal text-[8.5px]" x-text="exp.duration"></span>
+                      </div>
+                      <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed">
+                        <template x-for="bullet in exp.bullets">
+                          <li x-text="bullet"></li>
+                        </template>
+                      </ul>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Projects -->
+              <div x-show="form.projects.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-widest mb-2 pb-0.5 border-b-2" :style="{ color: themeColor, borderColor: themeColor + '20' }">Projects</h3>
+                <div class="space-y-3">
+                  <template x-for="(proj, idx) in form.projects" :key="idx">
+                    <div class="space-y-1">
+                      <div class="flex justify-between items-start text-[10px] font-bold">
+                        <span class="text-slate-900" x-text="proj.title"></span>
+                        <span class="text-gray-500 font-normal text-[8.5px]" x-text="proj.duration"></span>
+                      </div>
+                      <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed">
+                        <template x-for="bullet in proj.bullets">
+                          <li x-text="bullet"></li>
+                        </template>
+                      </ul>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right side Skills/Education column -->
+            <div class="col-span-4 space-y-4">
+              <!-- Summary -->
+              <div x-show="form.summary">
+                <h3 class="text-xs font-bold uppercase tracking-widest mb-1.5" :style="{ color: themeColor }">Profile</h3>
+                <p class="text-[8.5px] leading-relaxed text-slate-600 m-0" x-text="form.summary"></p>
+              </div>
+
+              <!-- Skills -->
+              <div>
+                <h3 class="text-xs font-bold uppercase tracking-widest mb-1.5" :style="{ color: themeColor }">Competencies</h3>
+                <div class="flex flex-wrap gap-1">
+                  <template x-for="s in (form.skills.languages || []).concat(form.skills.frameworks || [])">
+                    <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[7.5px] font-medium" x-text="s"></span>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Education -->
+              <div x-show="form.education.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-widest mb-1.5" :style="{ color: themeColor }">Education</h3>
+                <div class="space-y-2">
+                  <template x-for="edu in form.education">
+                    <div class="text-[8.5px] leading-snug">
+                      <div class="font-bold text-slate-800" x-text="edu.degree"></div>
+                      <div class="text-slate-600" x-text="edu.institution"></div>
+                      <div class="text-gray-400" x-text="edu.duration"></div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             LAYOUT 5: MINIMALIST CLEAN 
+             ============================================== -->
+        <div x-show="selectedTemplate === 'minimalist_clean'" class="space-y-4 text-slate-800 bg-white font-sans">
+          <!-- Left Bar Accent -->
+          <div class="border-l-4 border-gray-400 pl-4 py-1">
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900" x-text="form.name || 'Candidate Name'"></h1>
+            <div class="text-[9px] text-gray-500 flex flex-wrap gap-x-2 gap-y-0.5 font-mono mt-1">
+              <span x-text="form.contact.email"></span> | <span x-text="form.contact.phone"></span> | <span x-text="form.contact.location"></span>
+            </div>
+          </div>
+
+          <!-- Professional Summary -->
+          <div x-show="form.summary">
+            <p class="text-[9.5px] leading-relaxed text-gray-600 m-0" x-text="form.summary"></p>
+          </div>
+
+          <!-- Experience -->
+          <div x-show="form.experience && form.experience.length > 0" class="space-y-2.5">
+            <h3 class="text-[10px] font-bold text-slate-800 tracking-wider uppercase border-b pb-0.5">Professional Experience</h3>
+            <div class="space-y-2.5">
+              <template x-for="(exp, idx) in form.experience" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start text-[9.5px] font-bold">
+                    <span class="text-slate-900" x-text="`${exp.role} at ${exp.company}`"></span>
+                    <span class="text-gray-500 font-normal" x-text="exp.duration"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed">
+                    <template x-for="bullet in exp.bullets">
+                      <li x-text="bullet"></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Projects -->
+          <div x-show="form.projects && form.projects.length > 0" class="space-y-2.5">
+            <h3 class="text-[10px] font-bold text-slate-800 tracking-wider uppercase border-b pb-0.5">Projects</h3>
+            <div class="space-y-2.5">
+              <template x-for="(proj, idx) in form.projects" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start text-[9.5px] font-bold">
+                    <span class="text-slate-900" x-text="proj.title"></span>
+                    <span class="text-gray-500 font-normal" x-text="proj.duration"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed">
+                    <template x-for="bullet in proj.bullets">
+                      <li x-text="bullet"></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             LAYOUT 6: CREATIVE DEVELOPER 
+             ============================================== -->
+        <div x-show="selectedTemplate === 'creative_dev'" class="space-y-4 text-slate-800 bg-white font-sans">
+          <div class="flex flex-col md:flex-row justify-between items-start gap-4 border-b pb-4">
+            <div>
+              <h1 class="text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent" x-text="form.name || 'Candidate Name'"></h1>
+              <div class="text-xs font-bold text-slate-700 tracking-widest mt-1 uppercase" x-text="targetJobTitle || 'Creative Builder'"></div>
+            </div>
+            <div class="text-[8.5px] text-slate-500 font-mono space-y-0.5">
+              <div class="flex items-center gap-1 font-sans">📬 <span x-text="form.contact.email"></span></div>
+              <div class="flex items-center gap-1 font-sans">📞 <span x-text="form.contact.phone"></span></div>
+              <div class="flex items-center gap-1 font-sans">📍 <span x-text="form.contact.location"></span></div>
+            </div>
+          </div>
+
+          <!-- Summary -->
+          <div x-show="form.summary">
+            <p class="text-[10px] leading-relaxed text-slate-600 border-l-2 border-purple-500 pl-3 italic" x-text="form.summary"></p>
+          </div>
+
+          <!-- Skills block -->
+          <div class="p-3 bg-purple-500/5 rounded-xl border border-purple-500/10">
+            <div class="text-[9px] font-bold text-purple-700 uppercase tracking-widest mb-1.5">Skillset Pills</div>
+            <div class="flex flex-wrap gap-1">
+              <template x-for="s in (form.skills.languages || []).concat(form.skills.frameworks || [])">
+                <span class="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 text-purple-700 px-2 py-0.5 rounded-full text-[8px] font-bold" x-text="s"></span>
+              </template>
+            </div>
+          </div>
+
+          <!-- Experience -->
+          <div x-show="form.experience.length > 0" class="space-y-3">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Work Experience</h3>
+            <div class="space-y-3 pl-3.5 border-l border-gray-100">
+              <template x-for="(exp, idx) in form.experience" :key="idx">
+                <div class="space-y-0.5 relative">
+                  <div class="flex justify-between items-start text-[10px] font-bold">
+                    <span class="text-slate-800" x-text="exp.role"></span>
+                    <span class="text-purple-600 text-[8.5px]" x-text="exp.duration"></span>
+                  </div>
+                  <div class="text-[8.5px] text-gray-500 font-medium" x-text="exp.company"></div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed">
+                    <template x-for="bullet in exp.bullets">
+                      <li x-text="bullet"></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             LAYOUT 7: EXECUTIVE ELITE 
+             ============================================== -->
+        <div x-show="selectedTemplate === 'executive_elite'" class="space-y-4 font-times text-black">
+          <!-- Centered Navy Header -->
+          <div class="text-center pb-3 border-b-2 border-indigo-900">
+            <h1 class="text-2xl font-bold uppercase tracking-widest text-indigo-950 m-0" x-text="form.name || 'Candidate Name'"></h1>
+            <div class="text-[8.5px] text-gray-600 uppercase tracking-widest mt-1 flex justify-center gap-x-2 font-sans">
+              <span x-text="form.contact.email"></span> | <span x-text="form.contact.phone"></span> | <span x-text="form.contact.location"></span>
+            </div>
+          </div>
+
+          <!-- Summary -->
+          <div x-show="form.summary">
+            <p class="text-[9.5px] leading-relaxed text-gray-800 text-justify" x-text="form.summary"></p>
+          </div>
+
+          <!-- Experience -->
+          <div x-show="form.experience && form.experience.length > 0">
+            <h3 class="text-[10px] font-bold text-indigo-950 uppercase tracking-wider mb-2 border-b border-indigo-100 pb-0.5">Professional Experience</h3>
+            <div class="space-y-3.5">
+              <template x-for="(exp, idx) in form.experience" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start text-[9.5px] font-bold">
+                    <span x-text="exp.role"></span>
+                    <span class="font-normal" x-text="exp.duration"></span>
+                  </div>
+                  <div class="text-[8.5px] italic text-gray-700" x-text="exp.company"></div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[8.5px] leading-relaxed text-gray-800">
+                    <template x-for="bullet in exp.bullets">
+                      <li x-text="bullet"></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             LAYOUT 8: STARTUP SANS 
+             ============================================== -->
+        <div x-show="selectedTemplate === 'startup_sans'" class="space-y-4 text-slate-800 bg-white font-sans">
+          <!-- Bold Left Border Accent Title -->
+          <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+            <div>
+              <h1 class="text-3xl font-extrabold tracking-tight text-slate-900" x-text="form.name || 'Candidate Name'"></h1>
+              <div class="text-xs font-bold text-brand uppercase mt-0.5" x-text="targetJobTitle || 'Startup Dev'"></div>
+            </div>
+            <div class="text-[9px] text-gray-500 font-mono text-right">
+              <div x-text="form.contact.email"></div>
+              <div x-text="form.contact.phone"></div>
+              <div x-text="form.contact.location"></div>
+            </div>
+          </div>
+
+          <!-- Summary -->
+          <div x-show="form.summary">
+            <p class="text-[9.5px] leading-relaxed text-slate-600 m-0" x-text="form.summary"></p>
+          </div>
+
+          <!-- Experience -->
+          <div x-show="form.experience && form.experience.length > 0">
+            <h3 class="text-[10px] font-extrabold text-slate-900 uppercase tracking-widest border-l-4 border-brand pl-2 mb-2">Work Experience</h3>
+            <div class="space-y-3.5">
+              <template x-for="(exp, idx) in form.experience" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start text-[9.5px] font-bold text-slate-900">
+                    <span x-text="`${exp.role} @ ${exp.company}`"></span>
+                    <span class="text-gray-500 font-normal" x-text="exp.duration"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed">
+                    <template x-for="bullet in exp.bullets">
+                      <li x-text="bullet"></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             LAYOUT 9: ACADEMIC CV 
+             ============================================== -->
+        <div x-show="selectedTemplate === 'academic_cv'" class="space-y-4 font-times text-black">
+          <div class="text-center pb-2">
+            <h1 class="text-2xl font-bold uppercase m-0" x-text="form.name || 'Candidate Name'"></h1>
+            <div class="text-[9px] mt-1 italic" x-text="`${form.contact.email} | ${form.contact.phone} | ${form.contact.location}`"></div>
+          </div>
+
+          <!-- Education -->
+          <div x-show="form.education && form.education.length > 0">
+            <h3 class="text-[10px] font-bold uppercase tracking-wider border-b border-black mb-1.5">1. Education History</h3>
+            <div class="space-y-2 pl-3">
+              <template x-for="(edu, idx) in form.education" :key="idx">
+                <div class="text-[9px] leading-relaxed">
+                  <div class="font-bold" x-text="`${edu.degree} — ${edu.institution}`"></div>
+                  <div class="text-gray-600" x-text="`Graduated: ${edu.duration}`"></div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Experience -->
+          <div x-show="form.experience && form.experience.length > 0">
+            <h3 class="text-[10px] font-bold uppercase tracking-wider border-b border-black mb-1.5">2. Research & Academic Experience</h3>
+            <div class="space-y-3 pl-3">
+              <template x-for="(exp, idx) in form.experience" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start text-[9px] font-bold">
+                    <span x-text="`${exp.role} at ${exp.company}`"></span>
+                    <span class="font-normal" x-text="exp.duration"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[8.5px] leading-relaxed text-gray-800">
+                    <template x-for="bullet in exp.bullets">
+                      <li x-text="bullet"></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             LAYOUT 10: SIMPLE STANDARD 
+             ============================================== -->
+        <div x-show="selectedTemplate === 'simple_standard'" class="space-y-3.5 text-slate-800 bg-white font-sans text-[9.5px]">
+          <!-- Standard Left aligned header -->
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 m-0" x-text="form.name || 'Candidate Name'"></h1>
+            <div class="text-[8.5px] text-gray-500 space-x-1.5 flex flex-wrap mt-0.5 font-sans">
+              <span x-text="form.contact.email"></span>
+              <span>•</span>
+              <span x-text="form.contact.phone"></span>
+              <span x-show="form.contact.location">
+                <span>•</span>
+                <span x-text="form.contact.location"></span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Experience -->
+          <div x-show="form.experience && form.experience.length > 0">
+            <div class="font-bold text-[10px] uppercase tracking-wider border-b border-slate-300 pb-0.5 mb-2 text-slate-800">Work Experience</div>
+            <div class="space-y-3">
+              <template x-for="(exp, idx) in form.experience" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start font-bold">
+                    <span class="text-slate-900" x-text="`${exp.role} — ${exp.company}`"></span>
+                    <span class="text-gray-500 font-normal text-[8.5px]" x-text="exp.duration"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed">
+                    <template x-for="bullet in exp.bullets">
+                      <li x-text="bullet"></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Projects -->
+          <div x-show="form.projects && form.projects.length > 0">
+            <div class="font-bold text-[10px] uppercase tracking-wider border-b border-slate-300 pb-0.5 mb-2 text-slate-800">Projects</div>
+            <div class="space-y-3">
+              <template x-for="(proj, idx) in form.projects" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start font-bold">
+                    <span class="text-slate-900" x-text="proj.title"></span>
+                    <span class="text-gray-500 font-normal text-[8.5px]" x-text="proj.duration"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed">
+                    <template x-for="bullet in proj.bullets">
+                      <li x-text="bullet"></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
   <!-- AI Suggestion Slide-out Drawer Panel -->
   <div 
@@ -1241,8 +1860,8 @@
   function resumeBuilder() {
     return {
       step: 1,
-      maxSteps: 6,
-      stepNames: ['Contact', 'Summary', 'Experience', 'Education', 'Skills', 'Export'],
+      maxSteps: 9,
+      stepNames: ['Contact', 'Summary', 'Experience', 'Projects', 'Education', 'Skills', 'Certifications', 'Extracurriculars', 'Export'],
       form: {
         name: '',
         contact: {
@@ -1254,13 +1873,16 @@
         },
         summary: '',
         experience: [],
+        projects: [],
         education: [],
         skills: {
           languages: [],
           frameworks: [],
           tools: [],
           other: []
-        }
+        },
+        certifications: [],
+        extracurriculars: []
       },
       validationErrors: {
         name: '',
@@ -1282,7 +1904,7 @@
       targetIndustry: 'Technology',
       
       // Styling Choices bound directly to A4 Canvas CSS style attributes
-      selectedTemplate: 'modern',
+      selectedTemplate: 'jakes_resume',
       fontChoice: 'font-inter',
       lineHeight: '1.4',
       margins: '1.6rem',
@@ -1364,8 +1986,17 @@
         if (!this.form.experience || this.form.experience.length === 0) {
           this.addExperience();
         }
+        if (!this.form.projects || this.form.projects.length === 0) {
+          this.addProject();
+        }
         if (!this.form.education || this.form.education.length === 0) {
           this.addEducation();
+        }
+        if (!this.form.certifications || this.form.certifications.length === 0) {
+          this.addCertification();
+        }
+        if (!this.form.extracurriculars || this.form.extracurriculars.length === 0) {
+          this.addExtracurricular();
         }
 
         // Set default values if empty
@@ -1451,6 +2082,77 @@
           }
         }
         return true;
+      },
+
+      addProject() {
+        if (!this.form.projects) this.form.projects = [];
+        this.form.projects.push({
+          title: '',
+          duration: '',
+          bullets: ['']
+        });
+      },
+
+      removeProject(index) {
+        this.form.projects.splice(index, 1);
+        if (this.form.projects.length === 0) {
+          this.addProject();
+        }
+      },
+
+      addProjectBullet(projIdx) {
+        this.form.projects[projIdx].bullets.push('');
+      },
+
+      removeProjectBullet(projIdx, bIdx) {
+        this.form.projects[projIdx].bullets.splice(bIdx, 1);
+        if (this.form.projects[projIdx].bullets.length === 0) {
+          this.form.projects[projIdx].bullets.push('');
+        }
+      },
+
+      addCertification() {
+        if (!this.form.certifications) this.form.certifications = [];
+        this.form.certifications.push({
+          name: '',
+          authority: '',
+          duration: ''
+        });
+      },
+
+      removeCertification(index) {
+        this.form.certifications.splice(index, 1);
+        if (this.form.certifications.length === 0) {
+          this.addCertification();
+        }
+      },
+
+      addExtracurricular() {
+        if (!this.form.extracurriculars) this.form.extracurriculars = [];
+        this.form.extracurriculars.push({
+          role: '',
+          organization: '',
+          duration: '',
+          bullets: ['']
+        });
+      },
+
+      removeExtracurricular(index) {
+        this.form.extracurriculars.splice(index, 1);
+        if (this.form.extracurriculars.length === 0) {
+          this.addExtracurricular();
+        }
+      },
+
+      addExtracurricularBullet(exIdx) {
+        this.form.extracurriculars[exIdx].bullets.push('');
+      },
+
+      removeExtracurricularBullet(exIdx, bIdx) {
+        this.form.extracurriculars[exIdx].bullets.splice(bIdx, 1);
+        if (this.form.extracurriculars[exIdx].bullets.length === 0) {
+          this.form.extracurriculars[exIdx].bullets.push('');
+        }
       },
 
       addExperience() {
@@ -1594,11 +2296,17 @@
             contact: { email: 'john.doe@example.com', phone: '', location: '', linkedin: '', github: '' },
             summary: '',
             experience: [],
+            projects: [],
             education: [],
-            skills: { languages: [], frameworks: [], tools: [], other: [] }
+            skills: { languages: [], frameworks: [], tools: [], other: [] },
+            certifications: [],
+            extracurriculars: []
           };
           this.addExperience();
+          this.addProject();
           this.addEducation();
+          this.addCertification();
+          this.addExtracurricular();
           this.step = 1;
         }
       },

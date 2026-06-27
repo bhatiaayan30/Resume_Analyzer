@@ -36,10 +36,8 @@
             isLoading: false,
 
             init() {
-                // If backend flags suggest phone or email was just updated, trigger OTP request automatically.
-                {% if phone_updated %}
-                    this.requestOTP('phone');
-                {% elif email_updated %}
+                // If backend flags suggest email was just updated, trigger OTP request automatically.
+                {% if email_updated %}
                     this.requestOTP('email');
                 {% endif %}
 
@@ -51,22 +49,8 @@
 
                 const focus = params.get('focus');
                 const verify = params.get('verify');
-                
-                if (focus === 'phone') {
-                    this.activeTab = 'personal';
-                    if (verify) {
-                        this.requestOTP('phone');
-                    } else {
-                        this.isEditing = true;
-                        this.$nextTick(() => {
-                            const phoneInput = document.querySelector('input[name=phone_number]');
-                            if (phoneInput) {
-                                phoneInput.focus();
-                                phoneInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }
-                        });
-                    }
-                } else if (focus === 'email') {
+
+                if (focus === 'email') {
                     this.activeTab = 'personal';
                     if (verify) {
                         this.requestOTP('email');
@@ -531,22 +515,7 @@
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Phone Number</label>
-                            <div class="flex items-center gap-4" x-show="!isEditing">
-                                <div class="w-full bg-black/20 border border-gray-700/50 rounded-lg p-3.5 text-gray-200">
-                                    {{ profile.phone_number|default:"Not provided" }}
-                                </div>
-                                {% if profile.phone_number and not profile.phone_verified %}
-                                    <button type="button" @click="requestOTP('phone')" :disabled="isLoading" class="whitespace-nowrap px-3 py-1.5 bg-brand/20 hover:bg-brand/30 text-brand-light rounded border border-brand/30 text-xs font-bold transition-colors">Verify Phone</button>
-                                {% elif profile.phone_verified %}
-                                    <span class="whitespace-nowrap text-green-400 text-xs font-bold flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Verified</span>
-                                {% endif %}
-                            </div>
-                            <input x-show="isEditing" type="text" name="phone_number" value="{{ profile.phone_number|default:'' }}"
-                                   placeholder="Add your phone number"
-                                   class="w-full bg-black/40 border border-gray-700 rounded-lg p-3.5 text-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all" style="display:none;">
-                        </div>
+
 
                         <div>
                             <label class="block text-sm font-medium text-gray-400 mb-2">Date Joined</label>

@@ -637,6 +637,34 @@
         stroke: #ffffff !important;
     }
 
+    /* Subscription Badges in Dark Mode (Default) */
+    .subscription-badge-unlimited {
+        background: linear-gradient(135deg, #ec4899, #f43f5e) !important;
+        color: #ffffff !important;
+        border-color: rgba(244, 63, 94, 0.4) !important;
+        box-shadow: 0 0 12px rgba(244, 63, 94, 0.4) !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .subscription-badge-elite {
+        background: linear-gradient(135deg, #10b981, #06b6d4) !important;
+        color: #ffffff !important;
+        border-color: rgba(6, 182, 212, 0.4) !important;
+        box-shadow: 0 0 12px rgba(6, 182, 212, 0.4) !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .subscription-badge-pro {
+        background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+        color: #ffffff !important;
+        border-color: rgba(99, 102, 241, 0.4) !important;
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.4) !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .subscription-badge-starter {
+        background: linear-gradient(135deg, #4b5563, #374151) !important;
+        color: #e5e7eb !important;
+        border-color: rgba(75, 85, 99, 0.4) !important;
+    }
+
     /* Subscription Badges in Light Mode */
     html.light .subscription-badge-unlimited {
         background-color: #fce7f3 !important;
@@ -870,20 +898,27 @@
             </svg>
           </button>
           <div x-show="userDropdownOpen" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-slate-950/95 backdrop-blur-xl shadow-2xl z-50 py-1.5 text-slate-200 dropdown-menu" style="display: none;">
-            <div class="px-4 py-2 border-b border-white/5 mb-1.5">
-              <p class="text-[10px] text-gray-500 font-semibold tracking-wide uppercase">Signed in as</p>
-              <p class="text-sm font-bold text-white truncate">{{ user.username }}</p>
-              <div class="mt-1.5">
+            <div class="px-4 py-3.5 border-b border-white/5 mb-1.5 flex flex-col gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand to-pink-500 flex items-center justify-center text-white text-xs font-black ring-2 ring-white/10 shrink-0">
+                  {{ user.username|slice:":1"|upper }}
+                </div>
+                <div class="min-w-0">
+                  <p class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Signed in as</p>
+                  <p class="text-xs font-black text-white truncate leading-tight mt-0.5">{{ user.username }}</p>
+                </div>
+              </div>
+              <div class="mt-1">
                 {% if user.profile.subscription_tier == 4 %}
-                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded subscription-badge-unlimited border">Unlimited</span>
+                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded-full subscription-badge-unlimited border border-pink-500/20">Unlimited</span>
                 {% elif user.profile.subscription_tier == 3 %}
-                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded subscription-badge-elite border">Elite</span>
+                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded-full subscription-badge-elite border border-emerald-500/20">Elite</span>
                 {% elif user.profile.subscription_tier == 2 %}
-                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded subscription-badge-pro border">Pro</span>
+                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded-full subscription-badge-pro border border-purple-500/20">Pro</span>
                 {% elif user.profile.subscription_tier == 1 %}
-                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded subscription-badge-starter border">Starter</span>
+                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded-full subscription-badge-starter border border-gray-600/20">Starter</span>
                 {% else %}
-                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded bg-gray-800 text-gray-400 border border-gray-700">Free Tier</span>
+                  <span class="inline-flex px-2 py-0.5 text-[8px] uppercase tracking-widest font-black rounded-full bg-gray-800 text-gray-400 border border-gray-700">Free Tier</span>
                 {% endif %}
               </div>
             </div>
@@ -1069,6 +1104,7 @@
           
           <a href="{% url 'index' %}#how-it-works" class="text-sm font-semibold text-gray-300 hover:text-white transition-colors">How It Works</a>
           <a href="{% url 'why_us' %}" class="text-sm font-semibold text-gray-300 hover:text-white transition-colors">Why Us</a>
+          <a href="{% url 'pricing' %}" class="text-sm font-semibold text-gray-300 hover:text-white transition-colors">Pricing</a>
           <a href="{% url 'blog_index' %}" class="text-sm font-semibold text-gray-300 hover:text-white transition-colors">Blogs</a>
           <a href="{% url 'contact' %}" class="text-sm font-bold text-brand hover:text-brand-hover dark:text-brand dark:hover:text-brand-hover transition-colors">Contact Us</a>
         </nav>
@@ -1163,6 +1199,7 @@
          </div>
          <a href="{% url 'index' %}#how-it-works" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">How It Works</a>
          <a href="{% url 'why_us' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Why Us</a>
+         <a href="{% url 'pricing' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Pricing</a>
          <a href="{% url 'blog_index' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Blogs</a>
          <a href="{% url 'contact' %}" class="text-brand font-bold py-2 px-3 rounded-lg hover:bg-white/5">Contact Us</a>
          <a href="{% url 'login' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Sign In</a>
@@ -1171,8 +1208,7 @@
   {% endif %}
 
   <main>
-    {% if user.is_authenticated %}
-      {% if not user.profile.email_verified or not user.profile.phone_number or not user.profile.phone_verified %}
+      {% if user.is_authenticated and not user.profile.email_verified %}
         <div x-data="{ showVerifyBanner: !sessionStorage.getItem('dismiss_verify_prompt') }" 
              x-show="showVerifyBanner" 
              style="display: none;"
@@ -1185,16 +1221,7 @@
             </div>
             <span class="text-sm font-medium">
               <strong>Account Verification:</strong>
-              {% if not user.profile.email_verified %}
-                Please <a href="{% url 'settings' %}?focus=email&verify=1" class="underline hover:text-white font-semibold">verify your email address</a>.
-              {% endif %}
-              {% if not user.profile.phone_number %}
-                {% if not user.profile.email_verified %} and {% endif %}
-                please <a href="{% url 'settings' %}?focus=phone" class="underline hover:text-white font-semibold">add your phone number</a>.
-              {% elif not user.profile.phone_verified %}
-                {% if not user.profile.email_verified %} and {% endif %}
-                please <a href="{% url 'settings' %}?focus=phone&verify=1" class="underline hover:text-white font-semibold">verify your phone number</a>.
-              {% endif %}
+              Please <a href="{% url 'settings' %}?focus=email&verify=1" class="underline hover:text-white font-semibold">verify your email address</a>.
             </span>
           </div>
           <button @click="sessionStorage.setItem('dismiss_verify_prompt', 'true'); showVerifyBanner = false" class="p-1.5 hover:bg-white/5 rounded-lg text-amber-400 hover:text-white transition-colors cursor-pointer shrink-0">
@@ -1204,7 +1231,6 @@
           </button>
         </div>
       {% endif %}
-    {% endif %}
 
     {% if messages %}
       <ul class="messages">
