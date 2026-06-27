@@ -3,107 +3,170 @@
 {% block title %}Why Choose Resume Analyzer - Advanced ATS Screening Intelligence{% endblock %}
 
 {% block content %}
-<div class="relative overflow-hidden flex flex-col min-h-screen py-16 md:py-24">
+<div class="relative overflow-hidden flex flex-col min-h-screen py-16 md:py-24"
+     x-data="{ 
+         activeTab: 'scrambler',
+         appPerWeek: 10,
+         tailorMin: 60,
+         get hoursSaved() {
+             return Math.max(0, Math.round(((this.appPerWeek * 4 * (this.tailorMin - 15)) / 60) * 10) / 10);
+         },
+         get daysSooner() {
+             return Math.min(45, Math.round(this.appPerWeek * 1.5 + 10));
+         },
+         get standardInterviews() {
+             return Math.round(this.appPerWeek * 4 * 0.02 * 10) / 10;
+         },
+         get optimizedInterviews() {
+             return Math.round(this.appPerWeek * 4 * 0.22 * 10) / 10;
+         }
+     }">
     <!-- Background Glows -->
     <div class="absolute top-[10%] left-1/4 -translate-x-1/2 w-[60vw] h-[60vw] bg-radial-gradient from-brand/10 to-transparent pointer-events-none z-0"></div>
     <div class="absolute top-[40%] right-0 w-[50vw] h-[50vw] bg-radial-gradient from-pink-500/5 to-transparent pointer-events-none z-0"></div>
 
     <div class="relative z-10 max-w-[1280px] mx-auto px-6 w-full">
+        
         <!-- Hero Section -->
-        <div class="text-center max-w-3xl mx-auto mb-20">
+        <div class="text-center max-w-3xl mx-auto mb-24">
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand/10 text-brand border border-brand/20 mb-6 uppercase tracking-wider">
-                The Science of Screening
+                Why Resume Analyzer
             </span>
             <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight">
-                Why 95% of Standard <br/>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-pink-500">Resume Checkers Fail You</span>
+                The Difference Between a Keyword List <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-pink-500">And an Interview Invitation</span>
             </h1>
             <p class="text-lg text-gray-400 leading-relaxed">
-                Standard scanners look only for basic keyword counts, leading to keyword stuffing. Resume Analyzer utilizes semantic LLM intelligence to match context, catch formatting issues, and verify authenticity.
+                Standard scanners only count words, forcing candidates to write artificial, stuffed text. Resume Analyzer reads your experience contextually, audits your formatting coordinates, and ensures your unique professional voice gets heard.
             </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+                <a href="{% url 'index' %}" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-brand to-pink-500 hover:from-brand-hover hover:to-pink-400 text-white font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02]">
+                    Scan Your Resume Now
+                </a>
+                <a href="#console" class="w-full sm:w-auto px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-xl transition-all">
+                    Explore Simulator
+                </a>
+            </div>
         </div>
 
-        <!-- Interactive Parser Simulator Section -->
-        <div class="glass-panel p-8 md:p-12 rounded-3xl border border-white/5 shadow-2xl mb-24 relative overflow-hidden" x-data="{ parserMode: 'semantic' }">
+        <!-- 2. The Interactive Diagnostic Console -->
+        <div id="console" class="glass-panel p-8 md:p-12 rounded-3xl border border-white/5 shadow-2xl mb-24 relative overflow-hidden">
             <div class="absolute -right-32 -bottom-32 w-96 h-96 bg-brand/10 rounded-full blur-3xl pointer-events-none"></div>
             
-            <div class="grid lg:grid-cols-12 gap-12 items-center">
-                <!-- Left: Simulator Copy -->
-                <div class="lg:col-span-5 space-y-6">
-                    <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">
-                        See how ATS systems <span class="text-brand">actually read</span> your layout.
-                    </h2>
-                    <p class="text-gray-400 text-sm leading-relaxed">
-                        Many candidates design multi-column Canva resumes. To a standard parser, these horizontal lines merge together, scrambling your work history. 
-                    </p>
-                    <p class="text-gray-400 text-sm leading-relaxed">
-                        Toggle the terminal on the right to compare how a traditional parser scrambling your resume compares to our semantic indexing engine.
-                    </p>
-                    
-                    <!-- Toggle Buttons -->
-                    <div class="flex gap-4 pt-2">
-                        <button @click="parserMode = 'traditional'" 
-                                class="flex-1 py-3 px-4 rounded-xl border text-xs font-bold transition-all"
-                                :class="parserMode === 'traditional' ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'">
-                            Traditional Parser
-                        </button>
-                        <button @click="parserMode = 'semantic'" 
-                                class="flex-1 py-3 px-4 rounded-xl border text-xs font-bold transition-all"
-                                :class="parserMode === 'semantic' ? 'bg-brand/10 border-brand/30 text-brand' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'">
-                            Our Semantic Engine
-                        </button>
-                    </div>
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-3">The Diagnostic Console</h2>
+                <p class="text-gray-400 text-sm">Select a diagnostic tab to see how our validation engines run checks compared to standard scanners.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-12 gap-8 items-stretch">
+                <!-- Left Menu Controls -->
+                <div class="lg:col-span-4 flex flex-col gap-3 justify-center">
+                    <!-- Tab 1 -->
+                    <button @click="activeTab = 'scrambler'"
+                            class="p-5 rounded-2xl border text-left transition-all duration-300 group cursor-pointer"
+                            :class="activeTab === 'scrambler' ? 'bg-brand/5 border-brand/30 shadow-lg' : 'bg-white/5 border-white/5 hover:bg-white/[0.02] hover:border-white/10'">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
+                                 :class="activeTab === 'scrambler' ? 'bg-brand/20 text-brand' : 'bg-white/5 text-gray-400'">1</div>
+                            <span class="font-bold text-sm" :class="activeTab === 'scrambler' ? 'text-white' : 'text-gray-400 group-hover:text-gray-300'">Coordinate Scrambler</span>
+                        </div>
+                        <p class="text-xs text-gray-500 leading-relaxed">Exposes how standard scanners scramble formatting coordinates on complex multi-column resumes.</p>
+                    </button>
+
+                    <!-- Tab 2 -->
+                    <button @click="activeTab = 'fatigue'"
+                            class="p-5 rounded-2xl border text-left transition-all duration-300 group cursor-pointer"
+                            :class="activeTab === 'fatigue' ? 'bg-brand/5 border-brand/30 shadow-lg' : 'bg-white/5 border-white/5 hover:bg-white/[0.02] hover:border-white/10'">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
+                                 :class="activeTab === 'fatigue' ? 'bg-brand/20 text-brand' : 'bg-white/5 text-gray-400'">2</div>
+                            <span class="font-bold text-sm" :class="activeTab === 'fatigue' ? 'text-white' : 'text-gray-400 group-hover:text-gray-300'">AI-Fatigue Audit</span>
+                        </div>
+                        <p class="text-xs text-gray-500 leading-relaxed">Identifies overused ChatGPT-like clichés and vague metrics that trigger recruiter filters.</p>
+                    </button>
+
+                    <!-- Tab 3 -->
+                    <button @click="activeTab = 'semantic'"
+                            class="p-5 rounded-2xl border text-left transition-all duration-300 group cursor-pointer"
+                            :class="activeTab === 'semantic' ? 'bg-brand/5 border-brand/30 shadow-lg' : 'bg-white/5 border-white/5 hover:bg-white/[0.02] hover:border-white/10'">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
+                                 :class="activeTab === 'semantic' ? 'bg-brand/20 text-brand' : 'bg-white/5 text-gray-400'">3</div>
+                            <span class="font-bold text-sm" :class="activeTab === 'semantic' ? 'text-white' : 'text-gray-400 group-hover:text-gray-300'">Semantic Matcher</span>
+                        </div>
+                        <p class="text-xs text-gray-500 leading-relaxed">Demonstrates conceptual skill mapping without requiring rigid, stuffed keywords.</p>
+                    </button>
                 </div>
 
-                <!-- Right: Interactive Terminal -->
-                <div class="lg:col-span-7">
-                    <div class="bg-gray-950 rounded-2xl border border-white/10 shadow-2xl overflow-hidden font-mono text-xs md:text-sm">
-                        <!-- Terminal Title Bar -->
-                        <div class="bg-gray-900 px-4 py-3 flex items-center justify-between border-b border-white/5">
+                <!-- Right Display Console -->
+                <div class="lg:col-span-8 flex flex-col">
+                    <div class="flex-grow bg-gray-950 rounded-2xl border border-white/10 overflow-hidden font-mono text-xs md:text-sm shadow-2xl flex flex-col min-h-[360px]">
+                        <!-- Window Titlebar -->
+                        <div class="bg-gray-900/80 px-4 py-3 flex items-center justify-between border-b border-white/5 shrink-0">
                             <div class="flex gap-1.5">
-                                <span class="w-3 h-3 rounded-full transition-colors duration-350" :class="parserMode === 'traditional' ? 'bg-red-500' : 'bg-emerald-500'"></span>
+                                <span class="w-3 h-3 rounded-full" :class="activeTab === 'scrambler' ? 'bg-red-500' : activeTab === 'fatigue' ? 'bg-amber-500' : 'bg-emerald-500'"></span>
                                 <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
                                 <span class="w-3 h-3 rounded-full bg-blue-500"></span>
                             </div>
-                            <span class="text-[10px] text-gray-500 uppercase tracking-wider font-bold">
-                                <span x-show="parserMode === 'traditional'">traditional_scrambler.log</span>
-                                <span x-show="parserMode === 'semantic'">resume_analyzer_llm.json</span>
+                            <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                                <span x-show="activeTab === 'scrambler'">pdf_coordinate_scrambler.log</span>
+                                <span x-show="activeTab === 'fatigue'">authenticity_cliche_check.json</span>
+                                <span x-show="activeTab === 'semantic'">semantic_concept_mapper.json</span>
                             </span>
                         </div>
                         
-                        <!-- Terminal Logs -->
-                        <div class="p-6 h-[320px] overflow-y-auto space-y-4 text-left leading-relaxed">
-                            <!-- Traditional Scrambled Logs -->
-                            <div x-show="parserMode === 'traditional'" x-cloak class="text-red-400/90 space-y-3">
-                                <div>[WARN] Found multi-column bounding box. Merging horizontally...</div>
-                                <div class="text-gray-400">
-                                    <span class="text-red-500 font-bold">> Extracted string:</span><br/>
-                                    "Contact Info Summary John Doe Experienced JavaScript Developer Passionate about creating systems Phone: 123456789 Email: email@net React, Node.js, HTML, Python"
+                        <!-- Console Output Panel -->
+                        <div class="p-6 overflow-y-auto flex-grow space-y-4 text-left leading-relaxed">
+                            
+                            <!-- Tab 1: Scrambler Content -->
+                            <div x-show="activeTab === 'scrambler'" x-cloak class="space-y-4">
+                                <div class="text-red-400/95 font-bold">[WARN] Scrambler scanner activated for two-column PDF structure.</div>
+                                <div class="space-y-2 text-gray-400">
+                                    <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">// Horizontal coordinate line 14:</div>
+                                    <div class="bg-red-500/5 p-3 rounded-lg border border-red-500/10 font-mono text-xs">
+                                        <span class="text-red-400 font-bold">Source layout:</span> [Left Column: Contact Info] <span class="text-gray-600">|</span> [Right Column: Professional Summary]<br/>
+                                        <span class="text-red-500 font-bold">Raw Text Stream:</span> "Phone: +1 555-0192 Email: contact@net Passionate Frontend Engineer driving key customer integrations..."
+                                    </div>
                                 </div>
-                                <div class="text-red-500 font-bold">[ERROR] Failed to map entities:</div>
-                                <div class="pl-4 border-l border-red-500/20 text-gray-400">
-                                    - Entity "JobTitle" mapped to: "Contact Info Summary John"<br/>
-                                    - Entity "Skills" mapped to: "Passionate about creating"<br/>
-                                    - Timeline validation: Date overlap detected (scrambled lines mixed months)
+                                <div class="text-red-500 font-bold">[CRITICAL] Scrambled data breaks semantic context.</div>
+                                <div class="text-gray-400 text-xs">
+                                    Entity parsing logic fails to map <span class="text-white font-semibold">"Frontend Engineer"</span> to candidate job title due to inline mixing. Recommendation: Use a structured vertical grid.
                                 </div>
-                                <div class="text-red-400">[SYSTEM] Fit Score: <span class="font-bold underline text-red-500">12%</span> (Reason: Unstructured Jargon)</div>
                             </div>
 
-                            <!-- Semantic Clean Logs -->
-                            <div x-show="parserMode === 'semantic'" x-cloak class="text-emerald-400/90 space-y-2">
-                                <div class="text-gray-500">// Semantic parsing complete in 240ms</div>
+                            <!-- Tab 2: Fatigue Content -->
+                            <div x-show="activeTab === 'fatigue'" x-cloak class="space-y-4">
+                                <div class="text-amber-500/90 font-bold">[INFO] Recruiter AI-Fatigue Audit initiated.</div>
+                                <div class="space-y-3">
+                                    <!-- Bad Bullet -->
+                                    <div class="bg-red-500/5 p-3 rounded-lg border border-red-500/10">
+                                        <span class="text-red-400 font-bold">ChatGPT Output (Raw):</span><br/>
+                                        "Spearheaded critical initiatives to <span class="bg-red-500/20 text-red-300 px-1 py-0.2 rounded font-bold">leverage synergy</span> and <span class="bg-red-500/20 text-red-300 px-1 py-0.2 rounded font-bold">dynamically streamline</span> backend database operations."
+                                        <div class="text-[10px] text-red-400 font-semibold mt-1">Status: Flagged for high AI probability, vague impact.</div>
+                                    </div>
+                                    
+                                    <!-- Better Bullet -->
+                                    <div class="bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/10">
+                                        <span class="text-emerald-400 font-bold">Optimized Version (Metrics-driven):</span><br/>
+                                        "Refactored SQL index schemas and query paths, reducing transactional latency by <span class="bg-emerald-500/20 text-emerald-300 px-1 py-0.2 rounded font-bold">34%</span>."
+                                        <div class="text-[10px] text-emerald-400 font-semibold mt-1">Status: Passed. Authenticity verified.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab 3: Semantic Content -->
+                            <div x-show="activeTab === 'semantic'" x-cloak class="space-y-3 text-emerald-400/90">
+                                <div class="text-gray-500">// Mapping resume vocabulary to Job Description concepts</div>
                                 <div>{</div>
-                                <div class="pl-4"><span class="text-purple-400">"candidate"</span>: <span class="text-yellow-200">"John Doe"</span>,</div>
-                                <div class="pl-4"><span class="text-purple-400">"job_title"</span>: <span class="text-yellow-200">"Senior Frontend Developer"</span>,</div>
-                                <div class="pl-4"><span class="text-purple-400">"extracted_skills"</span>: [</div>
-                                <div class="pl-8"><span class="text-yellow-200">"React"</span>, <span class="text-yellow-200">"Node.js"</span>, <span class="text-yellow-200">"TypeScript"</span>, <span class="text-yellow-200">"Systems Engineering"</span></div>
-                                <div class="pl-4">],</div>
-                                <div class="pl-4"><span class="text-purple-400">"formatting_checks"</span>: {</div>
-                                <div class="pl-8"><span class="text-purple-400">"multi_column_detected"</span>: <span class="text-blue-400">true</span>,</div>
-                                <div class="pl-8"><span class="text-purple-400">"ats_scramble_risk"</span>: <span class="text-yellow-500">"High (Flags Canva columns)"</span>,</div>
-                                <div class="pl-8"><span class="text-purple-400">"action_item"</span>: <span class="text-yellow-200">"Convert columns to single-row vertical layout"</span></div>
+                                <div class="pl-4"><span class="text-purple-400">"job_description_required"</span>: ["Containerization", "Relational Databases", "CI/CD Platforms"],</div>
+                                <div class="pl-4"><span class="text-purple-400">"candidate_resume_contains"</span>: ["Docker", "PostgreSQL", "GitHub Actions"],</div>
+                                <div class="pl-4"><span class="text-purple-400">"traditional_match_status"</span>: <span class="text-red-400 font-bold">"0% (Exact words missing)"</span>,</div>
+                                <div class="pl-4"><span class="text-purple-400">"semantic_match_status"</span>: {</div>
+                                <div class="pl-8"><span class="text-purple-400">"PostgreSQL -> Relational Databases"</span>: <span class="text-yellow-200">"98% semantic relevance"</span>,</div>
+                                <div class="pl-8"><span class="text-purple-400">"GitHub Actions -> CI/CD"</span>: <span class="text-yellow-200">"95% semantic relevance"</span>,</div>
+                                <div class="pl-8"><span class="text-purple-400">"Docker -> Containerization"</span>: <span class="text-yellow-200">"99% semantic relevance"</span></div>
                                 <div class="pl-4">},</div>
-                                <div class="pl-4"><span class="text-purple-400">"semantic_alignment_score"</span>: <span class="text-emerald-400 font-bold">88%</span></div>
+                                <div class="pl-4"><span class="text-purple-400">"composite_alignment_score"</span>: <span class="text-emerald-400 font-bold">"94% Match"</span></div>
                                 <div>}</div>
                             </div>
                         </div>
@@ -112,56 +175,179 @@
             </div>
         </div>
 
-        <!-- The Value Pillars Grid -->
+        <!-- 3. Job Search Velocity Calculator -->
+        <div class="glass-panel p-8 md:p-12 rounded-3xl border border-white/5 shadow-2xl mb-24 relative overflow-hidden">
+            <div class="absolute -left-32 -bottom-32 w-96 h-96 bg-pink-500/5 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-pink-500/10 text-pink-400 border border-pink-500/20 mb-3">
+                    Search Analytics
+                </span>
+                <h2 class="text-2xl md:text-4xl font-extrabold text-white mb-4">Job Search Velocity Calculator</h2>
+                <p class="text-gray-400">Adjust the sliders to see how much faster you will land interviews by switching to Resume Analyzer.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                <!-- Left Sliders -->
+                <div class="lg:col-span-6 space-y-8">
+                    <!-- Slider 1 -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="font-bold text-white">Applications submitted per week</span>
+                            <span class="font-black text-brand bg-brand/10 border border-brand/20 px-3 py-1 rounded-lg" x-text="appPerWeek"></span>
+                        </div>
+                        <input type="range" min="1" max="40" x-model="appPerWeek" 
+                               class="w-full h-1.5 bg-white/5 rounded-lg appearance-none cursor-pointer accent-brand" />
+                    </div>
+
+                    <!-- Slider 2 -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="font-bold text-white">Minutes spent tailoring each resume</span>
+                            <span class="font-black text-pink-500 bg-pink-500/10 border border-pink-500/20 px-3 py-1 rounded-lg" x-text="tailorMin + ' mins'"></span>
+                        </div>
+                        <input type="range" min="10" max="120" x-model="tailorMin" 
+                               class="w-full h-1.5 bg-white/5 rounded-lg appearance-none cursor-pointer accent-pink-500" />
+                    </div>
+                </div>
+
+                <!-- Right Calculations -->
+                <div class="lg:col-span-6 grid grid-cols-2 gap-4">
+                    <!-- Stats Card 1 -->
+                    <div class="bg-white/[0.01] border border-white/5 rounded-2xl p-6 text-center">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-2">Time Reclaimed</div>
+                        <div class="text-2xl md:text-3xl font-extrabold text-white mb-1" x-text="hoursSaved + ' hrs'"></div>
+                        <div class="text-[10px] text-gray-500">per month saved</div>
+                    </div>
+
+                    <!-- Stats Card 2 -->
+                    <div class="bg-white/[0.01] border border-white/5 rounded-2xl p-6 text-center">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-2">Interview Yield</div>
+                        <div class="text-2xl md:text-3xl font-extrabold text-brand mb-1" x-text="'~' + optimizedInterviews"></div>
+                        <div class="text-[10px] text-gray-500" x-text="'vs. ' + standardInterviews + ' standard'"></div>
+                    </div>
+
+                    <!-- Stats Card 3 -->
+                    <div class="bg-white/[0.01] border border-white/5 rounded-2xl p-6 text-center">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-2">Job Landing Speed</div>
+                        <div class="text-2xl md:text-3xl font-extrabold text-pink-500 mb-1" x-text="daysSooner + ' Days'"></div>
+                        <div class="text-[10px] text-gray-500">sooner on average</div>
+                    </div>
+
+                    <!-- Stats Card 4 -->
+                    <div class="bg-white/[0.01] border border-white/5 rounded-2xl p-6 text-center">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-2">Portfolio Conversions</div>
+                        <div class="text-2xl md:text-3xl font-extrabold text-emerald-400 mb-1">3.5x</div>
+                        <div class="text-[10px] text-gray-500">higher response rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Feature-by-Feature Comparison Matrix -->
         <div class="text-center mb-12">
-            <h2 class="text-2xl md:text-4xl font-extrabold text-white mb-4">Why Resume Analyzer is Different</h2>
-            <p class="text-gray-400">We engineered our tool alongside hiring managers to expose what actual recruiters flag.</p>
+            <h2 class="text-2xl md:text-4xl font-extrabold text-white mb-4">How We Compare</h2>
+            <p class="text-gray-400">Traditional keyword count checkers vs. Resume Analyzer's semantic engines.</p>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
-            <!-- Pillar 1 -->
-            <div class="glass-panel p-8 rounded-3xl border border-white/5 transition-all duration-300 hover:border-brand/40 hover:-translate-y-1 relative group">
-                <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-white mb-3">Authenticity Auditing</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">
-                    Recruiters are rejecting applications at record rates due to templated AI-generated language. We run a comprehensive audit on dates, metrics, and word redundancy so your resume looks authentic, not automated.
-                </p>
-            </div>
-
-            <!-- Pillar 2 -->
-            <div class="glass-panel p-8 rounded-3xl border border-white/5 transition-all duration-300 hover:border-brand/40 hover:-translate-y-1 relative group">
-                <div class="w-12 h-12 rounded-2xl bg-pink-500/10 flex items-center justify-center text-pink-400 mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-white mb-3">AI Screening Room</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">
-                    Don't just write a resume; practice it. Our interactive audio and text simulator grills you on the exact interview questions our model predicts for your target job description.
-                </p>
-            </div>
-
-            <!-- Pillar 3 -->
-            <div class="glass-panel p-8 rounded-3xl border border-white/5 transition-all duration-300 hover:border-brand/40 hover:-translate-y-1 relative group">
-                <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-white mb-3">True Coordinate Diagnostics</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">
-                    Most checkers guess if your layout passes. We actually parse your resume using coordinate extraction algorithms, identifying precisely where text merges, hidden characters exist, or columns scramble.
-                </p>
+        <div class="glass-panel overflow-hidden border border-white/5 rounded-3xl shadow-xl mb-24">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/[0.02] border-b border-white/5">
+                            <th class="p-6 text-sm font-bold text-white uppercase tracking-wider">Capability</th>
+                            <th class="p-6 text-sm font-bold text-gray-400 uppercase tracking-wider">Traditional checkers</th>
+                            <th class="p-6 text-sm font-bold text-brand uppercase tracking-wider">Resume Analyzer</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5 text-sm text-gray-300">
+                        <tr>
+                            <td class="p-6 font-semibold text-white">Coordinate Grid Formatting check</td>
+                            <td class="p-6 text-gray-500">❌ Emojis & placeholders only</td>
+                            <td class="p-6 text-emerald-400 font-bold">✅ Yes (Coordinate verification)</td>
+                        </tr>
+                        <tr>
+                            <td class="p-6 font-semibold text-white">Authenticity Audit (AI check)</td>
+                            <td class="p-6 text-gray-500">❌ None</td>
+                            <td class="p-6 text-emerald-400 font-bold">✅ Yes (Fraud & overlap detection)</td>
+                        </tr>
+                        <tr>
+                            <td class="p-6 font-semibold text-white">Semantic Concept Matching</td>
+                            <td class="p-6 text-gray-500">❌ Keyword matching only</td>
+                            <td class="p-6 text-emerald-400 font-bold">✅ Yes (Vector similarity logic)</td>
+                        </tr>
+                        <tr>
+                            <td class="p-6 font-semibold text-white">Audio/Text Interview Prep</td>
+                            <td class="p-6 text-gray-500">❌ None</td>
+                            <td class="p-6 text-emerald-400 font-bold">✅ Yes (Active mock feedback)</td>
+                        </tr>
+                        <tr>
+                            <td class="p-6 font-semibold text-white">Chrome Extension integration</td>
+                            <td class="p-6 text-gray-500">❌ None</td>
+                            <td class="p-6 text-emerald-400 font-bold">✅ Yes (LinkedIn profiling)</td>
+                        </tr>
+                        <tr>
+                            <td class="p-6 font-semibold text-white">Multi-lingual Resume Translation</td>
+                            <td class="p-6 text-gray-500">❌ None</td>
+                            <td class="p-6 text-emerald-400 font-bold">✅ Yes (Dynamic localization)</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- Recruiter Quote Callout -->
-        <div class="relative max-w-4xl mx-auto py-12 px-8 rounded-3xl border border-white/5 bg-white/[0.01] text-center overflow-hidden">
+        <!-- 5. Accordions ("Still Not Convinced?") -->
+        <div class="text-center mb-12">
+            <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-4">Still Not Convinced?</h2>
+            <p class="text-gray-400">Common questions from candidates using our optimization engine.</p>
+        </div>
+
+        <div class="max-w-4xl mx-auto space-y-4 mb-24" x-data="{ activeFaq: null }">
+            <!-- FAQ 1 -->
+            <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300"
+                 :class="{ 'border-brand/40 bg-brand/5 shadow-[0_0_20px_rgba(139,92,246,0.1)]': activeFaq === 1 }">
+                <button @click="activeFaq = activeFaq === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
+                    <span class="font-bold text-white text-base">How secure is my personal resume data?</span>
+                    <svg class="w-4 h-4 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 1 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div x-show="activeFaq === 1" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                    We take security seriously. All resumes uploaded are parsed securely in memory, stored using AES-256 database-level encryption, and are never shared with external scrapers or public training systems.
+                </div>
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300"
+                 :class="{ 'border-brand/40 bg-brand/5 shadow-[0_0_20px_rgba(139,92,246,0.1)]': activeFaq === 2 }">
+                <button @click="activeFaq = activeFaq === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
+                    <span class="font-bold text-white text-base">Will using an optimization tool get me blacklisted by recruiters?</span>
+                    <svg class="w-4 h-4 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 2 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div x-show="activeFaq === 2" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                    No. Unlike platforms that dump hidden keywords onto your resume (which recruiters instantly spot and blacklist), our optimizer teaches you to describe achievements contextually and verify metrics.
+                </div>
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300"
+                 :class="{ 'border-brand/40 bg-brand/5 shadow-[0_0_20px_rgba(139,92,246,0.1)]': activeFaq === 3 }">
+                <button @click="activeFaq = activeFaq === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left focus:outline-none">
+                    <span class="font-bold text-white text-base">What formatting files can I analyze?</span>
+                    <svg class="w-4 h-4 text-brand transition-transform duration-300" :class="{ 'rotate-180': activeFaq === 3 }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div x-show="activeFaq === 3" x-collapse x-cloak class="px-6 pb-6 text-gray-400 leading-relaxed text-sm">
+                    We support direct coordinate parsing for PDF, DOCX, and image formats. However, we always recommend single-column PDF formats for online portals to minimize scramble risk.
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Bottom CTA -->
+        <div class="relative max-w-4xl mx-auto py-16 px-8 rounded-3xl border border-white/5 bg-white/[0.01] text-center overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-brand/5 to-transparent z-0"></div>
-            <span class="text-6xl text-brand/20 font-serif leading-none block mb-4 select-none">“</span>
-            <p class="text-xl text-gray-300 italic relative z-10 mb-6 leading-relaxed">
-                "90% of applicants who copy-paste job requirements into hidden resume footers get automatically flagged for manipulation. The key is context and semantic relevance, which Resume Analyzer teaches candidates to build."
-            </p>
-            <div class="text-sm font-bold text-white relative z-10">Sarah Lin</div>
-            <div class="text-xs text-gray-500 relative z-10 mt-1">Lead Technical Recruiter, TechCorp</div>
+            <h2 class="text-3xl font-extrabold text-white mb-4 relative z-10">Ready to Bypass the ATS?</h2>
+            <p class="text-gray-400 text-sm mb-8 relative z-10">Stop guessing if your resume works. Get the context score that lands technical interviews.</p>
+            <a href="{% url 'index' %}" class="relative z-10 inline-flex items-center gap-1.5 px-8 py-4 bg-gradient-to-r from-brand to-pink-500 hover:from-brand-hover hover:to-pink-400 text-white font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02]">
+                Start Free Optimization Scan
+            </a>
         </div>
     </div>
 </div>
