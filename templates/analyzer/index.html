@@ -148,93 +148,88 @@
               </div>
 
                <!-- Cloud / LinkedIn Section -->
-               <div id="cloud-section" class="upload-resume-box hidden flex flex-col w-full rounded-2xl border border-dashed border-gray-700/60 bg-slate-950/20 p-5 gap-4">
-                   <div class="text-center text-xs text-gray-400 mb-2">
-                       <span class="inline-flex items-center gap-1.5 justify-center">
-                           <svg class="w-4 h-4 text-brand animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                           Get your resume from your cloud storage or profile, then upload it in the <strong>Upload File</strong> tab.
-                       </span>
-                   </div>
-                   <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                       <a href="https://drive.google.com/" target="_blank" rel="noopener noreferrer" id="btn-gdrive" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#34A853]/60 hover:bg-[#34A853]/5 hover:shadow-[0_0_15px_rgba(52,168,83,0.15)] transition-all gap-2 group">
-                            <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                              <path d="m38.7 419.3 22.6 39c4.7 8.2 11.4 14.7 19.4 19.4l80.6-139.6H0c0 9.1 2.3 18.2 7 26.4z" style="fill:#0066da"/>
-                              <path d="M256 173.9 175.4 34.3c-7.9 4.7-14.7 11.1-19.4 19.4L7 311.7c-4.6 8-7 17.1-7 26.4h161.3z" style="fill:#00ac47"/>
-                              <path d="M431.4 477.7c7.9-4.7 14.7-11.1 19.4-19.4l9.4-16.1 44.9-77.7c4.7-8.2 7-17.3 7-26.4H350.7l34.3 67.4z" style="fill:#ea4335"/>
-                              <path d="m256 173.9 80.6-139.6c-7.9-4.7-17-7-26.4-7H201.8c-9.4 0-18.5 2.6-26.4 7z" style="fill:#00832d"/>
-                              <path d="M350.7 338.1H161.3L80.6 477.7c7.9 4.7 17 7 26.4 7h298c9.4 0 18.5-2.6 26.4-7z" style="fill:#2684fc"/>
-                              <path d="M430.5 182.7 356 53.7c-4.7-8.2-11.4-14.7-19.4-19.4L256 173.9l94.7 164.2h161c0-9.1-2.3-18.2-7-26.4z" style="fill:#ffba00"/>
+                <div id="cloud-section" class="upload-resume-box hidden flex flex-col w-full rounded-2xl border border-dashed border-gray-700/60 bg-slate-950/20 p-5 gap-4">
+                    <div class="text-center text-xs text-gray-400 mb-2">
+                        <span class="inline-flex items-center gap-1.5 justify-center">
+                            <svg class="w-4 h-4 text-brand animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Select a cloud provider to link your resume.
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <button type="button" id="btn-gdrive" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#34A853]/60 hover:bg-[#34A853]/5 hover:shadow-[0_0_15px_rgba(52,168,83,0.15)] transition-all gap-2 group cursor-pointer">
+                             <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                               <path d="m38.7 419.3 22.6 39c4.7 8.2 11.4 14.7 19.4 19.4l80.6-139.6H0c0 9.1 2.3 18.2 7 26.4z" style="fill:#0066da"/>
+                               <path d="M256 173.9 175.4 34.3c-7.9 4.7-14.7 11.1-19.4 19.4L7 311.7c-4.6 8-7 17.1-7 26.4h161.3z" style="fill:#00ac47"/>
+                               <path d="M431.4 477.7c7.9-4.7 14.7-11.1 19.4-19.4l9.4-16.1 44.9-77.7c4.7-8.2 7-17.3 7-26.4H350.7l34.3 67.4z" style="fill:#ea4335"/>
+                               <path d="m256 173.9 80.6-139.6c-7.9-4.7-17-7-26.4-7H201.8c-9.4 0-18.5 2.6-26.4 7z" style="fill:#00832d"/>
+                               <path d="M350.7 338.1H161.3L80.6 477.7c7.9 4.7 17 7 26.4 7h298c9.4 0 18.5-2.6 26.4-7z" style="fill:#2684fc"/>
+                               <path d="M430.5 182.7 356 53.7c-4.7-8.2-11.4-14.7-19.4-19.4L256 173.9l94.7 164.2h161c0-9.1-2.3-18.2-7-26.4z" style="fill:#ffba00"/>
+                             </svg>
+                            <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">Google Drive</span>
+                        </button>
+                        <button type="button" id="btn-dropbox" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#0061FE]/60 hover:bg-[#0061FE]/5 hover:shadow-[0_0_15px_rgba(0,97,254,0.15)] transition-all gap-2 group cursor-pointer">
+                            <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="#0061FE" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M6 1.807L0 5.629l6 3.822 6.001-3.822L6 1.807zM18 1.807l-6 3.822 6 3.822 6-3.822-6-3.822zM0 13.274l6 3.822 6.001-3.822L6 9.452l-6 3.822zM18 9.452l-6 3.822 6 3.822 6-3.822-6-3.822zM6 18.371l6.001 3.822 6-3.822-6-3.822L6 18.371z"/>
                             </svg>
-                           <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">Google Drive</span>
-                       </a>
-                       <a href="https://www.dropbox.com/" target="_blank" rel="noopener noreferrer" id="btn-dropbox" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#0061FE]/60 hover:bg-[#0061FE]/5 hover:shadow-[0_0_15px_rgba(0,97,254,0.15)] transition-all gap-2 group">
-                           <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="#0061FE" xmlns="http://www.w3.org/2000/svg">
-                             <path d="M6 1.807L0 5.629l6 3.822 6.001-3.822L6 1.807zM18 1.807l-6 3.822 6 3.822 6-3.822-6-3.822zM0 13.274l6 3.822 6.001-3.822L6 9.452l-6 3.822zM18 9.452l-6 3.822 6 3.822 6-3.822-6-3.822zM6 18.371l6.001 3.822 6-3.822-6-3.822L6 18.371z"/>
-                           </svg>
-                           <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">Dropbox</span>
-                       </a>
-                       <a href="https://onedrive.live.com/" target="_blank" rel="noopener noreferrer" id="btn-onedrive" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#0078D4]/60 hover:bg-[#0078D4]/5 hover:shadow-[0_0_15px_rgba(0,120,212,0.15)] transition-all gap-2 group">
-                            <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="35.98 139.2 648.03 430.85" xmlns="http://www.w3.org/2000/svg">
-                              <defs>
-                                <radialGradient id="od-radial0" gradientUnits="userSpaceOnUse" cx="0" cy="0" fx="0" fy="0" r="1" gradientTransform="matrix(130.864814,156.804864,-260.089994,217.063603,48.669602,228.766494)">
-                                  <stop offset="0" style="stop-color:rgb(28.235294%,58.039216%,99.607843%);stop-opacity:1;"/>
-                                  <stop offset="0.695072" style="stop-color:rgb(3.529412%,20.392157%,70.196078%);stop-opacity:1;"/>
-                                </radialGradient>
-                                <radialGradient id="od-radial1" gradientUnits="userSpaceOnUse" cx="0" cy="0" fx="0" fy="0" r="1" gradientTransform="matrix(-575.289668,663.594003,-491.728488,-426.294267,596.956501,-6.380235)">
-                                  <stop offset="0.165327" style="stop-color:rgb(13.72549%,75.294118%,99.607843%);stop-opacity:1;"/>
-                                  <stop offset="0.534" style="stop-color:rgb(10.980392%,56.862745%,100%);stop-opacity:1;"/>
-                                </radialGradient>
-                                <radialGradient id="od-radial2" gradientUnits="userSpaceOnUse" cx="0" cy="0" fx="0" fy="0" r="1" gradientTransform="matrix(-136.753383,-114.806698,262.816935,-313.057562,181.196995,240.395994)">
-                                  <stop offset="0" style="stop-color:rgb(100%,100%,100%);stop-opacity:0.4;"/>
-                                  <stop offset="0.660528" style="stop-color:rgb(67.843137%,75.294118%,100%);stop-opacity:0;"/>
-                                </radialGradient>
-                                <radialGradient id="od-radial3" gradientUnits="userSpaceOnUse" cx="0" cy="0" fx="0" fy="0" r="1" gradientTransform="matrix(-153.638428,-130.000063,197.433014,-233.332948,375.353994,451.43549)">
-                                  <stop offset="0" style="stop-color:rgb(1.176471%,22.745098%,80%);stop-opacity:1;"/>
-                                  <stop offset="1" style="stop-color:rgb(21.176471%,55.686275%,100%);stop-opacity:0;"/>
-                                </radialGradient>
-                                <radialGradient id="od-radial4" gradientUnits="userSpaceOnUse" cx="0" cy="0" fx="0" fy="0" r="1" gradientTransform="matrix(175.585899,405.198026,-437.434522,189.555055,169.378495,125.589294)">
-                                  <stop offset="0.592618" style="stop-color:rgb(20.392157%,39.215686%,89.019608%);stop-opacity:0;"/>
-                                  <stop offset="1" style="stop-color:rgb(1.176471%,22.745098%,80%);stop-opacity:0.6;"/>
-                                </radialGradient>
-                                <radialGradient id="od-radial5" gradientUnits="userSpaceOnUse" cx="0" cy="0" fx="0" fy="0" r="1" gradientTransform="matrix(-459.329491,459.329491,-719.614455,-719.614455,589.876499,39.484649)">
-                                  <stop offset="0" style="stop-color:rgb(29.411765%,99.215686%,90.980392%);stop-opacity:0.898039;"/>
-                                  <stop offset="0.543937" style="stop-color:rgb(29.411765%,99.215686%,90.980392%);stop-opacity:0;"/>
-                                </radialGradient>
-                                <linearGradient id="od-linear0" gradientUnits="userSpaceOnUse" x1="29.999701" y1="37.9823" x2="29.999701" y2="18.398199" gradientTransform="matrix(15,0,0,15,0,0)">
-                                  <stop offset="0" style="stop-color:rgb(0%,52.54902%,100%);stop-opacity:1;"/>
-                                  <stop offset="0.49" style="stop-color:rgb(0%,73.333333%,100%);stop-opacity:1;"/>
-                                </linearGradient>
-                                <radialGradient id="od-radial6" gradientUnits="userSpaceOnUse" cx="0" cy="0" fx="0" fy="0" r="1" gradientTransform="matrix(273.622108,108.513684,-205.488428,518.148261,296.488495,307.441492)">
-                                  <stop offset="0" style="stop-color:rgb(100%,100%,100%);stop-opacity:0.4;"/>
-                                  <stop offset="0.785262" style="stop-color:rgb(100%,100%,100%);stop-opacity:0;"/>
-                                </radialGradient>
-                                <radialGradient id="od-radial7" gradientUnits="userSpaceOnUse" cx="0" cy="0" fx="0" fy="0" r="1" gradientTransform="matrix(-305.683909,263.459223,-264.352324,-306.720147,674.845505,249.378004)">
-                                  <stop offset="0" style="stop-color:rgb(29.411765%,99.215686%,90.980392%);stop-opacity:0.898039;"/>
-                                  <stop offset="0.584724" style="stop-color:rgb(29.411765%,99.215686%,90.980392%);stop-opacity:0;"/>
-                                </radialGradient>
-                              </defs>
-                              <g id="surface1">
-                                <path style=" stroke:none;fill-rule:nonzero;fill:url(#od-radial0);" d="M 215.078125 205.089844 C 116.011719 205.09375 41.957031 286.1875 36.382812 376.527344 C 39.835938 395.992188 51.175781 434.429688 68.941406 432.457031 C 91.144531 429.988281 147.066406 432.457031 194.765625 346.105469 C 229.609375 283.027344 301.285156 205.085938 215.078125 205.089844 Z M 215.078125 205.089844 "/>
-                                <path style=" stroke:none;fill-rule:nonzero;fill:url(#od-radial1);" d="M 192.171875 238.8125 C 158.871094 291.535156 114.042969 367.085938 98.914062 390.859375 C 80.929688 419.121094 33.304688 407.113281 37.25 366.609375 C 36.863281 369.894531 36.5625 373.210938 36.355469 376.546875 C 29.84375 481.933594 113.398438 569.453125 217.375 569.453125 C 331.96875 569.453125 605.269531 426.671875 577.609375 283.609375 C 548.457031 199.519531 466.523438 139.203125 373.664062 139.203125 C 280.808594 139.203125 221.296875 192.699219 192.171875 238.8125 Z M 192.171875 238.8125 "/>
-                                <path style=" stroke:none;fill-rule:nonzero;fill:url(#od-radial2);" d="M 192.171875 238.8125 C 158.871094 291.535156 114.042969 367.085938 98.914062 390.859375 C 80.929688 419.121094 33.304688 407.113281 37.25 366.609375 C 36.863281 369.894531 36.5625 373.210938 36.355469 376.546875 C 29.84375 481.933594 113.398438 569.453125 217.375 569.453125 C 331.96875 569.453125 605.269531 426.671875 577.609375 283.609375 C 548.457031 199.519531 466.523438 139.203125 373.664062 139.203125 C 280.808594 139.203125 221.296875 192.699219 192.171875 238.8125 Z M 192.171875 238.8125 "/>
-                                <path style=" stroke:none;fill-rule:nonzero;fill:url(#od-radial3);" d="M 192.171875 238.8125 C 158.871094 291.535156 114.042969 367.085938 98.914062 390.859375 C 80.929688 419.121094 33.304688 407.113281 37.25 366.609375 C 36.863281 369.894531 36.5625 373.210938 36.355469 376.546875 C 29.84375 481.933594 113.398438 569.453125 217.375 569.453125 C 331.96875 569.453125 605.269531 426.671875 577.609375 283.609375 C 548.457031 199.519531 466.523438 139.203125 373.664062 139.203125 C 280.808594 139.203125 221.296875 192.699219 192.171875 238.8125 Z M 192.171875 238.8125 "/>
-                                <path style=" stroke:none;fill-rule:nonzero;fill:url(#od-radial4);" d="M 192.171875 238.8125 C 158.871094 291.535156 114.042969 367.085938 98.914062 390.859375 C 80.929688 419.121094 33.304688 407.113281 37.25 366.609375 C 36.863281 369.894531 36.5625 373.210938 36.355469 376.546875 C 29.84375 481.933594 113.398438 569.453125 217.375 569.453125 C 331.96875 569.453125 605.269531 426.671875 577.609375 283.609375 C 548.457031 199.519531 466.523438 139.203125 373.664062 139.203125 C 280.808594 139.203125 221.296875 192.699219 192.171875 238.8125 Z M 192.171875 238.8125 "/>
-                                <path style=" stroke:none;fill-rule:nonzero;fill:url(#od-radial5);" d="M 192.171875 238.8125 C 158.871094 291.535156 114.042969 367.085938 98.914062 390.859375 C 80.929688 419.121094 33.304688 407.113281 37.25 366.609375 C 36.863281 369.894531 36.5625 373.210938 36.355469 376.546875 C 29.84375 481.933594 113.398438 569.453125 217.375 569.453125 C 331.96875 569.453125 605.269531 426.671875 577.609375 283.609375 C 548.457031 199.519531 466.523438 139.203125 373.664062 139.203125 C 280.808594 139.203125 221.296875 192.699219 192.171875 238.8125 Z M 192.171875 238.8125 "/>
-                                <path style=" stroke:none;fill-rule:nonzero;fill:url(#od-linear0);" d="M 215.699219 569.496094 C 215.699219 569.496094 489.320312 570.035156 535.734375 570.035156 C 619.960938 570.035156 684 501.273438 684 421.03125 C 684 340.789062 618.671875 272.445312 535.734375 272.445312 C 452.792969 272.445312 405.027344 334.492188 369.152344 402.226562 C 327.117188 481.59375 273.488281 568.546875 215.699219 569.496094 Z M 215.699219 569.496094 "/>
-                                <path style=" stroke:none;fill-rule:nonzero;fill:url(#od-radial6);" d="M 215.699219 569.496094 C 215.699219 569.496094 489.320312 570.035156 535.734375 570.035156 C 619.960938 570.035156 684 501.273438 684 421.03125 C 684 340.789062 618.671875 272.445312 535.734375 272.445312 C 452.792969 272.445312 405.027344 334.492188 369.152344 402.226562 C 327.117188 481.59375 273.488281 568.546875 215.699219 569.496094 Z M 215.699219 569.496094 "/>
-                                <path style=" stroke:none;fill-rule:nonzero;fill:url(#od-radial7);" d="M 215.699219 569.496094 C 215.699219 569.496094 489.320312 570.035156 535.734375 570.035156 C 619.960938 570.035156 684 501.273438 684 421.03125 C 684 340.789062 618.671875 272.445312 535.734375 272.445312 C 452.792969 272.445312 405.027344 334.492188 369.152344 402.226562 C 327.117188 481.59375 273.488281 568.546875 215.699219 569.496094 Z M 215.699219 569.496094 "/>
-                              </g>
+                            <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">Dropbox</span>
+                        </button>
+                        <button type="button" id="btn-onedrive" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#0078D4]/60 hover:bg-[#0078D4]/5 hover:shadow-[0_0_15px_rgba(0,120,212,0.15)] transition-all gap-2 group cursor-pointer">
+                             <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="35.98 139.2 648.03 430.85" fill="#0078D4" xmlns="http://www.w3.org/2000/svg">
+                               <path d="M 215.078125 205.089844 C 116.011719 205.09375 41.957031 286.1875 36.382812 376.527344 C 39.835938 395.992188 51.175781 434.429688 68.941406 432.457031 C 91.144531 429.988281 147.066406 432.457031 194.765625 346.105469 C 229.609375 283.027344 301.285156 205.085938 215.078125 205.089844 Z"/>
+                               <path d="M 192.171875 238.8125 C 158.871094 291.535156 114.042969 367.085938 98.914062 390.859375 C 80.929688 419.121094 33.304688 407.113281 37.25 366.609375 C 36.863281 369.894531 36.5625 373.210938 36.355469 376.546875 C 29.84375 481.933594 113.398438 569.453125 217.375 569.453125 C 331.96875 569.453125 605.269531 426.671875 577.609375 283.609375 C 548.457031 199.519531 466.523438 139.203125 373.664062 139.203125 C 280.808594 139.203125 221.296875 192.699219 192.171875 238.8125 Z"/>
+                             </svg>
+                            <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">OneDrive</span>
+                        </button>
+                        <button type="button" id="btn-linkedin" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#0077B5]/60 hover:bg-[#0077B5]/5 hover:shadow-[0_0_15px_rgba(0,119,181,0.15)] transition-all gap-2 group cursor-pointer">
+                            <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="#0077B5" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                             </svg>
-                           <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">OneDrive</span>
-                       </a>
-                       <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" id="btn-linkedin" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#0077B5]/60 hover:bg-[#0077B5]/5 hover:shadow-[0_0_15px_rgba(0,119,181,0.15)] transition-all gap-2 group">
-                           <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="#0077B5" xmlns="http://www.w3.org/2000/svg">
-                             <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                           </svg>
-                           <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">LinkedIn</span>
-                       </a>
-                   </div>
-               </div>
+                            <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">LinkedIn</span>
+                        </button>
+                    </div>
+
+                    <!-- Cloud Link/Instruction Box -->
+                    <div id="cloud-importer-container" class="hidden border border-white/5 bg-slate-900/50 rounded-xl p-4 text-left space-y-3">
+                        <div class="flex items-center justify-between border-b border-white/5 pb-2">
+                            <span id="cloud-importer-title" class="text-xs font-bold text-white"></span>
+                            <button type="button" id="btn-cloud-cancel" class="text-[10px] text-gray-500 hover:text-white font-bold uppercase transition-colors">Cancel</button>
+                        </div>
+                        <div id="cloud-importer-body" class="space-y-3">
+                            <!-- Linked State -->
+                            <div id="cloud-linked-status" class="hidden flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2.5 text-xs text-emerald-400">
+                                <span class="flex items-center gap-1.5 font-semibold">
+                                    <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                    Linked: <span id="linked-filename" class="text-white underline"></span>
+                                </span>
+                                <button type="button" id="btn-remove-linked" class="text-[10px] text-gray-400 hover:text-rose-400 font-bold uppercase">Remove</button>
+                            </div>
+                            
+                            <!-- URL Input Box -->
+                            <div id="cloud-url-box" class="space-y-2">
+                                <p class="text-xs text-gray-400">Make sure your file is shared as <strong>Public / Anyone with the link</strong> so our parser can securely download and analyze it.</p>
+                                <div class="flex gap-2">
+                                    <input type="text" id="cloud-url-input" class="flex-grow bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand" placeholder="Paste your public file URL...">
+                                    <button type="button" id="btn-cloud-link-confirm" class="px-4 py-2 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-xl transition-all whitespace-nowrap shadow-md shadow-brand/20">Link File</button>
+                                </div>
+                            </div>
+
+                            <!-- LinkedIn Info Box -->
+                            <div id="cloud-linkedin-box" class="hidden space-y-2.5 text-xs text-gray-400 leading-relaxed">
+                                <p class="font-semibold text-white">To import your LinkedIn Profile directly, please export it as a PDF:</p>
+                                <ol class="list-decimal pl-4 space-y-1">
+                                    <li>Navigate to your LinkedIn Profile page.</li>
+                                    <li>Click the <strong>More</strong> button in your introduction section.</li>
+                                    <li>Select <strong>Save to PDF</strong> from the dropdown.</li>
+                                    <li>Switch back to the <strong class="text-brand hover:underline cursor-pointer" onclick="document.getElementById('tab-upload').click();">Upload File</strong> tab above and select the saved PDF.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="resume_url" id="resume_url_input">
+                    <input type="hidden" name="cloud_filename" id="cloud_filename_input">
+                </div>
                
                <input type="hidden" name="resume_input_type" id="resume_input_type" value="file">
           </div>
@@ -481,6 +476,96 @@ document.addEventListener('DOMContentLoaded', function() {
         resumeInputType.value = 'text';
     });
 
+    // Cloud Importer Logic
+    const btnGDrive = document.getElementById('btn-gdrive');
+    const btnDropbox = document.getElementById('btn-dropbox');
+    const btnOneDrive = document.getElementById('btn-onedrive');
+    const btnLinkedIn = document.getElementById('btn-linkedin');
+    const cloudImporterContainer = document.getElementById('cloud-importer-container');
+    const cloudImporterTitle = document.getElementById('cloud-importer-title');
+    const cloudUrlBox = document.getElementById('cloud-url-box');
+    const cloudLinkedinBox = document.getElementById('cloud-linkedin-box');
+    const cloudUrlInput = document.getElementById('cloud-url-input');
+    const btnCloudLinkConfirm = document.getElementById('btn-cloud-link-confirm');
+    const btnCloudCancel = document.getElementById('btn-cloud-cancel');
+    const cloudLinkedStatus = document.getElementById('cloud-linked-status');
+    const linkedFilename = document.getElementById('linked-filename');
+    const btnRemoveLinked = document.getElementById('btn-remove-linked');
+    
+    const resumeUrlInput = document.getElementById('resume_url_input');
+    const cloudFilenameInput = document.getElementById('cloud_filename_input');
+
+    let currentCloudService = '';
+
+    function showImporter(serviceName, isUrlRequired) {
+        currentCloudService = serviceName;
+        cloudImporterContainer.classList.remove('hidden');
+        cloudImporterTitle.textContent = "Import from " + serviceName;
+        
+        if (isUrlRequired) {
+            cloudUrlBox.classList.remove('hidden');
+            cloudLinkedinBox.classList.add('hidden');
+            if (serviceName === 'Google Drive') {
+                cloudUrlInput.placeholder = "e.g., https://drive.google.com/file/d/FILE_ID/view?usp=sharing";
+            } else if (serviceName === 'Dropbox') {
+                cloudUrlInput.placeholder = "e.g., https://www.dropbox.com/s/xyz/my_resume.pdf?dl=0";
+            } else {
+                cloudUrlInput.placeholder = "e.g., https://onedrive.live.com/download?id=...";
+            }
+        } else {
+            cloudUrlBox.classList.add('hidden');
+            cloudLinkedinBox.classList.remove('hidden');
+        }
+    }
+
+    btnGDrive.addEventListener('click', () => showImporter('Google Drive', true));
+    btnDropbox.addEventListener('click', () => showImporter('Dropbox', true));
+    btnOneDrive.addEventListener('click', () => showImporter('OneDrive', true));
+    btnLinkedIn.addEventListener('click', () => showImporter('LinkedIn', false));
+
+    btnCloudCancel.addEventListener('click', () => {
+        cloudImporterContainer.classList.add('hidden');
+        cloudUrlInput.value = '';
+    });
+
+    btnCloudLinkConfirm.addEventListener('click', () => {
+        const url = cloudUrlInput.value.trim();
+        if (!url) {
+            alert("Please paste a valid URL.");
+            return;
+        }
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            alert("Please enter a valid URL starting with http:// or https://");
+            return;
+        }
+
+        let mockName = currentCloudService + " Resume File";
+        try {
+            const urlPath = new URL(url).pathname;
+            const pathParts = urlPath.split('/');
+            const lastPart = pathParts[pathParts.length - 1];
+            if (lastPart && lastPart.includes('.')) {
+                mockName = decodeURIComponent(lastPart);
+            }
+        } catch (e) {}
+
+        resumeUrlInput.value = url;
+        cloudFilenameInput.value = mockName;
+
+        cloudUrlBox.classList.add('hidden');
+        cloudLinkedStatus.classList.remove('hidden');
+        linkedFilename.textContent = mockName;
+        linkedFilename.href = url;
+    });
+
+    btnRemoveLinked.addEventListener('click', () => {
+        resumeUrlInput.value = '';
+        cloudFilenameInput.value = '';
+        cloudUrlInput.value = '';
+        cloudLinkedStatus.classList.add('hidden');
+        cloudUrlBox.classList.remove('hidden');
+    });
+
     // Handle form submission asynchronously
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -493,9 +578,8 @@ document.addEventListener('DOMContentLoaded', function() {
             alert("Please take or upload a photo of your resume.");
             return;
         }
-        if (resumeInputType.value === 'cloud') {
-            alert("Please download your resume from the cloud service, then select 'Upload File' or 'Paste Text' to submit it.");
-            tabUpload.click();
+        if (resumeInputType.value === 'cloud' && !resumeUrlInput.value.trim()) {
+            alert("Please link a valid public document from Google Drive, Dropbox, or OneDrive first.");
             return;
         }
         if (resumeInputType.value === 'text' && !document.getElementById('resume_text').value.trim()) {

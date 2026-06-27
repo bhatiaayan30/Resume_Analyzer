@@ -191,14 +191,92 @@ def analyze(request):
         except Exception as exc:
             return render_error(str(exc), 422)
     elif resume_input_type == "cloud":
-        if not resume_text_input:
-            return render_error("Cloud resume data is required.", 400)
+        resume_url = request.POST.get("resume_url", "").strip() or resume_text_input
+        if not resume_url:
+            return render_error("Cloud resume data or URL is required.", 400)
             
-        resume_text = resume_text_input
-        ats_format_issues = []
-        from .utils import check_searchability
-        searchability_checks = check_searchability(resume_text)
-        filename = request.POST.get("cloud_filename", "").strip() or "Cloud Import"
+        if resume_url.startswith("http://") or resume_url.startswith("https://"):
+            import requests
+            import io
+            import re
+            
+            # Standardize common cloud sharing URLs to direct download links
+            download_url = resume_url
+            if "drive.google.com" in resume_url:
+                file_id_match = re.search(r'/d/([a-zA-Z0-9_-]+)', resume_url)
+                if not file_id_match:
+                    file_id_match = re.search(r'id=([a-zA-Z0-9_-]+)', resume_url)
+                if file_id_match:
+                    file_id = file_id_match.group(1)
+                    download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+            elif "dropbox.com" in resume_url:
+                download_url = resume_url.replace("dl=0", "dl=1")
+                
+            try:
+                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                response = requests.get(download_url, stream=True, headers=headers, timeout=15)
+                response.raise_for_status()
+                
+                content_length = response.headers.get('content-length')
+                if content_length and int(content_length) > 10 * 1024 * 1024:
+                    return render_error("The file in the provided URL exceeds the maximum size of 10 MB.", 400)
+                
+                file_content = response.content
+                if len(file_content) > 10 * 1024 * 1024:
+                    return render_error("The file in the provided URL exceeds the maximum size of 10 MB.", 400)
+                
+                content_type = response.headers.get('content-type', '').lower()
+                ext = None
+                if "application/pdf" in content_type:
+                    ext = ".pdf"
+                elif "application/vnd.openxmlformats-officedocument.wordprocessingml.document" in content_type:
+                    ext = ".docx"
+                elif "image/jpeg" in content_type:
+                    ext = ".jpg"
+                elif "image/png" in content_type:
+                    ext = ".png"
+                else:
+                    from urllib.parse import urlparse
+                    parsed_path = urlparse(resume_url).path
+                    _, url_ext = os.path.splitext(parsed_path.lower())
+                    if url_ext in [".pdf", ".docx", ".jpg", ".jpeg", ".png"]:
+                        ext = url_ext
+                        
+                if not ext:
+                    if file_content.startswith(b"%PDF-"):
+                        ext = ".pdf"
+                    elif file_content.startswith(b"PK\x03\x04"):
+                        ext = ".docx"
+                    elif file_content.startswith(b"\xff\xd8\xff"):
+                        ext = ".jpg"
+                    elif file_content.startswith(b"\x89PNG\r\n\x1a\n"):
+                        ext = ".png"
+                    else:
+                        return render_error("Unable to determine file type. Please make sure the URL points to a public PDF, DOCX or Image file.", 400)
+                
+                virtual_file = io.BytesIO(file_content)
+                virtual_file.name = "cloud_file" + ext
+                
+                from .utils import check_searchability
+                if ext in [".jpg", ".jpeg", ".png"]:
+                    from .utils import extract_text_from_image
+                    resume_text = extract_text_from_image(file_content, "image/png" if ext == ".png" else "image/jpeg")
+                    ats_format_issues = ["image_upload"]
+                    searchability_checks = check_searchability(resume_text)
+                else:
+                    resume_text, ats_format_issues, searchability_checks = extract_text(virtual_file, ext)
+                
+                filename = request.POST.get("cloud_filename", "").strip() or f"Cloud Import ({ext[1:].upper()})"
+            except requests.RequestException as e:
+                return render_error(f"Failed to download resume from cloud URL: {str(e)}", 400)
+            except Exception as e:
+                return render_error(f"Failed to process downloaded cloud file: {str(e)}", 422)
+        else:
+            resume_text = resume_url
+            ats_format_issues = []
+            from .utils import check_searchability
+            searchability_checks = check_searchability(resume_text)
+            filename = request.POST.get("cloud_filename", "").strip() or "Cloud Import"
     else:
         if not resume_text_input:
             return render_error("Resume text is required.", 400)
