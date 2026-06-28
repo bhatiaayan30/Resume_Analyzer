@@ -28,5 +28,5 @@ RUN SECRET_KEY=dummy-key-for-build ENCRYPTION_KEY=dummy-encryption-key python ma
 EXPOSE 8080
 ENV PORT 8080
 
-# Command to run supervisord
-CMD ["supervisord", "-c", "/app/supervisord.conf"]
+# Command to run gunicorn directly
+CMD gunicorn resume_analyzer.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
