@@ -21,8 +21,8 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Copy project
 COPY . /app/
 
-# Collect static files (pass dummy SECRET_KEY for build environment)
-RUN SECRET_KEY=dummy-key-for-build python manage.py collectstatic --noinput
+# Collect static files (pass dummy vars for build environment)
+RUN SECRET_KEY=dummy-key-for-build ENCRYPTION_KEY=dummy-encryption-key python manage.py collectstatic --noinput
 
 # Expose port (Cloud Run sets PORT env variable)
 EXPOSE 8080
