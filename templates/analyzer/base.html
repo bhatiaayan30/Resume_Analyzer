@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -778,7 +779,7 @@
       <div class="flex items-center gap-8">
         <!-- Logo -->
         <a class="flex items-center gap-2 font-bold text-lg tracking-tight text-white hover:opacity-90 transition-opacity" href="{% url 'index' %}">
-          <img src="/static/images/logo.png" alt="R" class="h-10 w-auto rounded-xl shadow-[0_0_15px_rgba(236,72,153,0.3)]">
+          <img src="{% static 'images/logo.png' %}" alt="R" class="h-10 w-auto rounded-xl shadow-[0_0_15px_rgba(236,72,153,0.3)]">
         </a>
         <nav class="hidden md:flex items-center gap-6 desktop-nav-links">
           <a href="{% url 'index' %}">Home</a>
@@ -1009,7 +1010,7 @@
       <div class="flex items-center gap-10">
         <!-- Logo -->
         <a class="flex items-center gap-2 font-bold text-lg tracking-tight text-white hover:opacity-90 transition-opacity" href="{% url 'index' %}">
-          <img src="/static/images/logo.png" alt="R" class="h-10 w-auto rounded-xl shadow-[0_0_15px_rgba(236,72,153,0.3)]">
+          <img src="{% static 'images/logo.png' %}" alt="R" class="h-10 w-auto rounded-xl shadow-[0_0_15px_rgba(236,72,153,0.3)]">
         </a>
         
         <!-- Desktop Navigation Links (Vet and Hire inspired) -->
