@@ -779,7 +779,16 @@
       <div class="flex items-center gap-8">
         <!-- Logo -->
         <a class="flex items-center gap-2 font-bold text-lg tracking-tight text-white hover:opacity-90 transition-opacity" href="{% url 'index' %}">
-          <img src="{% static 'images/logo.png' %}" alt="R" class="h-10 w-auto rounded-xl shadow-[0_0_15px_rgba(236,72,153,0.3)]">
+          <svg class="h-10 w-10 drop-shadow-[0_0_12px_rgba(236,72,153,0.4)] transform group-hover:scale-105 transition-transform duration-300" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f472b6" />
+                <stop offset="100%" stop-color="#8b5cf6" />
+              </linearGradient>
+            </defs>
+            <rect width="100" height="100" rx="24" fill="#0f172a" stroke="url(#logoGrad)" stroke-width="4"/>
+            <text x="50" y="72" font-family="'Outfit', sans-serif" font-size="68" font-weight="900" text-anchor="middle" fill="url(#logoGrad)">R</text>
+          </svg>
         </a>
         <nav class="hidden md:flex items-center gap-6 desktop-nav-links">
           <a href="{% url 'index' %}">Home</a>
@@ -1010,7 +1019,16 @@
       <div class="flex items-center gap-10">
         <!-- Logo -->
         <a class="flex items-center gap-2 font-bold text-lg tracking-tight text-white hover:opacity-90 transition-opacity" href="{% url 'index' %}">
-          <img src="{% static 'images/logo.png' %}" alt="R" class="h-10 w-auto rounded-xl shadow-[0_0_15px_rgba(236,72,153,0.3)]">
+          <svg class="h-10 w-10 drop-shadow-[0_0_12px_rgba(236,72,153,0.4)] transform group-hover:scale-105 transition-transform duration-300" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f472b6" />
+                <stop offset="100%" stop-color="#8b5cf6" />
+              </linearGradient>
+            </defs>
+            <rect width="100" height="100" rx="24" fill="#0f172a" stroke="url(#logoGrad)" stroke-width="4"/>
+            <text x="50" y="72" font-family="'Outfit', sans-serif" font-size="68" font-weight="900" text-anchor="middle" fill="url(#logoGrad)">R</text>
+          </svg>
         </a>
         
         <!-- Desktop Navigation Links (Vet and Hire inspired) -->
