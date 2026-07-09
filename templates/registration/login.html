@@ -10,7 +10,7 @@
         {% load socialaccount %}
         <div class="flex flex-col gap-3 mb-6">
             <!-- Google -->
-            <a href="{% provider_login_url 'google' %}" class="flex items-center justify-center gap-3 w-full bg-white text-[#3c4043] border border-[#dadce0] py-2.5 px-4 rounded-md font-medium hover:bg-[#f8f9fa] transition duration-200 shadow-sm">
+            <a href="{% provider_login_url 'google' %}" class="social-btn social-btn-google">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -21,15 +21,15 @@
             </a>
 
             <!-- Apple -->
-            <a href="{% provider_login_url 'apple' %}" class="apple-btn flex items-center justify-center gap-3 w-full bg-black text-white border border-black py-2.5 px-4 rounded-md font-medium hover:bg-[#333333] transition duration-200 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 814 1000" width="16" height="18" fill="white">
+            <a href="{% provider_login_url 'apple' %}" class="social-btn social-btn-apple">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 814 1000" width="16" height="18" fill="currentColor">
                     <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.3-150.3-102.1C27.5 753 0 644.7 0 540.8c0-203.9 132.4-312.1 262.1-312.1 73.1 0 133.6 48.4 179.8 48.4 43.9 0 114.4-51.1 197.1-51.1zM506.2 42.5c24.4-29.4 40.1-70.7 40.1-111.5 0-5.8-.5-11.6-1.7-16.1C423.8 23 349.6 91.2 349.6 191.3c0 5.2.5 10.4 1.4 15.1 9.4 1.5 18.7 2.2 27.4 2.2 80.2 0 173.3-47.1 128-166.1z"/>
                 </svg>
                 Continue with Apple
             </a>
 
             <!-- Microsoft -->
-            <a href="{% provider_login_url 'microsoft' %}" class="flex items-center justify-center gap-3 w-full bg-white text-[#5e5e5e] border border-[#8c8c8c] py-2.5 px-4 rounded-md font-medium hover:bg-[#f3f2f1] transition duration-200 shadow-sm">
+            <a href="{% provider_login_url 'microsoft' %}" class="social-btn social-btn-microsoft">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" width="18" height="18">
                     <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
                     <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
@@ -81,8 +81,7 @@
     </div>
 </div>
 <style>
-    /* Basic styling for django forms */
-    input[type="text"], input[type="password"] {
+    input[type="text"], input[type="email"], input[type="password"] {
         width: 100%;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -91,7 +90,7 @@
         border-radius: 0.5rem;
         transition: all 0.2s;
     }
-    input[type="text"]:focus, input[type="password"]:focus {
+    input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
         border-color: #00F0FF;
         outline: none;
         box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.2);
