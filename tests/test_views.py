@@ -130,8 +130,8 @@ def test_contact_view(factory):
     request.user = AnonymousUser()
     response = contact_view(request)
     assert response.status_code == 200
-    assert b"support@resume-analyzer.com" in response.content
-    assert b"+1 (800) 555-0199" in response.content
+    assert b"bhatiaayan30@gmail.com" in response.content
+    assert b"+91 8685091209" in response.content
 
 
 @pytest.mark.django_db
@@ -390,5 +390,53 @@ def test_request_and_verify_secondary_otp(factory):
     
     sec_email.refresh_from_db()
     assert sec_email.is_verified is True
+
+
+@pytest.mark.django_db
+def test_custom_password_reset(factory):
+    """Test EmailOrUsernamePasswordResetForm and CustomPasswordResetView validation and functionality."""
+    from analyzer.views import EmailOrUsernamePasswordResetForm
+    from analyzer.models import SecondaryEmail
+    
+    # 1. Create a user with primary email
+    user_with_email = User.objects.create_user(username="user1", email="user1@example.com", password="password")
+    
+    # 2. Create a user with NO email
+    user_no_email = User.objects.create_user(username="user2", email="", password="password")
+    
+    # 3. Create a user with verified secondary email but no primary email
+    user_sec_email = User.objects.create_user(username="user3", email="", password="password")
+    SecondaryEmail.objects.create(user=user_sec_email, email="sec3@example.com", is_verified=True)
+
+    # Test valid email lookup
+    form = EmailOrUsernamePasswordResetForm(data={"email_or_username": "user1@example.com"})
+    assert form.is_valid()
+    assert (user_with_email, "user1@example.com") in form.users_to_reset
+    
+    # Test valid username lookup (primary email)
+    form = EmailOrUsernamePasswordResetForm(data={"email_or_username": "user1"})
+    assert form.is_valid()
+    assert (user_with_email, "user1@example.com") in form.users_to_reset
+    
+    # Test valid username lookup (secondary email)
+    form = EmailOrUsernamePasswordResetForm(data={"email_or_username": "user3"})
+    assert form.is_valid()
+    assert (user_sec_email, "sec3@example.com") in form.users_to_reset
+    
+    # Test username exists but has no email
+    form = EmailOrUsernamePasswordResetForm(data={"email_or_username": "user2"})
+    assert not form.is_valid()
+    assert "This username does not have an email address associated with it." in form.errors["email_or_username"][0]
+    
+    # Test username does not exist
+    form = EmailOrUsernamePasswordResetForm(data={"email_or_username": "nonexistent_username"})
+    assert not form.is_valid()
+    assert "This username does not exist." in form.errors["email_or_username"][0]
+    
+    # Test email does not exist
+    form = EmailOrUsernamePasswordResetForm(data={"email_or_username": "nonexistent@example.com"})
+    assert not form.is_valid()
+    assert "No active account is associated with this email address." in form.errors["email_or_username"][0]
+
 
 

@@ -455,10 +455,12 @@ def get_premium_permissions(user, record):
         perms["can_download_pdf"] = True
         perms["can_audit"] = True
 
-    # 1. Unauthenticated user checking their one-time free scan
+    # 1. Guest record is public and unlocked for everyone
+    if record.user is None:
+        unlock_all()
+        return perms
+
     if not user.is_authenticated:
-        if record.user is None:
-            unlock_all()
         return perms
 
     # 2. Authenticated user trying to access someone else's record
@@ -619,7 +621,7 @@ def signup_view(request):
 
 @require_http_methods(["POST"])
 def generate_cover_letter_api(request, analysis_id):
-    """API endpoint for the React component to generate a cover letter asynchronously."""
+    """API endpoint for the React/HTML component to generate a cover letter asynchronously."""
     record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
     perms = get_premium_permissions(request.user, record)
     if not perms["can_cover_letter"]:
@@ -648,14 +650,21 @@ def generate_cover_letter_api(request, analysis_id):
             highlights=highlights
         )
         record.cover_letter = letter
+        
+        # Cache inside structured_resume to preserve in builder workspace
+        if not record.structured_resume:
+            record.structured_resume = {}
+        record.structured_resume["cover_letter"] = letter
         record.save()
+        
         return JsonResponse({"cover_letter": letter})
     except Exception as exc:
         return JsonResponse({"error": str(exc)}, status=500)
 
 
+@login_required
 def export_cover_letter_pdf(request, analysis_id):
-    """Generates a PDF of the cover letter and returns it as a download."""
+    """Generates a styled PDF of the cover letter and returns it as a download."""
     record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
     perms = get_premium_permissions(request.user, record)
     if not perms["can_cover_letter"]:
@@ -664,27 +673,74 @@ def export_cover_letter_pdf(request, analysis_id):
     if not record.cover_letter:
         return HttpResponse("Cover letter not generated yet.", status=400)
 
-    import io
+    # Retrieve style options from structured resume JSON
+    resume_data = record.structured_resume or {}
+    style = resume_data.get("style", {}) if isinstance(resume_data, dict) else {}
+    
+    selected_template = request.GET.get("template", style.get("selectedTemplate", "jakes_resume")).lower()
+    
+    # Font Choice mapping
+    font_choice = request.GET.get("font", style.get("fontChoice", "font-inter")).lower()
+    if any(serif in font_choice for serif in ["times", "georgia", "playfair"]):
+        pdf_font = "Times-Roman"
+    else:
+        pdf_font = "Helvetica"
+        
+    text_color = request.GET.get("textColor", style.get("textColor", "#1e293b"))
+    theme_color = request.GET.get("themeColor", style.get("themeColor", "#7c3aed"))
+    
+    # Spacing and margins
+    line_height = request.GET.get("lineHeight", style.get("lineHeight", "1.4"))
+    margins = request.GET.get("margins", style.get("margins", "1.6rem"))
+    if "rem" in margins:
+        try:
+            val = float(margins.replace("rem", "").strip())
+            pdf_margins = f"{val * 0.8}cm"
+        except ValueError:
+            pdf_margins = "1.2cm"
+    else:
+        pdf_margins = "1.2cm"
+        
+    # Font Size
+    font_size = request.GET.get("fontSize", style.get("fontSize", "13px"))
+    if "px" in font_size:
+        try:
+            val = float(font_size.replace("px", "").strip())
+            pdf_font_size = f"{val * 0.75}pt"
+        except ValueError:
+            pdf_font_size = "9.5pt"
+    else:
+        pdf_font_size = "9.5pt"
 
-    from reportlab.lib.pagesizes import letter
-    from reportlab.lib.styles import getSampleStyleSheet
-    from reportlab.platypus import Paragraph, SimpleDocTemplate
+    from django.template.loader import render_to_string
+    import io
+    from xhtml2pdf import pisa
+
+    context = {
+        "resume": resume_data,
+        "cover_letter": record.cover_letter,
+        "selected_template": selected_template,
+        "pdf_font": pdf_font,
+        "pdf_font_size": pdf_font_size,
+        "pdf_line_height": line_height,
+        "pdf_margins": pdf_margins,
+        "pdf_text_color": text_color,
+        "pdf_theme_color": theme_color,
+    }
+
+    # Render unified cover letter template
+    template_name = "analyzer/cover_letter_pdf.html"
+    html_string = render_to_string(template_name, context)
 
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(
-        buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18
-    )
-    styles = getSampleStyleSheet()
-    Story = []
+    pisa_status = pisa.CreatePDF(html_string, dest=buffer)
 
-    text = record.cover_letter.replace("\n", "<br />")
-    Story.append(Paragraph(text, styles["Normal"]))
+    if pisa_status.err:
+        return HttpResponse("Failed to generate Cover Letter PDF. Please try again.", status=500)
 
-    doc.build(Story)
     buffer.seek(0)
-
     response = HttpResponse(buffer, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="Cover_Letter_{record.id}.pdf"'
+    response["Content-Disposition"] = f'attachment; filename="Cover_Letter_{selected_template}.pdf"'
     return response
 
 
@@ -714,6 +770,16 @@ def export_report_pdf(request, analysis_id):
         "analysis": record,
         "matched_skills": matched,
         "missing_skills": missing,
+        "key_strengths": record.key_strengths if record.key_strengths else [],
+        "areas_for_growth": record.areas_for_growth if record.areas_for_growth else [],
+        "formatting_readability": record.formatting_readability if record.formatting_readability else [],
+        "competency_matrix": record.competency_matrix if record.competency_matrix else [],
+        "experience_trajectory": record.experience_trajectory if record.experience_trajectory else {},
+        "salary_benchmark": record.salary_benchmark if record.salary_benchmark else {},
+        "project_portfolio_ideas": record.project_portfolio_ideas if record.project_portfolio_ideas else [],
+        "onboarding_checklist": record.onboarding_checklist if record.onboarding_checklist else [],
+        "match_score_negative": 100 - record.match_score,
+        "date_formatted": record.created_at.strftime('%B %d, %Y'),
     }
 
     # Render HTML
@@ -1289,7 +1355,6 @@ def contact_view(request):
     return render(request, "analyzer/contact.html")
 
 
-@login_required
 @require_http_methods(["POST"])
 def start_interview_api(request, analysis_id):
     """Starts a new mock interview session or resumes an active one."""
@@ -1298,11 +1363,12 @@ def start_interview_api(request, analysis_id):
     if not perms["can_interview"]:
         return JsonResponse({"error": "Upgrade to Pro, Elite, or Unlimited to access Mock Interviews."}, status=403)
 
-    session = InterviewSession.objects.filter(user=request.user, analysis=record, status="active").first()
+    session_user = request.user if request.user.is_authenticated else None
+    session = InterviewSession.objects.filter(user=session_user, analysis=record, status="active").first()
     is_new = False
 
     if not session:
-        session = InterviewSession.objects.create(user=request.user, analysis=record)
+        session = InterviewSession.objects.create(user=session_user, analysis=record)
         is_new = True
 
     messages = session.messages.all()
@@ -1331,11 +1397,11 @@ def start_interview_api(request, analysis_id):
     })
 
 
-@login_required
 @require_http_methods(["POST"])
 def send_interview_message_api(request, session_id):
     """Handles candidate's reply, evaluates it, and generates the next question."""
-    session = get_object_or_404(InterviewSession, id=session_id, user=request.user)
+    session_user = request.user if request.user.is_authenticated else None
+    session = get_object_or_404(InterviewSession, id=session_id, user=session_user)
     try:
         body = json.loads(request.body)
         user_answer = body.get("message", "").strip()
@@ -1467,15 +1533,11 @@ def recalculate_score_api(request, analysis_id):
 
 @login_required
 def export_resume_pdf(request, analysis_id):
-    """Parses resume to structured JSON if missing, and outputs standard resume PDF layouts."""
+    """Parses resume to structured JSON if missing, and outputs styled resume PDF layouts based on styling preferences."""
     record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
     perms = get_premium_permissions(request.user, record)
     if not perms["can_download_pdf"]:
         return HttpResponse("Pro, Elite, or Unlimited subscription required to download resume PDF.", status=403)
-
-    template_layout = request.GET.get("template", "minimal").lower()
-    if template_layout not in ["minimal", "executive", "modern"]:
-        template_layout = "minimal"
 
     # Check for localization
     localization_id = request.GET.get("localization_id")
@@ -1490,16 +1552,63 @@ def export_resume_pdf(request, analysis_id):
             record.save()
         resume_data = record.structured_resume
 
+    # Retrieve style options from structured resume JSON
+    style = resume_data.get("style", {}) if isinstance(resume_data, dict) else {}
+    
+    # 1. Selected template mapping
+    selected_template = request.GET.get("template", style.get("selectedTemplate", "jakes_resume")).lower()
+    
+    # 2. Font Choice mapping
+    font_choice = request.GET.get("font", style.get("fontChoice", "font-inter")).lower()
+    if any(serif in font_choice for serif in ["times", "georgia", "playfair"]):
+        pdf_font = "Times-Roman"
+    else:
+        pdf_font = "Helvetica"
+        
+    # 3. Colors
+    text_color = request.GET.get("textColor", style.get("textColor", "#1e293b"))
+    theme_color = request.GET.get("themeColor", style.get("themeColor", "#7c3aed"))
+    
+    # 4. Spacing and margins
+    line_height = request.GET.get("lineHeight", style.get("lineHeight", "1.4"))
+    margins = request.GET.get("margins", style.get("margins", "1.6rem"))
+    if "rem" in margins:
+        try:
+            val = float(margins.replace("rem", "").strip())
+            pdf_margins = f"{val * 0.8}cm"
+        except ValueError:
+            pdf_margins = "1.2cm"
+    else:
+        pdf_margins = "1.2cm"
+        
+    # 5. Font Size
+    font_size = request.GET.get("fontSize", style.get("fontSize", "13px"))
+    if "px" in font_size:
+        try:
+            val = float(font_size.replace("px", "").strip())
+            pdf_font_size = f"{val * 0.75}pt"
+        except ValueError:
+            pdf_font_size = "9.5pt"
+    else:
+        pdf_font_size = "9.5pt"
+
     from django.template.loader import render_to_string
     import io
     from xhtml2pdf import pisa
 
     context = {
         "resume": resume_data,
+        "selected_template": selected_template,
+        "pdf_font": pdf_font,
+        "pdf_font_size": pdf_font_size,
+        "pdf_line_height": line_height,
+        "pdf_margins": pdf_margins,
+        "pdf_text_color": text_color,
+        "pdf_theme_color": theme_color,
     }
 
-    # Render HTML template
-    template_name = f"analyzer/resume_pdf_{template_layout}.html"
+    # Render unified layout template
+    template_name = "analyzer/resume_pdf_wizard.html"
     html_string = render_to_string(template_name, context)
 
     buffer = io.BytesIO()
@@ -1510,7 +1619,7 @@ def export_resume_pdf(request, analysis_id):
 
     buffer.seek(0)
     response = HttpResponse(buffer, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="Optimized_Resume_{template_layout}.pdf"'
+    response["Content-Disposition"] = f'attachment; filename="Optimized_Resume_{selected_template}.pdf"'
     return response
 
 
@@ -1689,13 +1798,14 @@ def suggest_summary_api(request):
         body = json.loads(request.body)
         job_title = body.get("job_title", "").strip()
         industry = body.get("industry", "").strip()
+        tone = body.get("tone", "Professional").strip()
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON body."}, status=400)
 
     if not job_title:
         return JsonResponse({"error": "job_title is required."}, status=400)
 
-    suggestions = get_ai_summary_suggestions(job_title, industry or "General")
+    suggestions = get_ai_summary_suggestions(job_title, industry or "General", tone)
     return JsonResponse({"suggestions": suggestions})
 
 
@@ -1783,7 +1893,7 @@ def portfolio_view(request, analysis_id):
             owner_perms = get_premium_permissions(record.user, record)
             can_view_publicly = owner_perms.get("can_download_pdf", False)
         else:
-            can_view_publicly = False
+            can_view_publicly = True
 
         if not can_view_publicly:
             # Render premium-lock screen for recruiters/public
@@ -1822,7 +1932,7 @@ def export_portfolio_html(request, analysis_id):
     record = get_object_or_404(ResumeAnalysis, slug=analysis_id)
     
     # Ownership and premium permission checks
-    is_owner = request.user.is_authenticated and record.user == request.user
+    is_owner = (request.user.is_authenticated and record.user == request.user) or (not request.user.is_authenticated and record.user is None)
     if not is_owner:
         return HttpResponse("Access denied: Only the owner can export this portfolio.", status=403)
 
@@ -2045,7 +2155,25 @@ def auto_vet_view(request):
 def skills_gap_view(request):
     """Renders the Skills Gap Analysis visualization and competency mapping page."""
     if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        # Simulated skills gap matching data
+        try:
+            body = json.loads(request.body) if request.body else {}
+        except json.JSONDecodeError:
+            body = {}
+            
+        resume_text = body.get("resume_text", "").strip()
+        job_desc = body.get("job_description", "").strip()
+        
+        if resume_text and job_desc:
+            from .utils import analyze_skills_gap
+            try:
+                data = analyze_skills_gap(resume_text, job_desc)
+                data["status"] = "success"
+                return JsonResponse(data)
+            except Exception as e:
+                print(f"[skills_gap_view] AI analysis failed, falling back to simulator: {e}")
+                pass
+
+        # Simulated fallback data
         data = {
             "status": "success",
             "fit_score": 76,
@@ -2070,10 +2198,17 @@ def skills_gap_view(request):
                 }
             ],
             "learning_resources": [
-                {"skill": "TypeScript", "resource": "Official TypeScript Deep Dive Guide (Free)", "link": "https://www.typescriptlang.org/"},
-                {"skill": "Next.js", "resource": "Next.js Learn Dashboard (Interactive)", "link": "https://nextjs.org/learn"},
-                {"skill": "AWS", "resource": "AWS Cloud Practitioner Essentials (Free 6h Course)", "link": "https://aws.amazon.com/training/"},
-                {"skill": "GraphQL", "resource": "Apollo Odyssey GraphQL Tutorials", "link": "https://odyssey.apollographql.com/"}
+                {"skill": "TypeScript", "resource": "Official TypeScript Deep Dive Guide (Free)", "link": "https://www.typescriptlang.org/", "difficulty": "Intermediate", "time": "12 hours"},
+                {"skill": "Next.js", "resource": "Next.js Learn Dashboard (Interactive)", "link": "https://nextjs.org/learn", "difficulty": "Beginner", "time": "8 hours"},
+                {"skill": "AWS", "resource": "AWS Cloud Practitioner Essentials (Free Course)", "link": "https://aws.amazon.com/training/", "difficulty": "Beginner", "time": "6 hours"},
+                {"skill": "GraphQL", "resource": "Apollo Odyssey GraphQL Tutorials", "link": "https://odyssey.apollographql.com/", "difficulty": "Advanced", "time": "15 hours"}
+            ],
+            "pathwayNodes": [
+                { "skill": "TypeScript", "status": "missing", "desc": "Type safety layer for web code.", "x": 12, "y": 50 },
+                { "skill": "Next.js", "status": "missing", "desc": "React meta-framework for routing and SSR.", "x": 32, "y": 25 },
+                { "skill": "GraphQL", "status": "missing", "desc": "API querying layer to reduce payload.", "x": 52, "y": 70 },
+                { "skill": "Redis", "status": "missing", "desc": "Cache layer for blazing database access.", "x": 72, "y": 30 },
+                { "skill": "AWS Cloud", "status": "missing", "desc": "Cloud provisioning and deployments.", "x": 88, "y": 50 }
             ]
         }
         return JsonResponse(data)
@@ -2086,7 +2221,146 @@ def chrome_extension_view(request):
     return render(request, "analyzer/chrome_extension.html")
 
 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import EmailMultiAlternatives
+from django.template import loader
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.core.exceptions import ValidationError
+
+class EmailOrUsernamePasswordResetForm(forms.Form):
+    email_or_username = forms.CharField(
+        label="Email or Username",
+        max_length=254,
+        widget=forms.TextInput(attrs={
+            'autocomplete': 'email',
+            'placeholder': 'Enter your email or username',
+        })
+    )
+
+    def clean_email_or_username(self):
+        val = self.cleaned_data.get('email_or_username', '').strip()
+        UserModel = get_user_model()
+        
+        self.users_to_reset = []
+        
+        if '@' in val:
+            # Look up by primary email or secondary email
+            # Primary email
+            primary_users = list(UserModel.objects.filter(email__iexact=val, is_active=True))
+            # Secondary email
+            from .models import SecondaryEmail
+            sec_emails = SecondaryEmail.objects.filter(email__iexact=val, is_verified=True)
+            sec_users = [se.user for se in sec_emails if se.user.is_active]
+            
+            # Combine the two lists, avoiding duplicates
+            users = list(set(primary_users + sec_users))
+            if not users:
+                raise ValidationError("No active account is associated with this email address.")
+            
+            # Since we send to the entered email
+            self.users_to_reset = [(user, val) for user in users]
+        else:
+            # Look up by username
+            try:
+                user = UserModel.objects.get(username__iexact=val)
+            except UserModel.DoesNotExist:
+                raise ValidationError("This username does not exist.")
+            
+            if not user.is_active:
+                raise ValidationError("This user account is inactive.")
+            
+            # Check for emails associated with this user
+            emails = []
+            if user.email:
+                emails.append(user.email)
+            
+            from .models import SecondaryEmail
+            sec_emails = SecondaryEmail.objects.filter(user=user, is_verified=True)
+            for se in sec_emails:
+                if se.email not in emails:
+                    emails.append(se.email)
+            
+            if not emails:
+                raise ValidationError("This username does not have an email address associated with it.")
+            
+            # Prepare pairs of (user, target_email)
+            self.users_to_reset = [(user, email) for email in emails]
+            
+        return val
+
+    def save(
+        self,
+        domain_override=None,
+        subject_template_name="registration/password_reset_subject.txt",
+        email_template_name="registration/password_reset_email.html",
+        use_https=False,
+        token_generator=default_token_generator,
+        from_email=None,
+        request=None,
+        html_email_template_name=None,
+        extra_email_context=None,
+    ):
+        """
+        Generate a one-time use link and send it to the user.
+        """
+        if not domain_override:
+            current_site = get_current_site(request)
+            site_name = current_site.name
+            domain = current_site.domain
+        else:
+            site_name = domain = domain_override
+            
+        for user, target_email in self.users_to_reset:
+            context = {
+                "email": target_email,
+                "domain": domain,
+                "site_name": site_name,
+                "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                "user": user,
+                "token": token_generator.make_token(user),
+                "protocol": "https" if use_https else "http",
+                **(extra_email_context or {}),
+            }
+            self.send_mail(
+                subject_template_name,
+                email_template_name,
+                context,
+                from_email,
+                target_email,
+                html_email_template_name=html_email_template_name,
+            )
+
+    def send_mail(
+        self,
+        subject_template_name,
+        email_template_name,
+        context,
+        from_email,
+        to_email,
+        html_email_template_name=None,
+    ):
+        """
+        Send a base/text/HTML email to the user.
+        """
+        subject = loader.render_to_string(subject_template_name, context)
+        # Email subject *must not* contain newlines
+        subject = "".join(subject.splitlines())
+        body = loader.render_to_string(email_template_name, context)
+
+        email_message = EmailMultiAlternatives(subject, body, from_email, [to_email])
+        if html_email_template_name is not None:
+            html_email = loader.render_to_string(html_email_template_name, context)
+            email_message.attach_alternative(html_email, "text/html")
+
+        email_message.send()
+
+
 class CustomPasswordResetView(PasswordResetView):
+    form_class = EmailOrUsernamePasswordResetForm
+
     def form_valid(self, form):
         opts = {
             'use_https': self.request.is_secure(),
@@ -2152,6 +2426,109 @@ def support_view(request):
             return render(request, "analyzer/support.html", {"error": f"Failed to send ticket: {str(e)}"})
             
     return render(request, "analyzer/support.html")
+
+
+def serialize_structured_resume_to_text(data):
+    name = data.get("name", "").strip()
+    lines = [name]
+    contact = data.get("contact", {})
+    if contact.get("email"):
+        lines.append(contact["email"])
+    if contact.get("phone"):
+        lines.append(contact["phone"])
+    if contact.get("location"):
+        lines.append(contact["location"])
+    summary = data.get("summary", "")
+    if summary:
+        lines.append("\nSUMMARY\n" + summary)
+    for exp in data.get("experience", []):
+        lines.append(f"\n{exp.get('role', '')} at {exp.get('company', '')} | {exp.get('duration', '')}")
+        for b in exp.get("bullets", []):
+            lines.append(f"• {b}")
+    for proj in data.get("projects", []):
+        lines.append(f"\nPROJECT: {proj.get('title', '')} | {proj.get('duration', '')}")
+        for b in proj.get("bullets", []):
+            lines.append(f"• {b}")
+    for edu in data.get("education", []):
+        lines.append(f"\n{edu.get('degree', '')} — {edu.get('institution', '')} | {edu.get('duration', '')}")
+    
+    certs = data.get("certifications", [])
+    if certs:
+        lines.append("\nCERTIFICATIONS")
+        for cert in certs:
+            if isinstance(cert, dict):
+                lines.append(f"• {cert.get('name', '')} — {cert.get('authority', '')} | {cert.get('duration', '')}")
+            else:
+                lines.append(f"• {cert}")
+                
+    extras = data.get("extracurriculars", [])
+    if extras:
+        lines.append("\nLEADERSHIP & EXTRACURRICULAR ACTIVITIES")
+        for ex in extras:
+            if isinstance(ex, dict):
+                lines.append(f"• {ex.get('role', '')} — {ex.get('organization', '')} | {ex.get('duration', '')}")
+                for b in ex.get("bullets", []):
+                    lines.append(f"  • {b}")
+            else:
+                lines.append(f"• {ex}")
+
+    skills = data.get("skills", {})
+    all_skills = []
+    for cat in ["languages", "frameworks", "tools", "other"]:
+        all_skills.extend(skills.get(cat, []))
+    if all_skills:
+        lines.append("\nSKILLS\n" + ", ".join(all_skills))
+    return "\n".join(lines)
+
+
+@login_required
+@require_http_methods(["POST"])
+def auto_tailor_resume_api(request):
+    """API endpoint to tailor structured resume JSON to match target job description."""
+    try:
+        data = json.loads(request.body)
+        resume_json = data.get("resume")
+        job_desc = data.get("job_description", "").strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON body."}, status=400)
+
+    if not resume_json:
+        return JsonResponse({"error": "resume is required."}, status=400)
+    if not job_desc:
+        return JsonResponse({"error": "job_description is required."}, status=400)
+
+    from .utils import tailor_resume_data
+    try:
+        tailored_data = tailor_resume_data(resume_json, job_desc)
+        return JsonResponse({"status": "success", "resume": tailored_data})
+    except Exception as e:
+        return JsonResponse({"error": f"Failed to tailor resume: {str(e)}"}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def builder_skills_gap_api(request):
+    """API endpoint to run a skills gap analysis for the builder workspace."""
+    try:
+        data = json.loads(request.body)
+        resume_json = data.get("resume")
+        job_desc = data.get("job_description", "").strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON body."}, status=400)
+
+    if not resume_json:
+        return JsonResponse({"error": "resume is required."}, status=400)
+    if not job_desc:
+        return JsonResponse({"error": "job_description is required."}, status=400)
+
+    resume_text = serialize_structured_resume_to_text(resume_json)
+    from .utils import analyze_skills_gap
+    try:
+        analysis_result = analyze_skills_gap(resume_text, job_desc)
+        return JsonResponse({"status": "success", "skills_gap": analysis_result})
+    except Exception as e:
+        return JsonResponse({"error": f"Failed to analyze skills gap: {str(e)}"}, status=500)
+
 
 
 
