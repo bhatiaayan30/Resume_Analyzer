@@ -12,6 +12,7 @@
     candidates: [],
     selectedCandidate: null,
     modalOpen: false,
+    comingSoonModalOpen: false,
     
     // Weight parameters
     weightExperience: 25,
@@ -175,7 +176,7 @@
                 </div>
             </div>
 
-            <button @click="startScreening()" class="submit-btn w-full mt-6 py-3.5 font-bold">
+            <button @click="if (resumeCount === 0) { alert('Please select at least one candidate resume.'); } else { comingSoonModalOpen = true; }" class="submit-btn w-full mt-6 py-3.5 font-bold">
                 Run Bulk Screening
             </button>
         </div>
@@ -377,6 +378,64 @@
             <button @click="modalOpen = false" class="w-full py-3 bg-brand hover:bg-brand-hover text-white font-bold rounded-xl transition-colors text-sm">
                 Close Candidate Report
             </button>
+        </div>
+    </div>
+
+    <!-- Coming Soon Modal Overlay -->
+    <div x-show="comingSoonModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" style="display: none;" @click.self="comingSoonModalOpen = false" x-transition>
+        <div class="premium-card max-w-lg w-full p-8 space-y-6 bg-slate-950 border border-white/10 relative overflow-hidden text-left">
+            <div class="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-brand/10 rounded-full blur-2xl"></div>
+            
+            <div class="flex justify-between items-start">
+                <div class="space-y-1">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-pink-500/10 border border-pink-500/20 text-pink-400">
+                        🚀 COMING SOON IN V2.0
+                    </span>
+                    <h3 class="text-2xl font-black text-white tracking-tight mt-2">Next-Gen Screening Room</h3>
+                </div>
+                <button @click="comingSoonModalOpen = false" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <p class="text-sm text-gray-400 font-light leading-relaxed">
+                We are actively integrating our full **Smart Screening Room** and **Browser Extension** pipeline to fully automate candidate sourcing, parsing, and screening.
+            </p>
+
+            <div class="space-y-4">
+                <div class="flex gap-4 items-start p-3.5 rounded-xl border border-white/5 bg-white/[0.02]">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-lg flex-shrink-0">
+                        🎙️
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-white">Smart Screening Room Integration</h4>
+                        <p class="text-xs text-gray-400 font-light mt-0.5">Automatically invite and vet candidates through a virtual smart panel with real-time feedback and analysis.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start p-3.5 rounded-xl border border-white/5 bg-white/[0.02]">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-lg flex-shrink-0">
+                        🔌
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-white">Browser Extension Capture</h4>
+                        <p class="text-xs text-gray-400 font-light mt-0.5">Import, parse, and evaluate candidate profiles directly from professional networks and talent platforms in one click.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-brand/5 border border-brand/20 p-4 rounded-xl text-xs text-gray-300 font-light leading-relaxed">
+                ℹ️ **Note:** The current screening feature runs in **Sandbox Simulation** mode to showcase the candidate ranking interface. Real resume uploads will be fully enabled on release.
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <button @click="comingSoonModalOpen = false; startScreening()" class="premium-action-btn premium-btn-brand justify-center flex-1">
+                    Preview Sandbox Mode
+                </button>
+                <button @click="comingSoonModalOpen = false" class="premium-action-btn premium-btn-indigo justify-center flex-1">
+                    Get Waitlist Access
+                </button>
+            </div>
         </div>
     </div>
 

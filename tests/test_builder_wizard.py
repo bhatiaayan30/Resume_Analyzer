@@ -154,7 +154,7 @@ def test_suggest_summary_api(mock_suggest, factory, premium_user):
     assert "suggestions" in data
     assert len(data["suggestions"]) == 3
     assert data["suggestions"][0] == "Summary 1"
-    mock_suggest.assert_called_once_with("Product Manager", "Finance")
+    mock_suggest.assert_called_once_with("Product Manager", "Finance", "Professional")
 
 @pytest.mark.django_db
 @patch("analyzer.views.get_ai_experience_bullets")

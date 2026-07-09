@@ -7,6 +7,29 @@ ANALYSIS_JSON_SCHEMA = """
     "matched_skills": [{"skill": "string", "category": "hard|soft", "matched": true}],
     "missing_skills": [{"skill": "string", "category": "hard|soft", "matched": false}],
     "experience_gaps": [<list of strings>],
+    "key_strengths": [<list of 3-4 strings detailing candidate's key strengths relative to the JD requirements>],
+    "areas_for_growth": [<list of 3-4 strings detailing candidate's growth areas and minor gaps>],
+    "formatting_readability": [<list of strings detailing visual formatting analysis, font readability, layout alignment, section titles, and general feedback>],
+    "competency_matrix": [
+        {"competency": "string", "requirement": "string", "alignment": "High|Medium|Low", "evidence": "string"}
+    ],
+    "experience_trajectory": {
+        "seniority_fit": "High|Medium|Low",
+        "trajectory_narrative": "string",
+        "stability_metrics": "string",
+        "promotion_potential": "string"
+    },
+    "salary_benchmark": {
+        "currency": "string",
+        "min": <integer>,
+        "median": <integer>,
+        "max": <integer>,
+        "source": "string"
+    },
+    "project_portfolio_ideas": [
+        {"title": "string", "goal": "string", "stack": "string", "why_fit": "string"}
+    ],
+    "onboarding_checklist": [<list of 4-5 strings detailing actionable onboarding objectives for this candidate in the first 30/60/90 days>],
     "impact_critiques": [
         {"section": "Summary/Experience", "original_bullet": "string of original weak bullet point", "critique": "string identifying weak verbs, passive voice, or lack of metrics", "suggested_rewrite": "string of rewritten high-impact bullet point"}
     ],
@@ -105,6 +128,16 @@ def build_analysis_prompt(resume_text: str, job_desc: str) -> str:
     - Lack of quantification (metrics, numbers) in achievements.
     - Generate EXACTLY 15 highly tailored interview questions covering technical skills, behavioral situations, experience gaps, and deep-dive questions about specific projects listed in the resume. Avoid generic interview questions. Provide detailed, comprehensive answers for each question detailing key points the candidate must cover.
     - Extract skills and strictly categorize them as "hard" (technical, tools, specific knowledge) or "soft" (interpersonal, leadership, traits).
+    
+    Analyze and populate these new Recruiter Insights:
+    - Key Strengths: 3-4 bullet points highlighting candidate strengths matching the job description.
+    - Areas for Growth: 3-4 bullet points outlining growth opportunities and minor gaps.
+    - Formatting & Readability: Visual appeal analysis (e.g., standard layout, clear heading structures, ATS readibility advice).
+    - Competency Matrix: Map 3-5 key required competencies from the JD. Rate the candidate's alignment (High, Medium, Low) and provide clear evidence from their work experience or projects.
+    - Experience Trajectory: Evaluate the seniority level fit (High/Medium/Low), write a brief narrative, assess stability metrics (stability/career progression), and evaluate promotion potential.
+    - Salary Benchmark: Provide realistic min, median, max numbers and currency matching this role type.
+    - Project Portfolio Ideas: Propose 3 detailed project briefs (with Title, Goal, Stack, and how it fits) designed specifically for this candidate to address their gaps.
+    - Onboarding Checklist: Provide a structured list of 4-5 key performance milestones/objectives for the first 30, 60, and 90 days.
     
     Audit the resume content for potential discrepancies or credibility issues:
     - AI Content Detection: Estimate the probability (0-100%) that the resume (or parts of it) was written/assisted by AI. Identify specific stylistic evidence (e.g., overused buzzwords like 'spearheaded', 'leverage', 'testament', 'tapestry', or highly standardized structures).
@@ -283,18 +316,20 @@ def build_resume_parser_prompt(resume_text: str) -> str:
     {RESUME_STRUCTURE_SCHEMA}
     """
 
-def build_summary_suggestion_prompt(job_title: str, industry: str) -> str:
+def build_summary_suggestion_prompt(job_title: str, industry: str, tone: str = "Professional") -> str:
     """Constructs the prompt for professional summary suggestions."""
     return f"""
     You are an expert resume writer and career coach. Generate exactly 3 distinct professional summary statement options (each 3-4 sentences long) for a candidate targeting:
     Job Title: {job_title}
     Industry: {industry}
+    Requested Tone: {tone}
     
     Ensure the options target different professional styles:
     1. Metrics-driven and results-oriented (focusing on achievements, scaling, and business impact).
     2. Leadership and strategy-focused (focusing on team guidance, project management, and execution).
     3. Technical and domain-specific (focusing on tools, languages, methodologies, and technical expertise).
     
+    Adopt a {tone} tone across all options. Keep the style polished and clean.
     Return ONLY a JSON array containing exactly 3 string values. Do not include markdown code fences (like ```json), prefix numbers, or extra text. Output only the valid JSON array.
     """
 
@@ -337,5 +372,89 @@ def build_localization_prompt(resume_json: dict, target_lang: str, target_market
     
     Return ONLY the localized resume as a valid JSON object matching the input schema. Do not write any markdown code fences (like ```json), prefix numbers, or extra text. Output only the raw valid JSON.
     """
+
+
+def build_skills_gap_prompt(resume_text: str, job_desc: str) -> str:
+    """Constructs the prompt for dynamic skills gap and competency mapping."""
+    safe_resume = resume_text.replace("<", "[").replace(">", "]")
+    safe_jd = job_desc.replace("<", "[").replace(">", "]")
+    
+    return f"""
+    You are an expert technical recruiter and talent development specialist.
+    Analyze the candidate's resume against the target job description to perform a highly detailed Skills Gap Analysis and Competency Mapping.
+    
+    Structure the response as a valid JSON object matching this exact schema:
+    {{
+        "fit_score": <integer 0-100 representing overall capability and alignment score>,
+        "categories": [
+            {{
+                "name": "Core Technical Skills | Backend & Database | DevOps & Cloud | Systems & Architecture | Soft Skills & Leadership",
+                "match": <integer 0-100 representing category match percentage>,
+                "matched": [<list of strings representing matched skills found in resume>],
+                "missing": [<list of strings representing missing skills required by the JD but missing or weak in the resume>]
+            }}
+        ],
+        "learning_resources": [
+            {{
+                "skill": "<string representing the missing skill>",
+                "resource": "<string representing a high-quality free course, documentation, or tutorial>",
+                "link": "<string representing a valid URL to the resource>",
+                "difficulty": "Beginner | Intermediate | Advanced",
+                "time": "<string representing estimated time to complete, e.g. 8 hours, 15 hours>"
+            }}
+        ],
+        "pathwayNodes": [
+            {{
+                "skill": "<string representing a key missing skill or milestone (exactly 5 nodes)>",
+                "status": "missing | matched",
+                "desc": "<string representing a brief explanation of how to bridge this gap>",
+                "x": <integer representing x-coordinate (exactly 12 for node 1, 32 for node 2, 52 for node 3, 72 for node 4, 88 for node 5)>,
+                "y": <integer representing y-coordinate (suggested: 50 for node 1, 25 for node 2, 70 for node 3, 30 for node 4, 50 for node 5)>
+            }}
+        ]
+    }}
+    
+    Ensure:
+    1. The categories array has exactly 3 elements to map nicely on the visual Radar chart (e.g. Core Technical Skills, Backend & Database, and DevOps & Cloud).
+    2. The pathwayNodes array contains exactly 5 elements matching the target career metro line. Assign them coordinates matching the x/y guidelines above.
+    
+    <job_description>
+    {safe_jd[:10000]}
+    </job_description>
+
+    <resume_content>
+    {safe_resume[:30000]}
+    </resume_content>
+    """
+
+
+def build_auto_tailor_prompt(resume_json: dict, job_desc: str) -> str:
+    """Constructs the prompt to tailor structured resume JSON data to a target job description."""
+    import json
+    return f"""
+    You are an expert ATS Optimization specialist and professional resume writer.
+    Your task is to tailor the candidate's structured resume JSON to match the requirements of the target job description.
+    
+    Target Job Description:
+    {job_desc[:10000]}
+    
+    Source Resume JSON:
+    {json.dumps(resume_json, indent=2)}
+    
+    Tailoring Guidelines:
+    1. **Name, Contact, Education, Certifications**: Keep these exactly the same. Do not invent or change contact details, schools, degrees, or certifications.
+    2. **Professional Summary**: Rewrite the summary in 3-4 sentences to directly highlight relevant experiences and skills matching the job description, maintaining a highly professional and tailored tone.
+    3. **Work Experience & Projects**:
+       - Keep the job titles, companies, locations, and dates exactly the same.
+       - Rewrite the bullet points to use the STAR/XYZ format, embedding key responsibilities and keywords mentioned in the job description.
+       - Highlight achievements and metrics (quantifying them where appropriate) that align with what the job description values.
+    4. **Skills**:
+       - Review the languages, frameworks, tools, and other skills.
+       - If there are missing technical skills in the resume that are highlighted in the job description, add them to the appropriate skills list (e.g. languages, frameworks, tools, other) in the JSON, but do not exceed 8-10 skills per category.
+    5. **JSON Schema Integrity**: Output MUST be a valid JSON object matching the exact schema of the source resume. Do not add, remove, or modify any keys.
+    
+    Return ONLY the tailored resume as a valid JSON object matching the input schema. Do not write any markdown code fences (like ```json), prefix numbers, or extra text. Output only the raw valid JSON.
+    """
+
 
 

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Cover Letter - {{ resume.name }}</title>
+    <style>
+        @page {
+            size: letter portrait;
+            margin: {{ pdf_margins }};
+        }
+        body {
+            font-family: {{ pdf_font }}, sans-serif;
+            font-size: {{ pdf_font_size }};
+            line-height: {{ pdf_line_height }};
+            color: {{ pdf_text_color }};
+        }
+        .header {
+            {% if selected_template == 'hbs_traditional' or selected_template == 'academic_cv' %}
+            text-align: center;
+            border-bottom: 2px solid #000000;
+            {% elif selected_template == 'deedy_cv' or selected_template == 'marissa_mayer' or selected_template == 'modern_tech' or selected_template == 'creative_dev' %}
+            border-bottom: 1.5px solid #e2e8f0;
+            {% else %}
+            text-align: center;
+            border-bottom: 1.5px solid #e2e8f0;
+            {% endif %}
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        .name {
+            font-size: 20pt;
+            font-weight: bold;
+            color: {{ pdf_theme_color }};
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .date {
+            color: #64748b;
+            font-size: 8.5pt;
+            margin-bottom: 15px;
+        }
+        .recipient {
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #0f172a;
+            font-size: 9.5pt;
+        }
+        .content {
+            text-align: justify;
+            margin-bottom: 20px;
+        }
+        .content p {
+            margin-bottom: 10px;
+        }
+        .sign-off {
+            margin-top: 25px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="name">{{ resume.name }}</div>
+        <div style="font-size: 8.5pt; color: #475569; margin-top: 4px;">
+            {% if resume.contact.email %}{{ resume.contact.email }}{% endif %}
+            {% if resume.contact.phone %} | {{ resume.contact.phone }}{% endif %}
+            {% if resume.contact.location %} | {{ resume.contact.location }}{% endif %}
+            {% if resume.contact.linkedin %} | {{ resume.contact.linkedin }}{% endif %}
+            {% if resume.contact.github %} | {{ resume.contact.github }}{% endif %}
+            {% if resume.contact.website %} | {{ resume.contact.website }}{% endif %}
+        </div>
+    </div>
+
+    <!-- Date -->
+    <div class="date">
+        {% now "F j, Y" %}
+    </div>
+
+    <!-- Recipient -->
+    <div class="recipient">
+        To,<br/>
+        Hiring Manager / Recruiting Team<br/>
+        Professional Enterprise
+    </div>
+
+    <!-- Salutation -->
+    <div style="margin-bottom: 10px; font-weight: bold;">
+        Dear Hiring Manager,
+    </div>
+
+    <!-- Cover Letter Body -->
+    <div class="content">
+        {{ cover_letter|linebreaks }}
+    </div>
+
+    <!-- Sign-off -->
+    <div class="sign-off">
+        <div>Sincerely,</div>
+        <div style="font-weight: bold; margin-top: 15px; color: #0f172a;">{{ resume.name }}</div>
+    </div>
+
+</body>
+</html>

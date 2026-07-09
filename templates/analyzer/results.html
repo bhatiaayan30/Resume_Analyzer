@@ -142,19 +142,19 @@ html.light .guest-lock-btn-secondary:hover {
                 </a>
                 <div>
                     <h1 class="text-3xl md:text-4xl font-extrabold gradient-text-title">Analysis Results</h1>
-                    <p class="text-sm text-brand font-medium mt-1">Analyzing <span id="filename-display" class="text-gray-300 font-mono">{{ filename }}</span></p>
+                    <p class="text-sm text-brand font-medium mt-1">Match Report for <span id="filename-display" class="text-gray-300 font-mono">{{ filename }}</span></p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
                 <!-- Dropdown for PDF Resume Export -->
                 <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="inline-flex items-center gap-2 px-4 py-2 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg transition-colors shadow-[0_0_15px_rgba(139,92,246,0.3)] border border-brand/50">
+                    <button @click="open = !open" class="premium-action-btn premium-btn-brand">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         Export Resume
                         <svg class="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 border border-gray-700 ring-1 ring-black ring-opacity-5 z-50 py-1" style="display: none;">
-                        {% if perms.can_download_pdf and request.user.is_authenticated %}
+                        {% if perms.can_download_pdf %}
                         <a href="{% url 'export_resume_pdf' analysis.slug %}?template=minimal" class="block px-4 py-2 text-sm text-gray-200 hover:bg-white/5 transition-colors">Minimal Layout</a>
                         <a href="{% url 'export_resume_pdf' analysis.slug %}?template=executive" class="block px-4 py-2 text-sm text-gray-200 hover:bg-white/5 transition-colors">Executive Layout</a>
                         <a href="{% url 'export_resume_pdf' analysis.slug %}?template=modern" class="block px-4 py-2 text-sm text-gray-200 hover:bg-white/5 transition-colors">Modern Layout (2-Col)</a>
@@ -175,26 +175,31 @@ html.light .guest-lock-btn-secondary:hover {
                     </div>
                 </div>
 
-                {% if perms.can_download_pdf and request.user.is_authenticated %}
-                <a href="{% url 'export_report_pdf' analysis.slug %}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand/10 hover:bg-brand/20 text-brand-light text-sm font-semibold rounded-lg transition-colors border border-brand/30">
+                {% if perms.can_download_pdf %}
+                <a href="{% url 'export_report_pdf' analysis.slug %}" class="premium-action-btn premium-btn-brand">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     Download Match Report
                 </a>
                 {% else %}
-                <a href="{% url 'pricing' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-500 hover:text-gray-400 text-sm font-semibold rounded-lg transition-colors border border-gray-600" title="Requires Pro Tier or higher">
+                <a href="{% url 'pricing' %}" class="premium-action-btn premium-btn-disabled" title="Requires Pro Tier or higher">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     Download Match Report
                 </a>
                 {% endif %}
 
-                <a href="{% url 'portfolio_view' analysis.slug %}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
+                <a href="{% url 'auto_vet' %}" class="premium-action-btn premium-btn-emerald">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 00-2 2v6c0 1.1.9 2 2 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    Match Report (Recruiters)
+                </a>
+
+                <a href="{% url 'portfolio_view' analysis.slug %}" target="_blank" class="premium-action-btn premium-btn-indigo">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
                     Web Portfolio
                 </a>
 
                 <form action="{% url 'delete_analysis' analysis.slug %}" method="POST" class="m-0">
                     {% csrf_token %}
-                    <button type="submit" onclick="return confirm('Are you sure you want to delete this scan?');" class="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold rounded-lg transition-colors border border-red-500/30">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this scan?');" class="premium-action-btn premium-btn-red">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         Delete
                     </button>

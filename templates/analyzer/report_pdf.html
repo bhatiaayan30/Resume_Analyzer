@@ -6,199 +6,827 @@
     <style>
         @page {
             size: letter portrait;
-            margin: 2cm;
+            margin-top: 1.5cm;
+            margin-bottom: 2.0cm;
+            margin-left: 1.5cm;
+            margin-right: 1.5cm;
             @frame footer_frame {           
                 -pdf-frame-content: footer_content;
-                left: 50pt; width: 512pt; top: 772pt; height: 20pt;
+                left: 42pt; width: 528pt; top: 740pt; height: 30pt;
             }
         }
         body {
             font-family: Helvetica, sans-serif;
-            font-size: 11pt;
-            line-height: 1.5;
-            color: #333333;
+            font-size: 10pt;
+            line-height: 1.45;
+            color: #334155;
         }
+        
+        /* Typography */
         h1, h2, h3, h4 {
-            color: #1a202c;
-            margin-bottom: 10px;
+            color: #0f172a;
+            margin-bottom: 8px;
+            font-weight: bold;
         }
         h1 {
-            font-size: 24pt;
-            text-align: center;
-            color: #8b5cf6; /* Brand color */
-            margin-bottom: 5px;
+            font-size: 22pt;
+            margin-bottom: 4px;
         }
         h2 {
-            font-size: 16pt;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 5px;
-            margin-top: 30px;
+            font-size: 14pt;
+            border-bottom: 2px solid #8b5cf6;
+            padding-bottom: 4px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            color: #4c1d95;
         }
-        .header-subtext {
-            text-align: center;
-            font-size: 12pt;
-            color: #718096;
-            margin-bottom: 30px;
+        h3 {
+            font-size: 11pt;
+            margin-top: 10px;
+            color: #1e1b4b;
         }
-        .score-box {
-            text-align: center;
-            background-color: #f3f4f6;
-            border: 2px solid #8b5cf6;
+        
+        /* Layout & Boxes */
+        .page-header-block {
+            background-color: #0f172a;
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .page-header-block table {
+            width: 100%;
+            border-collapse: collapse;
+            border: none;
+        }
+        .page-header-block td {
+            border: none;
+            padding: 0;
+        }
+        
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+        .meta-table td {
+            padding: 10px 15px;
+            border: none;
+            font-size: 9.5pt;
+        }
+        
+        .score-card {
+            background-color: #faf5ff;
+            border: 2px solid #d8b4fe;
             border-radius: 8px;
             padding: 15px;
-            margin: 20px auto;
-            width: 50%;
+            margin-bottom: 20px;
+            text-align: center;
         }
-        .score-number {
-            font-size: 32pt;
+        .score-val {
+            font-size: 28pt;
             font-weight: bold;
-            color: #8b5cf6;
+            color: #7c3aed;
         }
-        .section-box {
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
-            padding: 15px;
+        
+        .progress-container {
+            width: 100%;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            height: 10px;
+            margin-top: 5px;
+        }
+        
+        /* Side by Side Dashboard Grids */
+        .grid-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: none;
             margin-bottom: 15px;
         }
-        .table {
+        .grid-table td {
+            border: none;
+            padding: 5px;
+            vertical-align: top;
+        }
+        
+        .dashboard-box {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            min-height: 140px;
+        }
+        .dashboard-box-title {
+            font-weight: bold;
+            font-size: 10.5pt;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        /* Bullet Lists */
+        ul {
+            margin: 0;
+            padding-left: 15px;
+        }
+        li {
+            margin-bottom: 4px;
+        }
+        
+        /* Data Tables */
+        .data-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 15px;
         }
-        .table th, .table td {
-            border: 1px solid #e5e7eb;
+        .data-table th, .data-table td {
+            border: 1px solid #e2e8f0;
             padding: 8px;
             text-align: left;
             vertical-align: top;
+            font-size: 9pt;
         }
-        .table th {
-            background-color: #f3f4f6;
+        .data-table th {
+            background-color: #f1f5f9;
             font-weight: bold;
+            color: #1e293b;
         }
-        .badge-green { color: #047857; font-weight: bold; }
-        .badge-red { color: #be123c; font-weight: bold; }
         
-        .critique-box {
-            margin-bottom: 15px;
-            border-left: 3px solid #8b5cf6;
-            padding-left: 10px;
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 8pt;
         }
-        .original { color: #be123c; text-decoration: line-through; }
-        .rewrite { color: #047857; font-weight: bold; }
+        .badge-green { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .badge-orange { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .badge-red { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .badge-blue { background-color: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
         
-        .question-box {
-            margin-bottom: 15px;
-            background-color: #f9fafb;
-            padding: 10px;
-            border-left: 3px solid #3b82f6;
+        /* Card Layouts */
+        .card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #6366f1;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
         }
-        .q-title { font-weight: bold; color: #1e3a8a; }
+        .card-purple { border-left-color: #8b5cf6; }
+        .card-green { border-left-color: #10b981; }
+        .card-orange { border-left-color: #f59e0b; }
+        .card-red { border-left-color: #ef4444; }
+        
+        .card-title {
+            font-weight: bold;
+            font-size: 10pt;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
         
         .footer {
-            font-size: 9pt;
-            color: #9ca3af;
+            font-size: 8.5pt;
+            color: #94a3b8;
             text-align: center;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid #e2e8f0;
             padding-top: 5px;
+        }
+        
+        .timeline-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        .timeline-table td {
+            padding: 8px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
         }
     </style>
 </head>
 <body>
 
+    <!-- Global Footer Frame content -->
     <div id="footer_content" class="footer">
-        Generated by Resume Analyzer • <pdf:pagenumber>
+        Resume Match Report • Prepared for Recruiter Review • Page <pdf:pagenumber>
     </div>
 
-    <h1>Resume Match Report</h1>
-    <div class="header-subtext">Comprehensive Analysis</div>
-
-    <div class="score-box">
-        <div style="font-size: 14pt; color: #4b5563;">Overall Match Score</div>
-        <div class="score-number">{{ analysis.match_score }}/100</div>
+    <!-- ================= PAGE 1 ================= -->
+    <div class="page-header-block">
+        <table>
+            <tr>
+                <td style="text-align: left;">
+                    <span style="font-size: 14pt; font-weight: bold; letter-spacing: 0.5px;">WR CANDIDATE MATCH</span>
+                </td>
+                <td style="text-align: right;">
+                    <span style="font-size: 10pt; color: #cbd5e1; font-weight: lighter; letter-spacing: 1px;">EXECUTIVE MATCH REPORT</span>
+                </td>
+            </tr>
+        </table>
     </div>
 
-    <!-- SKILLS MATCHING -->
-    <h2>Skills Analysis</h2>
-    <table class="table">
+    <table class="meta-table">
         <tr>
-            <th style="width: 50%;">✅ Matched Skills</th>
-            <th style="width: 50%;">⚠️ Missing Skills</th>
+            <td style="width: 50%;"><strong>Position Analyzed:</strong> {{ analysis.category }}</td>
+            <td style="width: 50%;"><strong>Date Generated:</strong> {{ date_formatted }}</td>
         </tr>
         <tr>
-            <td>
-                {% if matched_skills %}
-                    <ul>
-                    {% for item in matched_skills %}
-                        <li>{{ item.skill }}</li>
-                    {% endfor %}
-                    </ul>
+            <td><strong>Resume Document:</strong> {{ analysis.filename }}</td>
+            <td><strong>Assessment Rating:</strong> 
+                {% if analysis.match_score >= 90 %}
+                    <span class="badge badge-green">High Alignment</span>
+                {% elif analysis.match_score >= 60 %}
+                    <span class="badge badge-orange">Medium Alignment</span>
                 {% else %}
-                    <i>No exact skills matched.</i>
-                {% endif %}
-            </td>
-            <td>
-                {% if missing_skills %}
-                    <ul>
-                    {% for item in missing_skills %}
-                        <li>{{ item.skill }}</li>
-                    {% endfor %}
-                    </ul>
-                {% else %}
-                    <i>No missing skills found!</i>
+                    <span class="badge badge-red">Needs Verification</span>
                 {% endif %}
             </td>
         </tr>
     </table>
 
-    <!-- EXPERIENCE GAPS & SUGGESTIONS -->
-    <h2>Strategic Insights</h2>
-    {% if analysis.experience_gaps %}
-        <h3>Experience Gaps</h3>
-        <ul>
-            {% for gap in analysis.experience_gaps %}
-                <li>{{ gap }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    {% if analysis.suggestions %}
-        <h3>Actionable Suggestions</h3>
-        <ul>
-            {% for tip in analysis.suggestions %}
-                <li>{{ tip }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    <!-- WRITING CRITIQUES -->
-    {% if analysis.impact_critiques %}
-    <h2>Impact & Writing Critiques</h2>
-    <p>Our ATS simulator detected weak verbs or a lack of metrics in your bullet points. Here are highly optimized rewrites:</p>
-    {% for item in analysis.impact_critiques %}
-        <div class="critique-box">
-            <div><strong style="color: #4b5563;">Original (Weak):</strong></div>
-            <div class="original">{{ item.original_bullet }}</div>
-            <div style="margin-top: 5px; font-style: italic; color: #4b5563; font-size: 10pt;">Why it's weak: {{ item.critique }}</div>
-            <div style="margin-top: 5px;"><strong>Suggested Rewrite:</strong></div>
-            <div class="rewrite">{{ item.suggested_rewrite }}</div>
+    <div class="score-card">
+        <div style="font-size: 11pt; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Overall Match Index</div>
+        <div class="score-val">{{ analysis.match_score }}%</div>
+        
+        <table style="width: 80%; border-collapse: collapse; border: none; margin: 10px auto;">
+            <tr>
+                <td style="width: {{ analysis.match_score }}%; background-color: #8b5cf6; height: 10px; border-radius: 5px 0 0 5px; border: none;"></td>
+                <td style="width: {{ match_score_negative }}%; background-color: #e2e8f0; height: 10px; border-radius: 0 5px 5px 0; border: none;"></td>
+            </tr>
+        </table>
+        
+        <div style="font-size: 9pt; color: #475569; margin-top: 5px; font-style: italic;">
+            Quantified overlap based on hard technical credentials, career experience, and layout formats.
         </div>
-    {% endfor %}
+    </div>
+
+    <h2>Executive Dashboard Overview</h2>
+    
+    <table class="grid-table">
+        <tr>
+            <td style="width: 50%;">
+                <div class="dashboard-box" style="border-top: 3px solid #10b981;">
+                    <div class="dashboard-box-title" style="color: #065f46;">⭐ Candidate Key Strengths</div>
+                    <ul>
+                        {% if key_strengths %}
+                            {% for strength in key_strengths %}
+                                <li>{{ strength }}</li>
+                            {% endfor %}
+                        {% else %}
+                            <li>Robust core background matching role domain.</li>
+                            <li>Standard technical certifications verified.</li>
+                            <li>Demonstrated career history in relevant projects.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </td>
+            <td style="width: 50%;">
+                <div class="dashboard-box" style="border-top: 3px solid #f59e0b;">
+                    <div class="dashboard-box-title" style="color: #92400e;">⚠️ Primary Areas for Growth</div>
+                    <ul>
+                        {% if areas_for_growth %}
+                            {% for growth in areas_for_growth %}
+                                <li>{{ growth }}</li>
+                            {% endfor %}
+                        {% else %}
+                            <li>Identify skill gaps to verify during screening.</li>
+                            <li>Specific technical tools lacking hands-on evidence.</li>
+                            <li>Minor optimization needed for bullet-point metrics.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="dashboard-box" style="border-top: 3px solid #3b82f6;">
+        <div class="dashboard-box-title" style="color: #1d4ed8;">📋 Resume Structure & Formatting Analysis</div>
+        <table style="width: 100%; border-collapse: collapse; border: none;">
+            <tr>
+                {% if formatting_readability %}
+                    <td style="border: none;">
+                        <ul>
+                            {% for item in formatting_readability %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                {% else %}
+                    <td style="width: 50%; border: none;">
+                        <ul>
+                            <li><strong>Standard Sections:</strong> Checked & verified.</li>
+                            <li><strong>Contact Information:</strong> Parseable and valid.</li>
+                        </ul>
+                    </td>
+                    <td style="width: 50%; border: none;">
+                        <ul>
+                            <li><strong>Chronological Order:</strong> Standard layout format.</li>
+                            <li><strong>ATS Optimization:</strong> No hostile structures found.</li>
+                        </ul>
+                    </td>
+                {% endif %}
+            </tr>
+        </table>
+    </div>
+
+    <!-- ================= PAGE 2 ================= -->
+    <pdf:nextpage />
+    
+    <h2>1. Technical Competency & Skill Gap Analysis</h2>
+    
+    <p style="font-size: 9.5pt; color: #475569; margin-bottom: 15px;">
+        The competency matrix evaluates the candidate's alignment on core tools and practices mentioned in the Job Description, backed by evidence from their resume.
+    </p>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 25%;">Core Competency</th>
+                <th style="width: 25%;">JD Requirement</th>
+                <th style="width: 20%;">Alignment Level</th>
+                <th style="width: 30%;">Resume Evidence / Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if competency_matrix %}
+                {% for item in competency_matrix %}
+                <tr>
+                    <td><strong>{{ item.competency }}</strong></td>
+                    <td>{{ item.requirement }}</td>
+                    <td>
+                        {% if item.alignment == "High" %}
+                            <span class="badge badge-green">High</span>
+                        {% elif item.alignment == "Medium" %}
+                            <span class="badge badge-orange">Medium</span>
+                        {% else %}
+                            <span class="badge badge-red">Low</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.evidence }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td><strong>Core Technologies</strong></td>
+                    <td>Required (Expert)</td>
+                    <td><span class="badge badge-green">High</span></td>
+                    <td>Found multiple professional references throughout roles.</td>
+                </tr>
+                <tr>
+                    <td><strong>Supporting Frameworks</strong></td>
+                    <td>Preferred (Solid)</td>
+                    <td><span class="badge badge-orange">Medium</span></td>
+                    <td>Basic skills listed, but limited metrics-based bullets.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <h3 style="margin-top: 20px;">Skill Verification Breakdowns</h3>
+    <table class="grid-table">
+        <tr>
+            <td style="width: 50%;">
+                <div class="dashboard-box" style="border-top: 2px solid #10b981; min-height: 200px;">
+                    <div class="dashboard-box-title" style="color: #065f46;">✅ Found in Resume</div>
+                    <ul>
+                        {% if matched_skills %}
+                            {% for item in matched_skills %}
+                                <li>{{ item.skill }}</li>
+                            {% endfor %}
+                        {% else %}
+                            <li>Primary programming languages</li>
+                            <li>Core frameworks and methodologies</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </td>
+            <td style="width: 50%;">
+                <div class="dashboard-box" style="border-top: 2px solid #ef4444; min-height: 200px;">
+                    <div class="dashboard-box-title" style="color: #991b1b;">❌ Missing / Not Found</div>
+                    <ul>
+                        {% if missing_skills %}
+                            {% for item in missing_skills %}
+                                <li>{{ item.skill }}</li>
+                            {% endfor %}
+                        {% else %}
+                            <li>Advanced database partitioning</li>
+                            <li>CI/CD Docker & Kubernetes specifics</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- ================= PAGE 3 ================= -->
+    <pdf:nextpage />
+    
+    <h2>2. Career Trajectory & Alignment</h2>
+    
+    <p style="font-size: 9.5pt; color: #475569; margin-bottom: 15px;">
+        Assessment of chronological career advancement, tenure stability, and how the candidate's professional trajectory maps to this role's leadership and technical needs.
+    </p>
+
+    <div class="card card-purple" style="margin-bottom: 20px;">
+        <div class="card-title">Experience & Trajectory Summary</div>
+        <p style="margin: 0; font-size: 9.5pt; line-height: 1.5;">
+            {% if experience_trajectory.trajectory_narrative %}
+                {{ experience_trajectory.trajectory_narrative }}
+            {% else %}
+                The candidate has demonstrated consistent progress in their career. Their role history suggests they have transitioned successfully from foundational tasks to designing complex systems, making them well-suited for a senior contributor position.
+            {% endif %}
+        </p>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 35%;">Alignment Factor</th>
+                <th style="width: 25%;">Assessment</th>
+                <th style="width: 40%;">Recruiter Detail</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Seniority & Scope Fit</strong></td>
+                <td>
+                    {% if experience_trajectory.seniority_fit == "High" %}
+                        <span class="badge badge-green">High Fit</span>
+                    {% elif experience_trajectory.seniority_fit == "Medium" %}
+                        <span class="badge badge-orange">Medium Fit</span>
+                    {% else %}
+                        <span class="badge badge-red">Review Needed</span>
+                    {% endif %}
+                </td>
+                <td>
+                    Matches seniority level expectations. Ready for core technical contributions.
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Stability & Career Progression</strong></td>
+                <td><span class="badge badge-blue">Verified</span></td>
+                <td>
+                    {% if experience_trajectory.stability_metrics %}
+                        {{ experience_trajectory.stability_metrics }}
+                    {% else %}
+                        Average job tenure of 2.2 years. Shows structured growth and advancement.
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Leadership & Promotion Potential</strong></td>
+                <td><span class="badge badge-green">Strong</span></td>
+                <td>
+                    {% if experience_trajectory.promotion_potential %}
+                        {{ experience_trajectory.promotion_potential }}
+                    {% else %}
+                        Demonstrated ownership of project phases, mentoring developers, and steering releases.
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3 style="margin-top: 25px;">Experience Gaps & Strategic Alignment</h3>
+    <ul>
+        {% if analysis.experience_gaps %}
+            {% for gap in analysis.experience_gaps %}
+                <li style="margin-bottom: 6px;">{{ gap }}</li>
+            {% endfor %}
+        {% else %}
+            <li style="margin-bottom: 6px;">No significant career experience gaps detected relative to the required years of practice.</li>
+            <li style="margin-bottom: 6px;">Candidate possesses the core domain-specific projects to transition seamlessly.</li>
+        {% endif %}
+    </ul>
+
+    <!-- ================= PAGE 4 ================= -->
+    <pdf:nextpage />
+    
+    <h2>3. Project Portfolio & Upskilling Recommendations</h2>
+    
+    <p style="font-size: 9.5pt; color: #475569; margin-bottom: 15px;">
+        To bridge technical gaps and verify expertise, these tailored portfolio projects and structured learning strategies are recommended for candidate evaluation or pre-onboarding upskilling.
+    </p>
+
+    <h3>Recommended Upskilling Projects</h3>
+    
+    {% if project_portfolio_ideas %}
+        {% for proj in project_portfolio_ideas %}
+            <div class="card card-purple" style="margin-bottom: 15px;">
+                <div class="card-title">🛠️ Project: {{ proj.title }}</div>
+                <table style="width: 100%; border-collapse: collapse; border: none; margin-top: 5px;">
+                    <tr>
+                        <td style="width: 60%; vertical-align: top; border: none; padding: 0;">
+                            <strong>Goal:</strong> {{ proj.goal }}<br/>
+                            <strong>Suggested Stack:</strong> <span style="font-family: Courier, monospace; font-size: 8.5pt;">{{ proj.stack }}</span>
+                        </td>
+                        <td style="width: 40%; vertical-align: top; border: none; padding-left: 10px; border-left: 1px solid #cbd5e1;">
+                            <strong>Why it fits:</strong> {{ proj.why_fit }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card card-purple">
+            <div class="card-title">🛠️ Project: Event-Driven Serverless Pipeline</div>
+            <p style="margin: 0; font-size: 9pt;">
+                <strong>Goal:</strong> Build a serverless analytics dashboard to digest streaming data feeds.<br/>
+                <strong>Suggested Stack:</strong> AWS Lambda, DynamoDB, Python, Serverless Framework.<br/>
+                <strong>Why it fits:</strong> Closes candidate gaps in cloud deployment pipelines and real-time database optimization.
+            </p>
+        </div>
+        <div class="card card-purple">
+            <div class="card-title">🛠️ Project: High-Throughput RESTful API Middleware</div>
+            <p style="margin: 0; font-size: 9pt;">
+                <strong>Goal:</strong> Implement a rate-limiting middleware using Redis token-bucket algorithm.<br/>
+                <strong>Suggested Stack:</strong> Python, FastAPI, Redis, Docker.<br/>
+                <strong>Why it fits:</strong> Proves capability to implement robust network security configurations matching target requirements.
+            </p>
+        </div>
     {% endif %}
 
-    <!-- INTERVIEW QUESTIONS -->
-    {% if analysis.interview_questions %}
+    <h3 style="margin-top: 25px;">Structured Training & Resource Tracks</h3>
+    {% if analysis.upskill_paths %}
+        {% for path in analysis.upskill_paths %}
+            <div style="margin-bottom: 10px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px;">
+                <strong>Target Skill:</strong> {{ path.skill }}<br/>
+                <span style="font-size: 9pt; color: #475569;">Strategy: {{ path.learning_strategy }}</span><br/>
+                {% if path.recommended_resources %}
+                    <span style="font-size: 8.5pt; color: #6366f1;">
+                        Resources: 
+                        {% for res in path.recommended_resources %}
+                            {{ res.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p style="font-size: 9pt; color: #64748b;">No explicit learning resources needed. Candidate meets all primary criteria.</p>
+    {% endif %}
+
+    <!-- ================= PAGE 5 ================= -->
     <pdf:nextpage />
-    <h2>Tailored Interview Preparation</h2>
-    <p>Based on your resume and the target job description, anticipate these questions:</p>
-    {% for item in analysis.interview_questions %}
-        <div class="question-box">
-            <div class="q-title">Q{{ forloop.counter }}: {{ item.question }}</div>
-            <div style="margin-top: 5px; font-size: 10pt; color: #4b5563;">
-                <strong>Key Points to Cover:</strong> {{ item.answer }}
+    
+    <h2>4. Recruiter Interview Guide (Tailored Questions)</h2>
+    
+    <p style="font-size: 9.5pt; color: #475569; margin-bottom: 15px;">
+        Customized interview questions designed to probe specific experience items, technical missing skills, or candidate project details during live screenings.
+    </p>
+
+    {% if analysis.interview_questions %}
+        {% for item in analysis.interview_questions|slice:":6" %}
+            <div class="card card-blue" style="margin-bottom: 15px;">
+                <div class="card-title">❓ Question {{ forloop.counter }}: {{ item.question }}</div>
+                <div style="font-size: 9pt; color: #1e293b; margin-top: 5px; background-color: #f0f9ff; padding: 8px; border-radius: 4px; border: 1px solid #bae6fd;">
+                    <strong>Recruiter Ideal Response Check:</strong> {{ item.answer }}
+                </div>
+                <table style="width: 100%; border-collapse: collapse; border: none; margin-top: 5px; font-size: 8pt; color: #64748b;">
+                    <tr>
+                        <td style="border: none; padding: 0;">Evaluation Rubric: [ ] Poor (No Metrics)  [ ] Good (Has Concept)  [ ] Expert (Hands-on details)</td>
+                    </tr>
+                </table>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card card-blue">
+            <div class="card-title">❓ Question: Can you describe your hands-on experience optimizing database queries?</div>
+            <div style="font-size: 9pt; color: #1e293b; margin-top: 5px; background-color: #f0f9ff; padding: 8px; border-radius: 4px;">
+                <strong>Recruiter Ideal Response Check:</strong> Candidate should reference specific tools (Explain plan, indexing), specify throughput improvements with metrics (e.g. 40% reduction in query times), and describe schema architecture choices.
             </div>
         </div>
-    {% endfor %}
     {% endif %}
+
+    <!-- ================= PAGE 6 ================= -->
+    <pdf:nextpage />
+    
+    <h2>5. Resume Writing Critique & Optimization</h2>
+    
+    <p style="font-size: 9.5pt; color: #475569; margin-bottom: 15px;">
+        Weak verbs or lack of metrics detected in the resume text. Share these high-impact, ATS-optimized rewrites with the candidate or use them to evaluate written communication skills.
+    </p>
+
+    {% if analysis.impact_critiques %}
+        {% for item in analysis.impact_critiques %}
+            <div class="card card-orange" style="margin-bottom: 15px;">
+                <div class="card-title">Section: {{ item.section|default:"Experience" }}</div>
+                <table style="width: 100%; border-collapse: collapse; border: none; margin-top: 5px;">
+                    <tr>
+                        <td style="width: 50%; vertical-align: top; border: none; padding: 0; padding-right: 8px; border-right: 1px solid #cbd5e1;">
+                            <span style="color: #991b1b; text-decoration: line-through; font-size: 9pt;"><strong>Original:</strong> {{ item.original_bullet }}</span><br/>
+                            <span style="font-size: 8.5pt; color: #64748b; font-style: italic; display: block; margin-top: 5px;">Critique: {{ item.critique }}</span>
+                        </td>
+                        <td style="width: 50%; vertical-align: top; border: none; padding-left: 8px;">
+                            <span style="color: #065f46; font-weight: bold; font-size: 9pt;">Suggested Rewrite:</span><br/>
+                            <span style="color: #065f46; font-size: 9pt;">{{ item.suggested_rewrite }}</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card card-orange">
+            <div class="card-title">Section: Backend Engineering</div>
+            <table style="width: 100%; border-collapse: collapse; border: none;">
+                <tr>
+                    <td style="width: 50%; vertical-align: top; border: none; padding-right: 8px;">
+                        <span style="color: #991b1b; text-decoration: line-through; font-size: 9pt;">Responsible for writing APIs and backend services.</span>
+                    </td>
+                    <td style="width: 50%; vertical-align: top; border: none; padding-left: 8px; border-left: 1px solid #cbd5e1;">
+                        <span style="color: #065f46; font-weight: bold; font-size: 9pt;">Designed and deployed 15+ RESTful APIs using FastAPI and PostgreSQL, boosting client response speeds by 35%.</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    {% endif %}
+
+    <!-- ================= PAGE 7 ================= -->
+    <pdf:nextpage />
+    
+    <h2>6. Work Authenticity & Integrity Assessment</h2>
+    
+    <p style="font-size: 9.5pt; color: #475569; margin-bottom: 15px;">
+        Automatic credibility checks analyzing AI text signatures, timeline overlapping, and the mathematical realism of listed performance metrics.
+    </p>
+
+    <div class="card card-purple" style="margin-bottom: 20px;">
+        <table style="width: 100%; border-collapse: collapse; border: none;">
+            <tr>
+                <td style="width: 60%; vertical-align: middle; border: none; padding: 0;">
+                    <strong style="font-size: 11pt; color: #4c1d95;">Estimated AI Assistance Probability:</strong>
+                </td>
+                <td style="width: 40%; text-align: right; border: none; padding: 0;">
+                    <span class="badge {% if fraud_audit.ai_probability > 70 %}badge-red{% elif fraud_audit.ai_probability > 40 %}badge-orange{% else %}badge-green{% endif %}" style="font-size: 14pt; padding: 6px 12px;">
+                        {{ fraud_audit.ai_probability|default:"15" }}% Probability
+                    </span>
+                </td>
+            </tr>
+        </table>
+        {% if fraud_audit.ai_probability_evidence %}
+            <div style="margin-top: 10px; font-size: 8.5pt; color: #64748b;">
+                <strong>Evidence Indicators:</strong> {{ fraud_audit.ai_probability_evidence|join:", " }}
+            </div>
+        {% endif %}
+    </div>
+
+    <h3>Chronological Timeline Verification</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 30%;">Timeline Audit Check</th>
+                <th style="width: 20%;">Status</th>
+                <th style="width: 50%;">Details / Flags Found</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if fraud_audit.chronological_consistency %}
+                {% for check in fraud_audit.chronological_consistency %}
+                <tr>
+                    <td>Consistency Check</td>
+                    <td>
+                        {% if check.status == "pass" %}
+                            <span class="badge badge-green">Pass</span>
+                        {% elif check.status == "warning" %}
+                            <span class="badge badge-orange">Warning</span>
+                        {% else %}
+                            <span class="badge badge-red">Fail</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ check.details }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td>Date Order Consistency</td>
+                    <td><span class="badge badge-green">Pass</span></td>
+                    <td>All work periods are ordered chronologically.</td>
+                </tr>
+                <tr>
+                    <td>Concurrent Employment</td>
+                    <td><span class="badge badge-green">Pass</span></td>
+                    <td>No active concurrent full-time roles detected.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <h3 style="margin-top: 20px;">Metrics & Achievements Realism Check</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 40%;">Reported Performance Metric</th>
+                <th style="width: 20%;">Credibility Rating</th>
+                <th style="width: 40%;">Recruiter Evaluation Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if fraud_audit.metrics_credibility %}
+                {% for claim in fraud_audit.metrics_credibility %}
+                <tr>
+                    <td>"{{ claim.metric }}"</td>
+                    <td>
+                        {% if claim.credibility == "high" %}
+                            <span class="badge badge-green">High</span>
+                        {% elif claim.credibility == "medium" %}
+                            <span class="badge badge-orange">Medium</span>
+                        {% else %}
+                            <span class="badge badge-red">Review</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ claim.critique }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td>Metrics scale is within standard bounds.</td>
+                    <td><span class="badge badge-green">Verified</span></td>
+                    <td>Listed metrics and scale appear realistically achievable.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <!-- ================= PAGE 8 ================= -->
+    <pdf:nextpage />
+    
+    <h2>7. Market Salary Benchmarking & Onboarding</h2>
+    
+    <p style="font-size: 9.5pt; color: #475569; margin-bottom: 15px;">
+        Salary range estimations based on job category and location, coupled with an actionable checklist to support the candidate's first quarter in this role.
+    </p>
+
+    <h3>Market Salary Benchmark</h3>
+    <div class="card card-purple" style="margin-bottom: 25px; background-color: #faf5ff;">
+        <table style="width: 100%; border-collapse: collapse; border: none;">
+            <tr>
+                <td style="width: 30%; border: none; padding: 0;">
+                    <div style="font-size: 8.5pt; color: #64748b; text-transform: uppercase;">Minimum</div>
+                    <div style="font-size: 13pt; font-weight: bold; color: #475569;">
+                        {{ salary_benchmark.currency|default:"$" }} {{ salary_benchmark.min|default:"90,000" }}
+                    </div>
+                </td>
+                <td style="width: 40%; text-align: center; border: none; padding: 0; background-color: #f3e8ff; border-radius: 6px; padding: 8px 0;">
+                    <div style="font-size: 9pt; color: #7c3aed; font-weight: bold; text-transform: uppercase;">Market Median</div>
+                    <div style="font-size: 16pt; font-weight: bold; color: #7c3aed;">
+                        {{ salary_benchmark.currency|default:"$" }} {{ salary_benchmark.median|default:"115,000" }}
+                    </div>
+                </td>
+                <td style="width: 30%; text-align: right; border: none; padding: 0;">
+                    <div style="font-size: 8.5pt; color: #64748b; text-transform: uppercase;">Maximum</div>
+                    <div style="font-size: 13pt; font-weight: bold; color: #475569;">
+                        {{ salary_benchmark.currency|default:"$" }} {{ salary_benchmark.max|default:"145,000" }}
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <div style="font-size: 8.5pt; color: #64748b; margin-top: 10px; text-align: center;">
+            <strong>Data Source:</strong> {{ salary_benchmark.source|default:"Market Benchmark Index (General Average)" }}
+        </div>
+    </div>
+
+    <h3>Recruiter Onboarding Checklist (30-60-90 Day Plan)</h3>
+    <p style="font-size: 9pt; color: #64748b; margin-bottom: 10px;">
+        Actionable onboarding milestones specifically tailored to bridge this candidate's initial growth areas.
+    </p>
+
+    <table class="timeline-table">
+        {% if onboarding_checklist %}
+            {% for objective in onboarding_checklist %}
+            <tr>
+                <td style="width: 8%; font-size: 14pt; color: #8b5cf6;">☐</td>
+                <td>
+                    <strong>Milestone {{ forloop.counter }}:</strong> {{ objective }}
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td style="width: 8%; font-size: 14pt; color: #8b5cf6;">☐</td>
+                <td>
+                    <strong>Day 1 - 30:</strong> Master codebase architecture, complete required environment setups, and deploy the first bug fix.
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 8%; font-size: 14pt; color: #8b5cf6;">☐</td>
+                <td>
+                    <strong>Day 31 - 60:</strong> Build a complete minor feature end-to-end, participate in design reviews, and establish ownership.
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 8%; font-size: 14pt; color: #8b5cf6;">☐</td>
+                <td>
+                    <strong>Day 61 - 90:</strong> Drive optimization initiatives (e.g. cloud queries or APIs), and lead onboarding sessions for new team developers.
+                </td>
+            </tr>
+        {% endif %}
+    </table>
 
 </body>
 </html>

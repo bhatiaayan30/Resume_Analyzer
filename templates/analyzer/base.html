@@ -459,7 +459,7 @@
     html.light .bg-brand,
     html.light .bg-brand-hover,
     html.light .submit-btn,
-    html.light button[type="submit"],
+    html.light button[type="submit"]:not(.premium-action-btn),
     html.light .bg-blue-600,
     html.light .bg-emerald-600,
     html.light .bg-green-600,
@@ -477,7 +477,7 @@
     html.light .bg-brand *,
     html.light .bg-brand-hover *,
     html.light .submit-btn *,
-    html.light button[type="submit"] *,
+    html.light button[type="submit"]:not(.premium-action-btn) *,
     html.light .bg-blue-600 *,
     html.light .bg-emerald-600 *,
     html.light .bg-green-600 *,
@@ -492,12 +492,10 @@
     html.light a.bg-gradient-to-r * {
         color: inherit;
     }
-    html.light button[type="submit"] span,
+    html.light button[type="submit"]:not(.premium-action-btn) span,
     html.light .submit-btn span {
         color: #ffffff !important;
     }
-
-
     html.light .text-gray-200 { color: #1e293b !important; }
     html.light .text-gray-100 { color: #0f172a !important; }
 
@@ -525,6 +523,10 @@
     html.light .text-blue-300,
     html.light .text-blue-400 {
         color: #1e3a8a !important;
+    }
+    html.light .text-red-300,
+    html.light .text-red-400 {
+        color: #b91c1c !important;
     }
 
     /* Hover Inversions for light mode buttons & links */
@@ -578,17 +580,232 @@
         color: #64748b !important;
     }
 
-    /* Apple Button in Light Mode */
-    html.light .apple-btn {
-        background-color: #000000 !important;
-        color: #ffffff !important;
-        border-color: #000000 !important;
+    /* Social Authentication Buttons Style */
+    .social-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
-    html.light .apple-btn:hover {
-        background-color: #333333 !important;
+
+    /* Dark Mode (Default) Social Buttons */
+    .social-btn-google {
+        background-color: #1f2937 !important;
+        color: #f3f4f6 !important;
+        border: 1px solid #374151 !important;
     }
-    html.light .apple-btn svg path {
-        fill: #ffffff !important;
+    .social-btn-google:hover {
+        background-color: #374151 !important;
+    }
+
+    .social-btn-apple {
+        background-color: #1f2937 !important;
+        color: #f3f4f6 !important;
+        border: 1px solid #374151 !important;
+    }
+    .social-btn-apple:hover {
+        background-color: #374151 !important;
+    }
+    .social-btn-apple svg {
+        fill: currentColor !important;
+    }
+
+    .social-btn-microsoft {
+        background-color: #1f2937 !important;
+        color: #f3f4f6 !important;
+        border: 1px solid #374151 !important;
+    }
+    .social-btn-microsoft:hover {
+        background-color: #374151 !important;
+    }
+
+    /* Light Mode Social Buttons Overrides */
+    html.light .social-btn-google {
+        background-color: #ffffff !important;
+        color: #374151 !important;
+        border: 1px solid #d1d5db !important;
+    }
+    html.light .social-btn-google:hover {
+        background-color: #f9fafb !important;
+    }
+
+    html.light .social-btn-apple {
+        background-color: #ffffff !important;
+        color: #374151 !important;
+        border: 1px solid #d1d5db !important;
+    }
+    html.light .social-btn-apple:hover {
+        background-color: #f9fafb !important;
+    }
+    html.light .social-btn-apple svg {
+        fill: currentColor !important;
+    }
+
+    html.light .social-btn-microsoft {
+        background-color: #ffffff !important;
+        color: #374151 !important;
+        border: 1px solid #d1d5db !important;
+    }
+    html.light .social-btn-microsoft:hover {
+        background-color: #f9fafb !important;
+    }
+
+    /* Premium Action Buttons */
+    .premium-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 700;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .premium-action-btn:hover {
+        transform: translateY(-2px) !important;
+    }
+    .premium-action-btn:active {
+        transform: translateY(0) !important;
+    }
+
+    /* Brand / Purple Accent Button (Active) */
+    .premium-btn-brand {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05)) !important;
+        border: 1px solid rgba(139, 92, 246, 0.4) !important;
+        color: #a78bfa !important;
+        box-shadow: 0 0 15px rgba(139, 92, 246, 0.1) !important;
+    }
+    .premium-btn-brand:hover {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(139, 92, 246, 0.15)) !important;
+        border-color: rgba(139, 92, 246, 0.7) !important;
+        color: #c084fc !important;
+        box-shadow: 0 0 25px rgba(139, 92, 246, 0.3) !important;
+    }
+
+    /* Emerald / Green Accent Button */
+    .premium-btn-emerald {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05)) !important;
+        border: 1px solid rgba(16, 185, 129, 0.4) !important;
+        color: #34d399 !important;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.1) !important;
+    }
+    .premium-btn-emerald:hover {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.15)) !important;
+        border-color: rgba(16, 185, 129, 0.7) !important;
+        color: #6ee7b7 !important;
+        box-shadow: 0 0 25px rgba(16, 185, 129, 0.3) !important;
+    }
+
+    /* Indigo / Blue Accent Button */
+    .premium-btn-indigo {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.05)) !important;
+        border: 1px solid rgba(99, 102, 241, 0.4) !important;
+        color: #818cf8 !important;
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.1) !important;
+    }
+    .premium-btn-indigo:hover {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(99, 102, 241, 0.15)) !important;
+        border-color: rgba(99, 102, 241, 0.7) !important;
+        color: #a5b4fc !important;
+        box-shadow: 0 0 25px rgba(99, 102, 241, 0.3) !important;
+    }
+
+    /* Red / Rose Accent Button */
+    .premium-btn-red {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.04)) !important;
+        border: 1px solid rgba(239, 68, 68, 0.4) !important;
+        color: #f87171 !important;
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.1) !important;
+    }
+    .premium-btn-red:hover {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(239, 68, 68, 0.12)) !important;
+        border-color: rgba(239, 68, 68, 0.7) !important;
+        color: #fca5a5 !important;
+        box-shadow: 0 0 25px rgba(239, 68, 68, 0.3) !important;
+    }
+
+    /* Disabled Button */
+    .premium-btn-disabled {
+        background: rgba(31, 41, 55, 0.3) !important;
+        border: 1px solid rgba(75, 85, 99, 0.4) !important;
+        color: #9ca3af !important;
+        opacity: 0.6 !important;
+        cursor: not-allowed !important;
+        pointer-events: none !important;
+        box-shadow: none !important;
+    }
+    .premium-btn-disabled:hover {
+        transform: none !important;
+    }
+
+    /* Light Mode Overrides */
+    html.light .premium-btn-brand {
+        background: linear-gradient(135deg, rgba(109, 40, 217, 0.06), rgba(139, 92, 246, 0.02)) !important;
+        border-color: rgba(109, 40, 217, 0.25) !important;
+        color: #6d28d9 !important;
+        box-shadow: 0 2px 4px rgba(109, 40, 217, 0.05) !important;
+    }
+    html.light .premium-btn-brand:hover {
+        background: linear-gradient(135deg, rgba(109, 40, 217, 0.12), rgba(139, 92, 246, 0.06)) !important;
+        border-color: rgba(109, 40, 217, 0.5) !important;
+        color: #4c1d95 !important;
+        box-shadow: 0 4px 12px rgba(109, 40, 217, 0.12) !important;
+    }
+
+    html.light .premium-btn-emerald {
+        background: linear-gradient(135deg, rgba(4, 120, 87, 0.06), rgba(16, 185, 129, 0.02)) !important;
+        border-color: rgba(4, 120, 87, 0.25) !important;
+        color: #047857 !important;
+        box-shadow: 0 2px 4px rgba(4, 120, 87, 0.05) !important;
+    }
+    html.light .premium-btn-emerald:hover {
+        background: linear-gradient(135deg, rgba(4, 120, 87, 0.12), rgba(16, 185, 129, 0.06)) !important;
+        border-color: rgba(4, 120, 87, 0.5) !important;
+        color: #065f46 !important;
+        box-shadow: 0 4px 12px rgba(4, 120, 87, 0.12) !important;
+    }
+
+    html.light .premium-btn-indigo {
+        background: linear-gradient(135deg, rgba(67, 56, 202, 0.06), rgba(99, 102, 241, 0.02)) !important;
+        border-color: rgba(67, 56, 202, 0.25) !important;
+        color: #4338ca !important;
+        box-shadow: 0 2px 4px rgba(67, 56, 202, 0.05) !important;
+    }
+    html.light .premium-btn-indigo:hover {
+        background: linear-gradient(135deg, rgba(67, 56, 202, 0.12), rgba(99, 102, 241, 0.06)) !important;
+        border-color: rgba(67, 56, 202, 0.5) !important;
+        color: #3730a3 !important;
+        box-shadow: 0 4px 12px rgba(67, 56, 202, 0.12) !important;
+    }
+
+    html.light .premium-btn-red {
+        background: linear-gradient(135deg, rgba(185, 28, 28, 0.06), rgba(220, 38, 38, 0.02)) !important;
+        border-color: rgba(185, 28, 28, 0.25) !important;
+        color: #b91c1c !important;
+        box-shadow: 0 2px 4px rgba(185, 28, 28, 0.05) !important;
+    }
+    html.light .premium-btn-red:hover {
+        background: linear-gradient(135deg, rgba(185, 28, 28, 0.12), rgba(220, 38, 38, 0.06)) !important;
+        border-color: rgba(185, 28, 28, 0.5) !important;
+        color: #991b1b !important;
+        box-shadow: 0 4px 12px rgba(185, 28, 28, 0.12) !important;
+    }
+
+    html.light .premium-btn-disabled {
+        background: rgba(243, 244, 246, 0.8) !important;
+        border-color: rgba(209, 213, 219, 0.6) !important;
+        color: #9ca3af !important;
+        box-shadow: none !important;
     }
 
     /* Logout Button - Base (Dark Mode) */
@@ -669,24 +886,28 @@
 
     /* Subscription Badges in Light Mode */
     html.light .subscription-badge-unlimited {
-        background-color: #fce7f3 !important;
+        background: #fce7f3 !important;
         color: #db2777 !important;
         border-color: #fbcfe8 !important;
+        box-shadow: none !important;
     }
     html.light .subscription-badge-elite {
-        background-color: #dcfce7 !important;
+        background: #dcfce7 !important;
         color: #15803d !important;
         border-color: #bbf7d0 !important;
+        box-shadow: none !important;
     }
     html.light .subscription-badge-pro {
-        background-color: #ede9fe !important;
+        background: #ede9fe !important;
         color: #6d28d9 !important;
         border-color: #ddd6fe !important;
+        box-shadow: none !important;
     }
     html.light .subscription-badge-starter {
-        background-color: #f1f5f9 !important;
+        background: #f1f5f9 !important;
         color: #475569 !important;
         border-color: #cbd5e1 !important;
+        box-shadow: none !important;
     }
 
     /* Form inputs / Textareas in Light Mode */
@@ -834,7 +1055,10 @@
                      </svg>
                    </div>
                    <div>
-                     <div class="text-xs font-bold text-white">AI Screening Room</div>
+                     <div class="text-xs font-bold text-white flex items-center">
+                       AI Screening Room
+                       <span class="ml-2 px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-semibold text-red-400 bg-red-500/10 border border-red-500/25 rounded-md">Coming Soon</span>
+                     </div>
                      <div class="text-[10px] text-gray-400">Mock audio/text interview simulator</div>
                    </div>
                  </a>
@@ -874,7 +1098,10 @@
                      </svg>
                    </div>
                    <div>
-                     <div class="text-xs font-bold text-white">Chrome Extension</div>
+                     <div class="text-xs font-bold text-white flex items-center">
+                       Chrome Extension
+                       <span class="ml-2 px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-semibold text-red-400 bg-red-500/10 border border-red-500/25 rounded-md">Coming Soon</span>
+                     </div>
                      <div class="text-[10px] text-gray-400">Scan LinkedIn profiles directly</div>
                    </div>
                  </a>
@@ -981,10 +1208,16 @@
          <div class="px-3 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Features</div>
          <div class="pl-4 flex flex-col gap-1.5 border-l border-white/10">
               <a href="{% url 'authenticity_audit' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Authenticity Audit</a>
-              <a href="{% url 'screening_room' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">AI Screening Room</a>
+              <a href="{% url 'screening_room' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold flex items-center justify-between">
+                <span>AI Screening Room</span>
+                <span class="px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-semibold text-red-400 bg-red-500/10 border border-red-500/25 rounded-md">Soon</span>
+              </a>
               <a href="{% url 'auto_vet' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Auto-Vet Agent</a>
               <a href="{% url 'skills_gap' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Skills Gap Analysis</a>
-              <a href="{% url 'chrome_extension' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Chrome Extension</a>
+              <a href="{% url 'chrome_extension' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold flex items-center justify-between">
+                <span>Chrome Extension</span>
+                <span class="px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-semibold text-red-400 bg-red-500/10 border border-red-500/25 rounded-md">Soon</span>
+              </a>
          </div>
          <a href="{% url 'history' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">History</a>
          <a href="{% url 'resume_builder' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Build Resume</a>
@@ -1077,7 +1310,10 @@
                      </svg>
                    </div>
                    <div>
-                     <div class="text-xs font-bold text-white">AI Screening Room</div>
+                     <div class="text-xs font-bold text-white flex items-center">
+                       AI Screening Room
+                       <span class="ml-2 px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-semibold text-red-400 bg-red-500/10 border border-red-500/25 rounded-md">Coming Soon</span>
+                     </div>
                      <div class="text-[10px] text-gray-400">Mock audio/text interview simulator</div>
                    </div>
                  </a>
@@ -1117,7 +1353,10 @@
                      </svg>
                    </div>
                    <div>
-                     <div class="text-xs font-bold text-white">Chrome Extension</div>
+                     <div class="text-xs font-bold text-white flex items-center">
+                       Chrome Extension
+                       <span class="ml-2 px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-semibold text-red-400 bg-red-500/10 border border-red-500/25 rounded-md">Coming Soon</span>
+                     </div>
                      <div class="text-[10px] text-gray-400">Scan LinkedIn profiles directly</div>
                    </div>
                  </a>
@@ -1214,10 +1453,16 @@
          <div class="px-3 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Features</div>
          <div class="pl-4 flex flex-col gap-1.5 border-l border-white/10">
              <a href="{% url 'authenticity_audit' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Authenticity Audit</a>
-             <a href="{% url 'screening_room' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">AI Screening Room</a>
+             <a href="{% url 'screening_room' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold flex items-center justify-between">
+               <span>AI Screening Room</span>
+               <span class="px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-semibold text-red-400 bg-red-500/10 border border-red-500/25 rounded-md">Soon</span>
+             </a>
              <a href="{% url 'auto_vet' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Auto-Vet Agent</a>
              <a href="{% url 'skills_gap' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Skills Gap Analysis</a>
-             <a href="{% url 'chrome_extension' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold">Chrome Extension</a>
+             <a href="{% url 'chrome_extension' %}" class="text-gray-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 text-sm font-semibold flex items-center justify-between">
+               <span>Chrome Extension</span>
+               <span class="px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-semibold text-red-400 bg-red-500/10 border border-red-500/25 rounded-md">Soon</span>
+             </a>
          </div>
          <a href="{% url 'index' %}#how-it-works" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">How It Works</a>
          <a href="{% url 'why_us' %}" class="text-gray-300 hover:text-white py-2 px-3 rounded-lg hover:bg-white/5 font-semibold">Why Us</a>

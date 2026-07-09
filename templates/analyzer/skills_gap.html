@@ -16,6 +16,13 @@
     // Dynamic Role-Switching Simulator data
     targetRole: 'backend',
     roleData: {
+        custom: {
+            title: 'Custom Audit Results',
+            fitScore: 0,
+            categories: [],
+            learning_resources: [],
+            pathwayNodes: []
+        },
         backend: {
             title: 'Backend Engineer',
             fitScore: 76,
@@ -153,16 +160,28 @@
             method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
                 'x-requested-with': 'XMLHttpRequest'
-            }
+            },
+            body: JSON.stringify({
+                resume_text: this.resumeText,
+                job_description: this.jdText
+            })
         })
         .then(res => res.json())
         .then(data => {
             this.uploading = false;
             this.analyzed = true;
-            this.targetRole = 'backend';
             
-            // Set initial state from backend/local defaults
+            this.roleData['custom'] = {
+                title: 'Custom Audit Results',
+                fitScore: data.fit_score,
+                categories: data.categories,
+                learning_resources: data.learning_resources,
+                pathwayNodes: data.pathwayNodes || []
+            };
+            
+            this.targetRole = 'custom';
             this.changeRole();
         })
         .catch(err => {
@@ -256,6 +275,17 @@
         </div>
     </div>
 
+    <!-- Quick Try Templates -->
+    <div x-show="!uploading && !analyzed" class="max-w-4xl mx-auto mt-6 flex flex-wrap justify-center items-center gap-3 text-xs text-gray-400">
+        <span class="font-bold">💡 Quick Try:</span>
+        <button @click="resumeText = 'Jane Smith\nBackend Engineer\nExperience:\n- Built React frontends and Node.js APIs\n- Managed PostgreSQL database queries\n- Used Docker for containerization'; jdText = 'Senior Backend Engineer\nLooking for a developer with:\n- Node.js, Express, React, and Git\n- Experience with TypeScript and Next.js\n- Docker, AWS, and GraphQL'" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium border border-white/10 transition-colors">
+            Backend Developer
+        </button>
+        <button @click="resumeText = 'John Doe\nCloud Operations Specialist\nExperience:\n- Maintained Docker containers\n- Used Git for version control'; jdText = 'DevOps Cloud Architect\nRequirements:\n- Strong knowledge of Terraform, Ansible, and Kubernetes\n- AWS EKS provisioning\n- Prometheus and Grafana monitoring\n- Docker and CI/CD pipelines'" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium border border-white/10 transition-colors">
+            DevOps Architect
+        </button>
+    </div>
+
     <!-- Processing State -->
     <div x-show="uploading" class="max-w-md mx-auto premium-card p-10 text-center space-y-6" style="display: none;">
         <svg class="animate-spin h-8 w-8 text-brand mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -277,6 +307,7 @@
             <div class="premium-card p-5 space-y-2 text-left">
                 <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest block">Target Career Role</label>
                 <select x-model="targetRole" @change="changeRole()" class="w-full bg-[#1e1e24] border border-gray-700/60 rounded-xl p-3 text-sm text-white focus:border-brand outline-none">
+                    <option value="custom" x-show="analyzed && roleData['custom'] && roleData['custom'].fitScore > 0">Custom Audit Results</option>
                     <option value="backend">Backend Engineer</option>
                     <option value="lead">Full-Stack Tech Lead</option>
                     <option value="devops">DevOps Cloud Architect</option>

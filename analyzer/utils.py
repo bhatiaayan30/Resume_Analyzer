@@ -29,6 +29,8 @@ from analyzer.prompt_builder import (
     build_summary_suggestion_prompt,
     build_experience_bullets_prompt,
     build_localization_prompt,
+    build_skills_gap_prompt,
+    build_auto_tailor_prompt,
 )
 import re
 
@@ -248,6 +250,39 @@ def analyze_with_ai(resume_text: str, job_description: str) -> Tuple[Dict[str, A
         return json.loads(result_text), usage_data
     except Exception as exc:
         raise RuntimeError(f"AI Analysis Failed: {exc}")
+
+
+def analyze_skills_gap(resume_text: str, job_description: str) -> Dict[str, Any]:
+    """
+    Analyzes the skills gap between the candidate's resume and job description.
+    Queries Groq API and returns parsed JSON alignment data.
+    """
+    from django.conf import settings
+
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        raise RuntimeError("GROQ_API_KEY environment variable is not set.")
+
+    client = Groq(api_key=api_key)
+    prompt = build_skills_gap_prompt(resume_text, job_description)
+    fast_model = os.environ.get("FAST_MODEL", "llama-3.3-70b-versatile")
+
+    try:
+        response = client.chat.completions.create(
+            model=fast_model,
+            messages=[
+                {"role": "system", "content": "You output strictly valid JSON without markdown wrapping."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.2,
+            max_tokens=3000,
+            response_format={"type": "json_object"},
+        )
+        result_text = response.choices[0].message.content
+        return json.loads(result_text)
+    except Exception as exc:
+        raise RuntimeError(f"AI Skills Gap Analysis Failed: {exc}")
+
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
@@ -589,7 +624,7 @@ def parse_resume_to_json(resume_text: str) -> dict:
             "skills": {"other": ["AI parsing failed"]}
         }
 
-def get_ai_summary_suggestions(job_title: str, industry: str) -> list:
+def get_ai_summary_suggestions(job_title: str, industry: str, tone: str = "Professional") -> list:
     """Invokes AI to get 3 professional summary suggestions."""
     from django.conf import settings
     api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
@@ -601,7 +636,7 @@ def get_ai_summary_suggestions(job_title: str, industry: str) -> list:
         ]
     try:
         client = Groq(api_key=api_key)
-        prompt = build_summary_suggestion_prompt(job_title, industry)
+        prompt = build_summary_suggestion_prompt(job_title, industry, tone)
         model = os.environ.get("FAST_MODEL", "llama-3.1-8b-instant")
         response = client.chat.completions.create(
             model=model,
@@ -677,5 +712,31 @@ def localize_resume_data(resume_json: dict, target_lang: str, target_market: str
     except Exception as exc:
         print(f"[utils.localize_resume_data] Error: {exc}")
         return resume_json
+
+
+def tailor_resume_data(resume_json: dict, job_desc: str) -> dict:
+    """Invokes AI to tailor structured resume JSON data to a job description."""
+    from django.conf import settings
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        return resume_json
+        
+    try:
+        client = Groq(api_key=api_key)
+        prompt = build_auto_tailor_prompt(resume_json, job_desc)
+        model = os.environ.get("QUALITY_MODEL", "llama-3.3-70b-versatile")
+        
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=2000
+        )
+        
+        return robust_json_loads(response.choices[0].message.content)
+    except Exception as exc:
+        print(f"[utils.tailor_resume_data] Error: {exc}")
+        return resume_json
+
 
 

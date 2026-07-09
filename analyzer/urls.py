@@ -62,6 +62,8 @@ urlpatterns = [
     path("api/builder/save/", views.save_builder_resume_api, name="save_builder_resume_api"),
     path("api/builder/suggest-summary/", views.suggest_summary_api, name="suggest_summary_api"),
     path("api/builder/suggest-bullets/", views.suggest_bullets_api, name="suggest_bullets_api"),
+    path("api/builder/auto-tailor/", views.auto_tailor_resume_api, name="auto_tailor_resume_api"),
+    path("api/builder/skills-gap/", views.builder_skills_gap_api, name="builder_skills_gap_api"),
     
     # Vet and Hire Inspired Premium Features
     path("features/authenticity-audit/", views.authenticity_audit_view, name="authenticity_audit"),

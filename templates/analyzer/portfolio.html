@@ -199,6 +199,26 @@
     </div>
     {% else %}
 
+    <!-- Top Bar for Recruiter/Visitor (visible when viewed publicly) -->
+    {% if not is_export and not is_owner %}
+    <div class="bg-indigo-950/80 border-b border-indigo-500/30 backdrop-blur-md px-4 py-3 sm:px-6">
+        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+                    <i data-lucide="award" class="w-3.5 h-3.5"></i>
+                </span>
+                <span class="text-xs sm:text-sm font-semibold text-gray-300">
+                    This candidate has shared their verified ATS Match & Recruiter Guide.
+                </span>
+            </div>
+            <a href="{% url 'export_report_pdf' record.slug %}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-all shadow-[0_0_10px_rgba(99,102,241,0.3)] hover:scale-105">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                Download Recruiter Match Report (PDF)
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Top Toolbar (for owner preview) -->
     {% if not is_export and is_owner %}
     <div id="preview-toolbar" class="sticky top-0 z-40 bg-gray-950/80 border-b border-gray-800/80 backdrop-blur-md px-4 py-3 sm:px-6">
@@ -238,6 +258,12 @@
                 <a href="{% url 'export_portfolio_html' record.slug %}{% if localization_id %}?localization_id={{ localization_id }}{% endif %}" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-md transition-colors shadow-[0_0_10px_rgba(99,102,241,0.3)]">
                     <i data-lucide="download" class="w-3.5 h-3.5"></i>
                     Export HTML
+                </a>
+
+                <!-- Download Recruiter PDF Report -->
+                <a href="{% url 'export_report_pdf' record.slug %}" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-md transition-colors shadow-[0_0_10px_rgba(139,92,246,0.3)]">
+                    <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                    Download Recruiter PDF
                 </a>
             </div>
         </div>
@@ -529,6 +555,14 @@
                             Get In Touch
                         </a>
                         {% endif %}
+                        
+                        {% if not is_export %}
+                        <a href="{% url 'export_report_pdf' record.slug %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-transparent hover:bg-customAccent/5 text-customTextMain border border-customBorder hover:border-customAccent/20 font-semibold text-sm transition-all duration-200 hover:scale-105">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            Download Match Report
+                        </a>
+                        {% endif %}
+
                         <button onclick="window.print()" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-transparent hover:bg-customAccent/5 text-customTextMain border border-customBorder hover:border-customAccent/20 font-semibold text-sm transition-all duration-200">
                             <i data-lucide="printer" class="w-4 h-4"></i>
                             Print Resume

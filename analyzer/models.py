@@ -120,6 +120,16 @@ class ResumeAnalysis(models.Model):
     impact_critiques = models.JSONField(default=list)
     interview_questions = models.JSONField(default=list, blank=True)
     
+    # New Match Report fields (for Recruiters & Candidates)
+    key_strengths = models.JSONField(default=list, blank=True)
+    areas_for_growth = models.JSONField(default=list, blank=True)
+    formatting_readability = models.JSONField(default=list, blank=True)
+    competency_matrix = models.JSONField(default=list, blank=True)
+    experience_trajectory = models.JSONField(default=dict, blank=True)
+    salary_benchmark = models.JSONField(default=dict, blank=True)
+    project_portfolio_ideas = models.JSONField(default=list, blank=True)
+    onboarding_checklist = models.JSONField(default=list, blank=True)
+
     # Token Tracking
     prompt_tokens = models.IntegerField(default=0, blank=True, null=True)
     completion_tokens = models.IntegerField(default=0, blank=True, null=True)
@@ -166,7 +176,7 @@ class OTP(models.Model):
         return f"{self.purpose} OTP for {self.user.username}"
 
 class InterviewSession(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="interview_sessions")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="interview_sessions", null=True, blank=True)
     analysis = models.ForeignKey(ResumeAnalysis, on_delete=models.CASCADE, related_name="interview_sessions")
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, default="active") # active, completed

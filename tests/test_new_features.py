@@ -17,6 +17,7 @@ from analyzer.views import (
     export_portfolio_html,
     localize_resume_api,
     compare_versions_view,
+    export_report_pdf,
 )
 
 @pytest.fixture
@@ -165,14 +166,22 @@ def test_recalculate_score(mock_analyze_with_ai, factory, premium_user, analysis
     mock_analyze_with_ai.return_value = (
         {
             "job_category": "Software Engineering",
-            "match_score": 85,
+            "match_score": 90,
             "matched_skills": [{"skill": "Python", "category": "hard", "matched": True}],
             "missing_skills": [],
             "experience_gaps": [],
             "suggestions": ["Add cloud skills"],
             "upskill_paths": [],
             "impact_critiques": [],
-            "interview_questions": []
+            "interview_questions": [],
+            "key_strengths": ["Strong Python skill"],
+            "areas_for_growth": ["Add cloud experience"],
+            "formatting_readability": ["Standard layout"],
+            "competency_matrix": [{"competency": "Python", "requirement": "Required", "alignment": "High", "evidence": "Years of dev"}],
+            "experience_trajectory": {"seniority_fit": "High", "trajectory_narrative": "Great fit", "stability_metrics": "Good stability", "promotion_potential": "Ready"},
+            "salary_benchmark": {"currency": "USD", "min": 100000, "median": 120000, "max": 140000, "source": "Market"},
+            "project_portfolio_ideas": [{"title": "Serverless App", "goal": "Learn serverless", "stack": "AWS Lambda", "why_fit": "Close gap"}],
+            "onboarding_checklist": ["Objective 1"]
         },
         {"prompt_tokens": 120, "completion_tokens": 80}
     )
@@ -189,11 +198,11 @@ def test_recalculate_score(mock_analyze_with_ai, factory, premium_user, analysis
     assert response.status_code == 200
     data = json.loads(response.content)
     assert data["status"] == "success"
-    assert data["match_score"] == 85
+    assert data["match_score"] == 90
     
     # Verify in DB
     analysis_record.refresh_from_db()
-    assert analysis_record.match_score == 85
+    assert analysis_record.match_score == 90
     assert "Updated resume text" in analysis_record.resume_text
 
 # ──────────────────────────────────────────────────────────────
@@ -576,5 +585,193 @@ def test_fraud_audit_extraction_and_permissions(mock_analyze_with_ai, factory, p
     analysis_record.save()
     perms_starter = get_premium_permissions(starter_user, analysis_record)
     assert perms_starter["can_audit"] is False
+
+
+# ──────────────────────────────────────────────────────────────
+# 11. Programmatic Authenticity Engine & Skills Gap Tests
+# ──────────────────────────────────────────────────────────────
+def test_programmatic_authenticity_engine():
+    from analyzer.authenticity_engine import audit_authenticity
+    
+    resume_text = "I developed a delve and leverage robust tapestry testaments with spearheaded synergy."
+    structured_resume = {
+        "experience": [
+            {
+                "role": "Lead Architect",
+                "company": "Company A",
+                "duration": "June 2021 - Present",
+                "bullets": [
+                    "Engineered a scalable system improving performance by 300%.",
+                    "Assisted with operations without metrics."
+                ]
+            },
+            {
+                "role": "Developer",
+                "company": "Company B",
+                "duration": "January 2019 - May 2021",
+                "bullets": [
+                    "Reduced page load time by 40% using React."
+                ]
+            },
+            {
+                "role": "Junior Dev",
+                "company": "Company C",
+                "duration": "June 2017 - June 2018",
+                "bullets": []
+            }
+        ]
+    }
+    
+    audit = audit_authenticity(resume_text, structured_resume)
+    
+    # AI Phrases check
+    assert audit["ai_probability"] > 5
+    assert len(audit["ai_probability_evidence"]) > 0
+    
+    # Chronological Check
+    chrono_issues = [c["issue"] for c in audit["chronological_consistency"]]
+    assert "Employment Gap" in chrono_issues
+    
+    # Metrics credibility
+    assert len(audit["metrics_credibility"]) > 0
+    metrics_critiques = [m["critique"] for m in audit["metrics_credibility"]]
+    assert any("High rounded metric" in c for c in metrics_critiques)
+
+
+@pytest.mark.django_db
+def test_skills_gap_ajax_view(client):
+    from django.urls import reverse
+    import json
+    
+    url = reverse("skills_gap")
+    
+    response = client.post(
+        url,
+        data=json.dumps({}),
+        content_type="application/json",
+        HTTP_X_REQUESTED_WITH="XMLHttpRequest"
+    )
+    assert response.status_code == 200
+    res_data = response.json()
+    assert res_data["status"] == "success"
+    assert res_data["fit_score"] == 76
+
+
+# ──────────────────────────────────────────────────────────────
+# 12. Recruiter/Match PDF Export Tests
+# ──────────────────────────────────────────────────────────────
+@pytest.mark.django_db
+def test_export_report_pdf_success_premium(factory, premium_user, analysis_record):
+    url = reverse("export_report_pdf", kwargs={"analysis_id": analysis_record.slug})
+    request = factory.get(url)
+    request.user = premium_user
+
+    response = export_report_pdf(request, analysis_id=analysis_record.slug)
+    assert response.status_code == 200
+    assert response["Content-Type"] == "application/pdf"
+    assert f"Match_Report_{analysis_record.id}.pdf" in response["Content-Disposition"]
+
+@pytest.mark.django_db
+def test_export_report_pdf_success_one_time_free(factory, analysis_record):
+    # If the user is None, it is a one-time free scan and has access
+    analysis_record.user = None
+    analysis_record.save()
+    
+    url = reverse("export_report_pdf", kwargs={"analysis_id": analysis_record.slug})
+    request = factory.get(url)
+    from django.contrib.auth.models import AnonymousUser
+    request.user = AnonymousUser()
+
+    response = export_report_pdf(request, analysis_id=analysis_record.slug)
+    assert response.status_code == 200
+    assert response["Content-Type"] == "application/pdf"
+    assert f"Match_Report_{analysis_record.id}.pdf" in response["Content-Disposition"]
+
+@pytest.mark.django_db
+def test_export_report_pdf_forbidden_unpaid_second_scan(factory, analysis_record):
+    free_user = User.objects.create_user(username="freeuser2", password="password")
+    free_user.profile.is_premium = False
+    free_user.profile.subscription_tier = 0
+    free_user.profile.save()
+
+    # First scan gets the one-time free pass
+    ResumeAnalysis.objects.create(
+        user=free_user,
+        filename="first_free_resume.pdf",
+        status="completed"
+    )
+
+    # Second scan is restricted
+    second_record = ResumeAnalysis.objects.create(
+        user=free_user,
+        filename="second_resume.pdf",
+        status="completed"
+    )
+
+    url = reverse("export_report_pdf", kwargs={"analysis_id": second_record.slug})
+    request = factory.get(url)
+    request.user = free_user
+
+    response = export_report_pdf(request, analysis_id=second_record.slug)
+    assert response.status_code == 403
+    assert b"Pro, Elite, or Unlimited subscription required" in response.content
+
+@pytest.mark.django_db
+def test_export_report_pdf_forbidden_wrong_owner(factory, premium_user, analysis_record):
+    other_user = User.objects.create_user(username="otheruser2", password="password")
+    other_user.profile.is_premium = True
+    other_user.profile.subscription_tier = 2
+    other_user.profile.save()
+
+    url = reverse("export_report_pdf", kwargs={"analysis_id": analysis_record.slug})
+    request = factory.get(url)
+    request.user = other_user
+
+    response = export_report_pdf(request, analysis_id=analysis_record.slug)
+    assert response.status_code == 403
+
+@pytest.mark.django_db
+def test_export_report_pdf_forbidden_starter_tier(factory, analysis_record):
+    starter_user = User.objects.create_user(username="starteruser2", password="password")
+    starter_user.profile.is_premium = True
+    starter_user.profile.subscription_tier = 1
+    starter_user.profile.save()
+
+    # Create a dummy first scan in the past so analysis_record is restricted
+    from django.utils import timezone
+    dummy_scan = ResumeAnalysis.objects.create(
+        user=starter_user,
+        filename="dummy_first_scan.pdf",
+        status="completed"
+    )
+    ResumeAnalysis.objects.filter(id=dummy_scan.id).update(
+        created_at=timezone.now() - timezone.timedelta(hours=1)
+    )
+
+    analysis_record.user = starter_user
+    analysis_record.save()
+
+    url = reverse("export_report_pdf", kwargs={"analysis_id": analysis_record.slug})
+    request = factory.get(url)
+    request.user = starter_user
+
+    response = export_report_pdf(request, analysis_id=analysis_record.slug)
+    assert response.status_code == 403
+    assert b"Pro, Elite, or Unlimited subscription required" in response.content
+
+@pytest.mark.django_db
+def test_export_report_pdf_pending_status(factory, premium_user, analysis_record):
+    analysis_record.status = "pending"
+    analysis_record.save()
+
+    url = reverse("export_report_pdf", kwargs={"analysis_id": analysis_record.slug})
+    request = factory.get(url)
+    request.user = premium_user
+
+    response = export_report_pdf(request, analysis_id=analysis_record.slug)
+    assert response.status_code == 400
+    assert b"Report not ready yet" in response.content
+
+
 
 

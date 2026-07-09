@@ -186,6 +186,13 @@
                     {{ resume.contact.github }}
                 </div>
                 {% endif %}
+                
+                {% if resume.contact.website %}
+                <div class="contact-item">
+                    <span class="contact-label">Website:</span><br/>
+                    {{ resume.contact.website }}
+                </div>
+                {% endif %}
 
                 <!-- Education -->
                 {% if resume.education %}
