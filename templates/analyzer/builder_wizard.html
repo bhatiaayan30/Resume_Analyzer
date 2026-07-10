@@ -1118,10 +1118,14 @@
             <!-- ==============================================
              LAYOUT 1: JAKE'S RESUME (STANDARD TECH) 
              ============================================== -->
+        <!-- ==============================================
+             LAYOUT 1: JAKE'S RESUME (STANDARD TECH) 
+             ============================================== -->
         <div x-show="selectedTemplate === 'jakes_resume'" class="space-y-3">
           <!-- Centered Header -->
           <div class="text-center cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('contact')">
-            <h1 class="text-xl font-bold uppercase tracking-tight text-black m-0 outline-none focus:bg-violet-50 rounded p-0.5"
+            <h1 class="text-xl font-bold uppercase tracking-tight m-0 outline-none focus:bg-violet-50 rounded p-0.5"
+                :style="{ textTransform: textCase, color: textColor }"
                 contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
             <div class="text-[8.5px] text-gray-700 mt-1 flex flex-wrap justify-center gap-x-1.5 gap-y-0.5 font-sans">
               <span contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></span>
@@ -1147,15 +1151,21 @@
           </div>
 
           <!-- Professional Summary -->
-          <div x-show="form.summary" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')">
-            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Profile Summary</h2>
+          <div x-show="visibleSections.summary && form.summary" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), borderBottomColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.summary = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.summary || 'Profile Summary'"></span>
+            </h2>
             <p class="text-[8.5px] leading-relaxed text-gray-800 m-0 outline-none focus:bg-violet-50 rounded p-0.5"
                contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="form.summary"></p>
           </div>
 
           <!-- Experience -->
-          <div x-show="form.experience && form.experience.length > 0">
-            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Work History</h2>
+          <div x-show="visibleSections.experience && form.experience && form.experience.length > 0">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), borderBottomColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.experience = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.experience || 'Work History'"></span>
+            </h2>
             <div class="space-y-2">
               <template x-for="(exp, idx) in form.experience" :key="idx">
                 <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all animate-fade-in" @click="focusFormElement('experience', idx)">
@@ -1168,7 +1178,7 @@
                     <span class="text-[8.5px] font-normal text-gray-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
                   </div>
                   <div class="text-[8px] text-gray-500 italic outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-gray-800 text-[8px] leading-relaxed">
+                  <ul class="list-disc pl-4 space-y-0.5 text-gray-800 text-[8px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
                     <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
                       <li>
                         <span class="outline-none focus:bg-violet-50 rounded inline-block w-11/12" contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
@@ -1181,8 +1191,11 @@
           </div>
 
           <!-- Projects -->
-          <div x-show="form.projects && form.projects.length > 0">
-            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Projects</h2>
+          <div x-show="visibleSections.projects && form.projects && form.projects.length > 0">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), borderBottomColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.projects = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.projects || 'Projects'"></span>
+            </h2>
             <div class="space-y-2">
               <template x-for="(proj, idx) in form.projects" :key="idx">
                 <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('projects', idx)">
@@ -1190,7 +1203,7 @@
                     <span class="outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></span>
                     <span class="text-[8.5px] font-normal text-gray-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></span>
                   </div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-gray-800 text-[8px] leading-relaxed">
+                  <ul class="list-disc pl-4 space-y-0.5 text-gray-800 text-[8px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
                     <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
                       <li>
                         <span class="outline-none focus:bg-violet-50 rounded inline-block w-11/12" contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Project detail...'"></span>
@@ -1203,8 +1216,11 @@
           </div>
 
           <!-- Education -->
-          <div x-show="form.education && form.education.length > 0">
-            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Education</h2>
+          <div x-show="visibleSections.education && form.education && form.education.length > 0">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), borderBottomColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.education = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.education || 'Education'"></span>
+            </h2>
             <div class="space-y-1.5">
               <template x-for="(edu, idx) in form.education" :key="idx">
                 <div class="flex justify-between items-start text-[9px] text-black cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('education', idx)">
@@ -1220,8 +1236,11 @@
           </div>
 
           <!-- Skills -->
-          <div class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('skills')">
-            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Technical Skills</h2>
+          <div x-show="visibleSections.skills" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('skills')">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), borderBottomColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.skills = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.skills || 'Technical Skills'"></span>
+            </h2>
             <div class="space-y-0.5 text-[8.5px] text-gray-800 font-sans leading-normal">
               <div x-show="form.skills.languages.length"><strong>Languages:</strong> <span x-text="form.skills.languages.join(', ')"></span></div>
               <div x-show="form.skills.frameworks.length"><strong>Frameworks:</strong> <span x-text="form.skills.frameworks.join(', ')"></span></div>
@@ -1231,40 +1250,46 @@
           </div>
 
           <!-- Certifications -->
-          <div x-show="form.certifications && form.certifications.length > 0" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('certifications')">
-            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Certifications</h2>
+          <div x-show="visibleSections.certifications && form.certifications && form.certifications.length > 0" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('certifications')">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), borderBottomColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.certifications = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.certifications || 'Certifications'"></span>
+            </h2>
             <div class="space-y-1">
               <template x-for="(cert, idx) in form.certifications" :key="idx">
                 <div class="flex justify-between items-start text-[8.5px] text-gray-800">
                   <div>
-                    <span class="font-bold text-black" x-text="cert.name"></span>
-                    <span class="text-gray-500" x-show="cert.authority"> at </span>
-                    <span class="italic text-gray-600" x-text="cert.authority"></span>
+                    <span class="font-bold text-black outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.name = $event.target.innerText" x-text="cert.name || 'Cert Name'"></span>
+                    <span class="text-gray-500"> at </span>
+                    <span class="italic text-gray-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.authority = $event.target.innerText" x-text="cert.authority || 'Authority'"></span>
                   </div>
-                  <span class="text-gray-600" x-text="cert.duration"></span>
+                  <span class="text-gray-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.duration = $event.target.innerText" x-text="cert.duration || 'Duration'"></span>
                 </div>
               </template>
             </div>
           </div>
 
           <!-- Extracurriculars -->
-          <div x-show="form.extracurriculars && form.extracurriculars.length > 0" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('extracurriculars')">
-            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5">Leadership & Extracurriculars</h2>
+          <div x-show="visibleSections.extracurriculars && form.extracurriculars && form.extracurriculars.length > 0" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('extracurriculars')">
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-black border-b border-black pb-0.5 mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), borderBottomColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.extracurriculars = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.extracurriculars || 'Leadership & Extracurriculars'"></span>
+            </h2>
             <div class="space-y-2">
               <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
                 <div class="space-y-0.5">
                   <div class="flex justify-between items-start font-bold text-[9px] text-black">
                     <div>
-                      <span x-text="ex.role"></span>
+                      <span class="outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="ex.role = $event.target.innerText" x-text="ex.role || 'Role'"></span>
                       <span class="font-normal text-gray-500"> — </span>
-                      <span class="italic font-normal" x-text="ex.organization"></span>
+                      <span class="italic font-normal outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="ex.organization = $event.target.innerText" x-text="ex.organization || 'Organization'"></span>
                     </div>
-                    <span class="text-[8.5px] font-normal text-gray-600" x-text="ex.duration"></span>
+                    <span class="text-[8.5px] font-normal text-gray-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="ex.duration = $event.target.innerText" x-text="ex.duration || 'Duration'"></span>
                   </div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-gray-800 text-[8px] leading-relaxed">
+                  <ul class="list-disc pl-4 space-y-0.5 text-gray-800 text-[8px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
                     <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
                       <li>
-                        <span class="outline-none focus:bg-violet-50 rounded inline-block w-11/12" x-text="bullet"></span>
+                        <span class="outline-none focus:bg-violet-50 rounded inline-block w-11/12" contenteditable="true" @blur="ex.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
                       </li>
                     </template>
                   </ul>
@@ -1280,38 +1305,45 @@
         <div x-show="selectedTemplate === 'deedy_cv'" class="grid grid-cols-12 gap-4 text-slate-800 bg-white">
           <!-- Left Sidebar (4 cols) -->
           <div class="col-span-4 border-r border-gray-200 pr-3 space-y-4 font-sans text-[8.5px]">
-            <div>
-              <h1 class="text-xl font-bold uppercase text-slate-900 leading-tight" x-text="form.name || 'Candidate Name'"></h1>
-              <div class="text-[8px] text-brand uppercase font-bold tracking-wider mt-0.5" x-text="targetJobTitle || 'Job Title'"></div>
+            <div class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('contact')">
+              <h1 class="text-xl font-bold uppercase text-slate-900 leading-tight outline-none focus:bg-violet-50 rounded" 
+                  :style="{ textTransform: textCase }"
+                  contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
+              <div class="text-[8px] text-brand uppercase font-bold tracking-wider mt-0.5" 
+                   contenteditable="true" @blur="targetJobTitle = $event.target.innerText" x-text="targetJobTitle || 'Job Title'" :style="{ color: themeColor }"></div>
             </div>
 
-            <div class="space-y-1.5 text-gray-600">
-              <div class="font-bold text-slate-800 uppercase tracking-widest text-[8px]">Links</div>
-              <div x-show="form.contact.email" class="break-all">Email: <span x-text="form.contact.email"></span></div>
-              <div x-show="form.contact.phone">Phone: <span x-text="form.contact.phone"></span></div>
-              <div x-show="form.contact.location">Location: <span x-text="form.contact.location"></span></div>
-              <div x-show="form.contact.linkedin" class="break-all">LI: <span x-text="form.contact.linkedin"></span></div>
-              <div x-show="form.contact.github" class="break-all">GH: <span x-text="form.contact.github"></span></div>
-              <div x-show="form.contact.website" class="break-all">Web: <span x-text="form.contact.website"></span></div>
+            <div class="space-y-1.5 text-gray-600 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('contact')">
+              <div class="font-bold text-slate-800 uppercase tracking-widest text-[8px]" :style="{ color: themeColor }">Links</div>
+              <div class="break-all">Email: <span contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></span></div>
+              <div>Phone: <span contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone"></span></div>
+              <div x-show="form.contact.location">Location: <span contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location"></span></div>
+              <div x-show="form.contact.linkedin" class="break-all">LI: <span contenteditable="true" @blur="form.contact.linkedin = $event.target.innerText" x-text="form.contact.linkedin"></span></div>
+              <div x-show="form.contact.github" class="break-all">GH: <span contenteditable="true" @blur="form.contact.github = $event.target.innerText" x-text="form.contact.github"></span></div>
+              <div x-show="form.contact.website" class="break-all">Web: <span contenteditable="true" @blur="form.contact.website = $event.target.innerText" x-text="form.contact.website"></span></div>
             </div>
 
             <!-- Education -->
-            <div x-show="form.education && form.education.length > 0">
-              <div class="font-bold text-slate-800 uppercase tracking-widest text-[8px] mb-1.5">Education</div>
+            <div x-show="visibleSections.education && form.education && form.education.length > 0">
+              <div class="font-bold text-slate-800 uppercase tracking-widest text-[8px] mb-1.5" :style="{ color: themeColor }">
+                <span contenteditable="true" @blur="form.sectionTitles.education = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.education || 'Education'"></span>
+              </div>
               <div class="space-y-2">
                 <template x-for="(edu, idx) in form.education" :key="idx">
-                  <div class="space-y-0.5">
-                    <div class="font-bold text-slate-900" x-text="edu.degree"></div>
-                    <div class="text-slate-600" x-text="edu.institution"></div>
-                    <div class="text-gray-400 font-sans" x-text="edu.duration"></div>
+                  <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('education', idx)">
+                    <div class="font-bold text-slate-900 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></div>
+                    <div class="text-slate-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></div>
+                    <div class="text-gray-400 font-sans outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || 'Duration'"></div>
                   </div>
                 </template>
               </div>
             </div>
 
             <!-- Skills -->
-            <div class="space-y-2">
-              <div class="font-bold text-slate-800 uppercase tracking-widest text-[8px]">Skills</div>
+            <div x-show="visibleSections.skills" class="space-y-2 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('skills')">
+              <div class="font-bold text-slate-800 uppercase tracking-widest text-[8px]" :style="{ color: themeColor }">
+                <span contenteditable="true" @blur="form.sectionTitles.skills = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.skills || 'Skills'"></span>
+              </div>
               <div class="space-y-1.5 leading-normal">
                 <div x-show="form.skills.languages.length">
                   <strong>Languages:</strong>
@@ -1333,29 +1365,58 @@
                 </div>
               </div>
             </div>
+
+            <!-- Certifications (Injected) -->
+            <div x-show="visibleSections.certifications && form.certifications && form.certifications.length > 0">
+              <div class="font-bold text-slate-800 uppercase tracking-widest text-[8px] mb-1.5" :style="{ color: themeColor }">
+                <span contenteditable="true" @blur="form.sectionTitles.certifications = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.certifications || 'Certifications'"></span>
+              </div>
+              <div class="space-y-2">
+                <template x-for="(cert, idx) in form.certifications" :key="idx">
+                  <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('certifications', idx)">
+                    <div class="font-bold text-slate-900 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.name = $event.target.innerText" x-text="cert.name || 'Cert Name'"></div>
+                    <div class="text-slate-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.authority = $event.target.innerText" x-text="cert.authority || 'Authority'"></div>
+                    <div class="text-gray-400 font-sans outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.duration = $event.target.innerText" x-text="cert.duration || 'Duration'"></div>
+                  </div>
+                </template>
+              </div>
+            </div>
           </div>
 
           <!-- Right Content (8 cols) -->
           <div class="col-span-8 pl-1 space-y-4 text-[9.5px]">
-            <!-- Objective -->
-            <div x-show="form.summary">
-              <div class="font-bold text-brand uppercase tracking-wider border-b border-gray-100 pb-0.5 mb-1.5">Objective</div>
-              <p class="text-gray-700 leading-normal m-0" x-text="form.summary"></p>
+            <!-- Objective (Summary) -->
+            <div x-show="visibleSections.summary && form.summary" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')">
+              <div class="font-bold text-brand uppercase tracking-wider border-b border-gray-100 pb-0.5 mb-1.5"
+                   :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor }">
+                <span contenteditable="true" @blur="form.sectionTitles.summary = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.summary || 'Objective'"></span>
+              </div>
+              <p class="text-gray-700 leading-normal m-0 outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="form.summary"></p>
             </div>
 
             <!-- Experience -->
-            <div x-show="form.experience && form.experience.length > 0">
-              <div class="font-bold text-brand uppercase tracking-wider border-b border-gray-100 pb-0.5 mb-1.5">Experience</div>
+            <div x-show="visibleSections.experience && form.experience && form.experience.length > 0">
+              <div class="font-bold text-brand uppercase tracking-wider border-b border-gray-100 pb-0.5 mb-1.5"
+                   :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor }">
+                <span contenteditable="true" @blur="form.sectionTitles.experience = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.experience || 'Experience'"></span>
+              </div>
               <div class="space-y-3">
                 <template x-for="(exp, idx) in form.experience" :key="idx">
-                  <div class="space-y-0.5">
+                  <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('experience', idx)">
                     <div class="flex justify-between items-start font-bold">
-                      <span class="text-slate-900" x-text="`${exp.role} | ${exp.company}`"></span>
-                      <span class="text-gray-500 font-normal text-[8.5px]" x-text="exp.duration"></span>
+                      <span class="text-slate-900">
+                        <span contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Role'"></span>
+                        <span> | </span>
+                        <span class="font-medium italic text-gray-600" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
+                      </span>
+                      <span class="text-gray-500 font-normal text-[8.5px]" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
                     </div>
-                    <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed">
-                      <template x-for="bullet in exp.bullets">
-                        <li x-text="bullet"></li>
+                    <div class="text-[8px] text-gray-400 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></div>
+                    <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                      <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                        <li>
+                          <span contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
+                        </li>
                       </template>
                     </ul>
                   </div>
@@ -1364,18 +1425,52 @@
             </div>
 
             <!-- Projects -->
-            <div x-show="form.projects && form.projects.length > 0">
-              <div class="font-bold text-brand uppercase tracking-wider border-b border-gray-100 pb-0.5 mb-1.5">Selected Projects</div>
+            <div x-show="visibleSections.projects && form.projects && form.projects.length > 0">
+              <div class="font-bold text-brand uppercase tracking-wider border-b border-gray-100 pb-0.5 mb-1.5"
+                   :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor }">
+                <span contenteditable="true" @blur="form.sectionTitles.projects = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.projects || 'Selected Projects'"></span>
+              </div>
               <div class="space-y-3">
                 <template x-for="(proj, idx) in form.projects" :key="idx">
-                  <div class="space-y-0.5">
+                  <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('projects', idx)">
                     <div class="flex justify-between items-start font-bold">
-                      <span class="text-slate-900" x-text="proj.title"></span>
-                      <span class="text-gray-500 font-normal text-[8.5px]" x-text="proj.duration"></span>
+                      <span class="text-slate-900" contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></span>
+                      <span class="text-gray-500 font-normal text-[8.5px]" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></span>
                     </div>
-                    <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed">
-                      <template x-for="bullet in proj.bullets">
-                        <li x-text="bullet"></li>
+                    <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                      <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                        <li>
+                          <span contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                        </li>
+                      </template>
+                    </ul>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Extracurriculars (Injected) -->
+            <div x-show="visibleSections.extracurriculars && form.extracurriculars && form.extracurriculars.length > 0">
+              <div class="font-bold text-brand uppercase tracking-wider border-b border-gray-100 pb-0.5 mb-1.5"
+                   :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor }">
+                <span contenteditable="true" @blur="form.sectionTitles.extracurriculars = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.extracurriculars || 'Leadership & Extracurriculars'"></span>
+              </div>
+              <div class="space-y-3">
+                <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
+                  <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('extracurriculars', idx)">
+                    <div class="flex justify-between items-start font-bold">
+                      <span class="text-slate-900">
+                        <span contenteditable="true" @blur="ex.role = $event.target.innerText" x-text="ex.role || 'Role'"></span>
+                        <span> — </span>
+                        <span class="font-medium italic text-gray-600" contenteditable="true" @blur="ex.organization = $event.target.innerText" x-text="ex.organization || 'Organization'"></span>
+                      </span>
+                      <span class="text-gray-500 font-normal text-[8.5px]" contenteditable="true" @blur="ex.duration = $event.target.innerText" x-text="ex.duration || 'Duration'"></span>
+                    </div>
+                    <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                      <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
+                        <li>
+                          <span contenteditable="true" @blur="ex.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                        </li>
                       </template>
                     </ul>
                   </div>
@@ -1390,53 +1485,61 @@
              ============================================== -->
         <div x-show="selectedTemplate === 'hbs_traditional'" class="space-y-4 font-times text-black">
           <!-- Centered Header -->
-          <div class="text-center pb-2 border-b-2 border-black">
-            <h1 class="text-2xl font-bold tracking-wide uppercase m-0" x-text="form.name || 'Candidate Name'"></h1>
-            <div class="text-[9px] italic mt-1.5 space-x-1 flex justify-center flex-wrap">
-              <span x-text="form.contact.email"></span>
+          <div class="text-center pb-2 border-b-2 border-black"
+               :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '2px') }">
+            <h1 class="text-2xl font-bold tracking-wide uppercase m-0 outline-none focus:bg-violet-50 rounded"
+                :style="{ textTransform: textCase, color: textColor }"
+                contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
+            <div class="text-[9px] italic mt-1.5 space-x-1 flex justify-center flex-wrap font-sans">
+              <span contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></span>
               <span>|</span>
-              <span x-text="form.contact.phone"></span>
+              <span contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone"></span>
               <span x-show="form.contact.location">
                 <span>|</span>
-                <span x-text="form.contact.location"></span>
+                <span contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location"></span>
               </span>
               <span x-show="form.contact.linkedin">
                 <span>|</span>
-                <span x-text="form.contact.linkedin"></span>
+                <span contenteditable="true" @blur="form.contact.linkedin = $event.target.innerText" x-text="form.contact.linkedin"></span>
               </span>
               <span x-show="form.contact.github">
                 <span>|</span>
-                <span x-text="form.contact.github"></span>
+                <span contenteditable="true" @blur="form.contact.github = $event.target.innerText" x-text="form.contact.github"></span>
               </span>
               <span x-show="form.contact.website">
                 <span>|</span>
-                <span x-text="form.contact.website"></span>
+                <span contenteditable="true" @blur="form.contact.website = $event.target.innerText" x-text="form.contact.website"></span>
               </span>
             </div>
           </div>
 
           <!-- Summary -->
-          <div x-show="form.summary">
-            <p class="text-[10px] leading-relaxed text-justify m-0" x-text="form.summary"></p>
+          <div x-show="visibleSections.summary && form.summary" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')">
+            <p class="text-[10px] leading-relaxed text-justify m-0 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="form.summary"></p>
           </div>
 
           <!-- Experience -->
-          <div x-show="form.experience && form.experience.length > 0">
-            <div class="font-bold text-[11px] uppercase tracking-wider border-b border-black mb-2">Professional Experience</div>
+          <div x-show="visibleSections.experience && form.experience && form.experience.length > 0">
+            <div class="font-bold text-[11px] uppercase tracking-wider border-b border-black mb-2"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.experience = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.experience || 'Professional Experience'"></span>
+            </div>
             <div class="space-y-3">
               <template x-for="(exp, idx) in form.experience" :key="idx">
-                <div class="space-y-0.5">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('experience', idx)">
                   <div class="flex justify-between items-start font-bold text-[10px]">
-                    <span x-text="exp.company || 'Company'"></span>
-                    <span class="font-normal" x-text="exp.duration"></span>
+                    <span contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
+                    <span class="font-normal" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
                   </div>
                   <div class="flex justify-between items-start text-[9.5px] italic">
-                    <span x-text="exp.role || 'Job Role'"></span>
-                    <span class="font-normal not-italic" x-text="exp.location"></span>
+                    <span contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Job Role'"></span>
+                    <span class="font-normal not-italic" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></span>
                   </div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-[9px] text-justify leading-relaxed">
-                    <template x-for="bullet in exp.bullets">
-                      <li x-text="bullet"></li>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[9px] text-justify leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
+                      </li>
                     </template>
                   </ul>
                 </div>
@@ -1445,18 +1548,23 @@
           </div>
 
           <!-- Projects -->
-          <div x-show="form.projects && form.projects.length > 0">
-            <div class="font-bold text-[11px] uppercase tracking-wider border-b border-black mb-2">Selected Project Work</div>
+          <div x-show="visibleSections.projects && form.projects && form.projects.length > 0">
+            <div class="font-bold text-[11px] uppercase tracking-wider border-b border-black mb-2"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.projects = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.projects || 'Selected Project Work'"></span>
+            </div>
             <div class="space-y-3">
               <template x-for="(proj, idx) in form.projects" :key="idx">
-                <div class="space-y-0.5">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('projects', idx)">
                   <div class="flex justify-between items-start font-bold text-[10px]">
-                    <span x-text="proj.title"></span>
-                    <span class="font-normal" x-text="proj.duration"></span>
+                    <span contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></span>
+                    <span class="font-normal" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></span>
                   </div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-[9px] text-justify leading-relaxed">
-                    <template x-for="bullet in proj.bullets">
-                      <li x-text="bullet"></li>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[9px] text-justify leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Project details...'"></span>
+                      </li>
                     </template>
                   </ul>
                 </div>
@@ -1465,16 +1573,83 @@
           </div>
 
           <!-- Education -->
-          <div x-show="form.education && form.education.length > 0">
-            <div class="font-bold text-[11px] uppercase tracking-wider border-b border-black mb-2">Education</div>
+          <div x-show="visibleSections.education && form.education && form.education.length > 0">
+            <div class="font-bold text-[11px] uppercase tracking-wider border-b border-black mb-2"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.education = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.education || 'Education'"></span>
+            </div>
             <div class="space-y-2">
               <template x-for="(edu, idx) in form.education" :key="idx">
+                <div class="flex justify-between items-start text-[9.5px] cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('education', idx)">
+                  <div>
+                    <strong contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></strong>
+                    <span> - </span>
+                    <span contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></span>
+                  </div>
+                  <span contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || 'Graduation'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Skills (Injected) -->
+          <div x-show="visibleSections.skills" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('skills')">
+            <div class="font-bold text-[11px] uppercase tracking-wider border-b border-black mb-2"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.skills = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.skills || 'Technical Skills'"></span>
+            </div>
+            <div class="space-y-0.5 text-[9px] text-gray-800 leading-normal font-sans">
+              <div x-show="form.skills.languages.length"><strong>Languages:</strong> <span x-text="form.skills.languages.join(', ')"></span></div>
+              <div x-show="form.skills.frameworks.length"><strong>Frameworks:</strong> <span x-text="form.skills.frameworks.join(', ')"></span></div>
+              <div x-show="form.skills.tools.length"><strong>Tools:</strong> <span x-text="form.skills.tools.join(', ')"></span></div>
+              <div x-show="form.skills.other.length"><strong>Other:</strong> <span x-text="form.skills.other.join(', ')"></span></div>
+            </div>
+          </div>
+
+          <!-- Certifications (Injected) -->
+          <div x-show="visibleSections.certifications && form.certifications && form.certifications.length > 0" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('certifications')">
+            <div class="font-bold text-[11px] uppercase tracking-wider border-b border-black mb-2"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.certifications = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.certifications || 'Certifications'"></span>
+            </div>
+            <div class="space-y-1.5">
+              <template x-for="(cert, idx) in form.certifications" :key="idx">
                 <div class="flex justify-between items-start text-[9.5px]">
                   <div>
-                    <strong x-text="edu.institution"></strong>
-                    <span x-text="` - ${edu.degree}`"></span>
+                    <span class="font-bold outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.name = $event.target.innerText" x-text="cert.name || 'Cert Name'"></span>
+                    <span class="font-normal text-gray-500"> - </span>
+                    <span class="italic outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.authority = $event.target.innerText" x-text="cert.authority || 'Authority'"></span>
                   </div>
-                  <span x-text="edu.duration"></span>
+                  <span class="outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.duration = $event.target.innerText" x-text="cert.duration || 'Duration'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Extracurriculars (Injected) -->
+          <div x-show="visibleSections.extracurriculars && form.extracurriculars && form.extracurriculars.length > 0" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('extracurriculars')">
+            <div class="font-bold text-[11px] uppercase tracking-wider border-b border-black mb-2"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.extracurriculars = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.extracurriculars || 'Leadership & Extracurriculars'"></span>
+            </div>
+            <div class="space-y-3">
+              <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start font-bold text-[10px]">
+                    <div>
+                      <span class="outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="ex.role = $event.target.innerText" x-text="ex.role || 'Role'"></span>
+                      <span class="font-normal"> - </span>
+                      <span class="italic font-normal outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="ex.organization = $event.target.innerText" x-text="ex.organization || 'Organization'"></span>
+                    </div>
+                    <span class="font-normal outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="ex.duration = $event.target.innerText" x-text="ex.duration || 'Duration'"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[9px] text-justify leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
+                      <li>
+                        <span class="outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="ex.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
+                    </template>
+                  </ul>
                 </div>
               </template>
             </div>
@@ -1486,18 +1661,21 @@
              ============================================== -->
         <div x-show="selectedTemplate === 'modern_tech'" class="space-y-4 text-slate-800 bg-white font-sans">
           <!-- Top Accent Block -->
-          <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 flex justify-between items-center">
+          <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 flex justify-between items-center cursor-pointer hover:ring-1 hover:ring-brand/30 rounded transition-all" @click="focusFormElement('contact')">
             <div>
-              <h1 class="text-2xl font-black tracking-tight" :style="{ color: themeColor }" x-text="form.name || 'Candidate Name'"></h1>
-              <div class="text-xs text-gray-500 font-bold uppercase tracking-widest mt-0.5" x-text="targetJobTitle || 'Professional Title'"></div>
+              <h1 class="text-2xl font-black tracking-tight outline-none focus:bg-violet-50 rounded p-0.5" 
+                  :style="{ color: themeColor, textTransform: textCase }" 
+                  contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
+              <div class="text-xs text-gray-500 font-bold uppercase tracking-widest mt-0.5" 
+                   contenteditable="true" @blur="targetJobTitle = $event.target.innerText" x-text="targetJobTitle || 'Professional Title'"></div>
             </div>
             <div class="text-[8.5px] text-right space-y-0.5 text-gray-600 font-sans">
-              <div x-text="form.contact.email"></div>
-              <div x-text="form.contact.phone" x-show="form.contact.phone"></div>
-              <div x-text="form.contact.location" x-show="form.contact.location"></div>
-              <div x-text="form.contact.linkedin" x-show="form.contact.linkedin"></div>
-              <div x-text="form.contact.github" x-show="form.contact.github"></div>
-              <div x-text="form.contact.website" x-show="form.contact.website"></div>
+              <div contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></div>
+              <div contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone" x-show="form.contact.phone"></div>
+              <div contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location" x-show="form.contact.location"></div>
+              <div contenteditable="true" @blur="form.contact.linkedin = $event.target.innerText" x-text="form.contact.linkedin" x-show="form.contact.linkedin"></div>
+              <div contenteditable="true" @blur="form.contact.github = $event.target.innerText" x-text="form.contact.github" x-show="form.contact.github"></div>
+              <div contenteditable="true" @blur="form.contact.website = $event.target.innerText" x-text="form.contact.website" x-show="form.contact.website"></div>
             </div>
           </div>
 
@@ -1505,18 +1683,28 @@
           <div class="grid grid-cols-12 gap-4">
             <div class="col-span-8 space-y-4">
               <!-- Experience -->
-              <div x-show="form.experience.length > 0">
-                <h3 class="text-xs font-bold uppercase tracking-widest mb-2 pb-0.5 border-b-2" :style="{ color: themeColor, borderColor: themeColor + '20' }">Experience</h3>
+              <div x-show="visibleSections.experience && form.experience.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-widest mb-2 pb-0.5 border-b-2" 
+                    :style="{ color: themeColor, borderColor: themeColor + '20', borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '2px') }">
+                  <span contenteditable="true" @blur="form.sectionTitles.experience = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.experience || 'Experience'"></span>
+                </h3>
                 <div class="space-y-3">
                   <template x-for="(exp, idx) in form.experience" :key="idx">
-                    <div class="space-y-1">
+                    <div class="space-y-1 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('experience', idx)">
                       <div class="flex justify-between items-start text-[10px] font-bold">
-                        <span class="text-slate-900" x-text="`${exp.role} at ${exp.company}`"></span>
-                        <span class="text-gray-500 font-normal text-[8.5px]" x-text="exp.duration"></span>
+                        <span class="text-slate-900">
+                          <span contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Job Role'"></span>
+                          <span class="font-normal text-gray-400"> at </span>
+                          <span class="italic font-normal text-slate-700" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
+                        </span>
+                        <span class="text-gray-500 font-normal text-[8.5px]" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
                       </div>
-                      <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed">
-                        <template x-for="bullet in exp.bullets">
-                          <li x-text="bullet"></li>
+                      <div class="text-[8px] text-slate-400 italic outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></div>
+                      <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                        <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                          <li>
+                            <span contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
+                          </li>
                         </template>
                       </ul>
                     </div>
@@ -1525,18 +1713,52 @@
               </div>
 
               <!-- Projects -->
-              <div x-show="form.projects.length > 0">
-                <h3 class="text-xs font-bold uppercase tracking-widest mb-2 pb-0.5 border-b-2" :style="{ color: themeColor, borderColor: themeColor + '20' }">Projects</h3>
+              <div x-show="visibleSections.projects && form.projects.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-widest mb-2 pb-0.5 border-b-2" 
+                    :style="{ color: themeColor, borderColor: themeColor + '20', borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '2px') }">
+                  <span contenteditable="true" @blur="form.sectionTitles.projects = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.projects || 'Projects'"></span>
+                </h3>
                 <div class="space-y-3">
                   <template x-for="(proj, idx) in form.projects" :key="idx">
-                    <div class="space-y-1">
+                    <div class="space-y-1 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('projects', idx)">
                       <div class="flex justify-between items-start text-[10px] font-bold">
-                        <span class="text-slate-900" x-text="proj.title"></span>
-                        <span class="text-gray-500 font-normal text-[8.5px]" x-text="proj.duration"></span>
+                        <span class="text-slate-900" contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></span>
+                        <span class="text-gray-500 font-normal text-[8.5px]" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></span>
                       </div>
-                      <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed">
-                        <template x-for="bullet in proj.bullets">
-                          <li x-text="bullet"></li>
+                      <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                        <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                          <li>
+                            <span contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                          </li>
+                        </template>
+                      </ul>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Extracurriculars (Injected) -->
+              <div x-show="visibleSections.extracurriculars && form.extracurriculars.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-widest mb-2 pb-0.5 border-b-2" 
+                    :style="{ color: themeColor, borderColor: themeColor + '20', borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '2px') }">
+                  <span contenteditable="true" @blur="form.sectionTitles.extracurriculars = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.extracurriculars || 'Leadership'"></span>
+                </h3>
+                <div class="space-y-3">
+                  <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
+                    <div class="space-y-1 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('extracurriculars', idx)">
+                      <div class="flex justify-between items-start text-[10px] font-bold">
+                        <span class="text-slate-900">
+                          <span contenteditable="true" @blur="ex.role = $event.target.innerText" x-text="ex.role || 'Role'"></span>
+                          <span class="font-normal text-gray-400"> at </span>
+                          <span class="italic font-normal text-slate-700" contenteditable="true" @blur="ex.organization = $event.target.innerText" x-text="ex.organization || 'Organization'"></span>
+                        </span>
+                        <span class="text-gray-500 font-normal text-[8.5px]" contenteditable="true" @blur="ex.duration = $event.target.innerText" x-text="ex.duration || 'Duration'"></span>
+                      </div>
+                      <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                        <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
+                          <li>
+                            <span contenteditable="true" @blur="ex.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                          </li>
                         </template>
                       </ul>
                     </div>
@@ -1548,30 +1770,52 @@
             <!-- Right side Skills/Education column -->
             <div class="col-span-4 space-y-4">
               <!-- Summary -->
-              <div x-show="form.summary">
-                <h3 class="text-xs font-bold uppercase tracking-widest mb-1.5" :style="{ color: themeColor }">Profile</h3>
-                <p class="text-[8.5px] leading-relaxed text-slate-600 m-0" x-text="form.summary"></p>
+              <div x-show="visibleSections.summary && form.summary" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')">
+                <h3 class="text-xs font-bold uppercase tracking-widest mb-1.5" :style="{ color: themeColor }">
+                  <span contenteditable="true" @blur="form.sectionTitles.summary = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.summary || 'Profile'"></span>
+                </h3>
+                <p class="text-[8.5px] leading-relaxed text-slate-600 m-0 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="form.summary"></p>
               </div>
 
               <!-- Skills -->
-              <div>
-                <h3 class="text-xs font-bold uppercase tracking-widest mb-1.5" :style="{ color: themeColor }">Competencies</h3>
+              <div x-show="visibleSections.skills" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('skills')">
+                <h3 class="text-xs font-bold uppercase tracking-widest mb-1.5" :style="{ color: themeColor }">
+                  <span contenteditable="true" @blur="form.sectionTitles.skills = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.skills || 'Competencies'"></span>
+                </h3>
                 <div class="flex flex-wrap gap-1">
-                  <template x-for="s in (form.skills.languages || []).concat(form.skills.frameworks || [])">
+                  <template x-for="s in (form.skills.languages || []).concat(form.skills.frameworks || []).concat(form.skills.tools || []).concat(form.skills.other || [])">
                     <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[7.5px] font-medium" x-text="s"></span>
                   </template>
                 </div>
               </div>
 
               <!-- Education -->
-              <div x-show="form.education.length > 0">
-                <h3 class="text-xs font-bold uppercase tracking-widest mb-1.5" :style="{ color: themeColor }">Education</h3>
+              <div x-show="visibleSections.education && form.education.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-widest mb-1.5" :style="{ color: themeColor }">
+                  <span contenteditable="true" @blur="form.sectionTitles.education = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.education || 'Education'"></span>
+                </h3>
                 <div class="space-y-2">
-                  <template x-for="edu in form.education">
-                    <div class="text-[8.5px] leading-snug">
-                      <div class="font-bold text-slate-800" x-text="edu.degree"></div>
-                      <div class="text-slate-600" x-text="edu.institution"></div>
-                      <div class="text-gray-400" x-text="edu.duration"></div>
+                  <template x-for="(edu, idx) in form.education" :key="idx">
+                    <div class="text-[8.5px] leading-snug cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('education', idx)">
+                      <div class="font-bold text-slate-800 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></div>
+                      <div class="text-slate-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></div>
+                      <div class="text-gray-400 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || 'Duration'"></div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Certifications (Injected) -->
+              <div x-show="visibleSections.certifications && form.certifications.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-widest mb-1.5" :style="{ color: themeColor }">
+                  <span contenteditable="true" @blur="form.sectionTitles.certifications = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.certifications || 'Certifications'"></span>
+                </h3>
+                <div class="space-y-2">
+                  <template x-for="(cert, idx) in form.certifications" :key="idx">
+                    <div class="text-[8.5px] leading-snug cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('certifications', idx)">
+                      <div class="font-bold text-slate-800 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.name = $event.target.innerText" x-text="cert.name || 'Cert Name'"></div>
+                      <div class="text-slate-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.authority = $event.target.innerText" x-text="cert.authority || 'Authority'"></div>
+                      <div class="text-gray-400 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.duration = $event.target.innerText" x-text="cert.duration || 'Duration'"></div>
                     </div>
                   </template>
                 </div>
@@ -1585,36 +1829,48 @@
              ============================================== -->
         <div x-show="selectedTemplate === 'minimalist_clean'" class="space-y-4 text-slate-800 bg-white font-sans">
           <!-- Left Bar Accent -->
-          <div class="border-l-4 border-gray-400 pl-4 py-1">
-            <h1 class="text-2xl font-bold tracking-tight text-slate-900" x-text="form.name || 'Candidate Name'"></h1>
+          <div class="border-l-4 border-gray-400 pl-4 py-1 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded transition-all" @click="focusFormElement('contact')" :style="{ borderColor: themeColor }">
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 outline-none focus:bg-violet-50 rounded" 
+                :style="{ textTransform: textCase, color: textColor }"
+                contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
             <div class="text-[9px] text-gray-500 flex flex-wrap gap-x-2 gap-y-0.5 font-mono mt-1">
-              <span x-text="form.contact.email"></span>
-              <span x-show="form.contact.phone"> | <span x-text="form.contact.phone"></span></span>
-              <span x-show="form.contact.location"> | <span x-text="form.contact.location"></span></span>
-              <span x-show="form.contact.linkedin"> | <span x-text="form.contact.linkedin"></span></span>
-              <span x-show="form.contact.github"> | <span x-text="form.contact.github"></span></span>
-              <span x-show="form.contact.website"> | <span x-text="form.contact.website"></span></span>
+              <span contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></span>
+              <span x-show="form.contact.phone"> | <span contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone"></span></span>
+              <span x-show="form.contact.location"> | <span contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location"></span></span>
+              <span x-show="form.contact.linkedin"> | <span contenteditable="true" @blur="form.contact.linkedin = $event.target.innerText" x-text="form.contact.linkedin"></span></span>
+              <span x-show="form.contact.github"> | <span contenteditable="true" @blur="form.contact.github = $event.target.innerText" x-text="form.contact.github"></span></span>
+              <span x-show="form.contact.website"> | <span contenteditable="true" @blur="form.contact.website = $event.target.innerText" x-text="form.contact.website"></span></span>
             </div>
           </div>
 
           <!-- Professional Summary -->
-          <div x-show="form.summary">
-            <p class="text-[9.5px] leading-relaxed text-gray-600 m-0" x-text="form.summary"></p>
+          <div x-show="visibleSections.summary && form.summary" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')">
+            <p class="text-[9.5px] leading-relaxed text-gray-600 m-0 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="form.summary"></p>
           </div>
 
           <!-- Experience -->
-          <div x-show="form.experience && form.experience.length > 0" class="space-y-2.5">
-            <h3 class="text-[10px] font-bold text-slate-800 tracking-wider uppercase border-b pb-0.5">Professional Experience</h3>
+          <div x-show="visibleSections.experience && form.experience && form.experience.length > 0" class="space-y-2.5">
+            <h3 class="text-[10px] font-bold text-slate-800 tracking-wider uppercase border-b pb-0.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.experience = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.experience || 'Professional Experience'"></span>
+            </h3>
             <div class="space-y-2.5">
               <template x-for="(exp, idx) in form.experience" :key="idx">
-                <div class="space-y-0.5">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('experience', idx)">
                   <div class="flex justify-between items-start text-[9.5px] font-bold">
-                    <span class="text-slate-900" x-text="`${exp.role} at ${exp.company}`"></span>
-                    <span class="text-gray-500 font-normal" x-text="exp.duration"></span>
+                    <span class="text-slate-900">
+                      <span contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Role'"></span>
+                      <span class="font-normal text-gray-400"> at </span>
+                      <span class="italic font-normal text-slate-700" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
+                    </span>
+                    <span class="text-gray-500 font-normal" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
                   </div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed">
-                    <template x-for="bullet in exp.bullets">
-                      <li x-text="bullet"></li>
+                  <div class="text-[8px] text-gray-400 italic outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
+                      </li>
                     </template>
                   </ul>
                 </div>
@@ -1623,18 +1879,106 @@
           </div>
 
           <!-- Projects -->
-          <div x-show="form.projects && form.projects.length > 0" class="space-y-2.5">
-            <h3 class="text-[10px] font-bold text-slate-800 tracking-wider uppercase border-b pb-0.5">Projects</h3>
+          <div x-show="visibleSections.projects && form.projects && form.projects.length > 0" class="space-y-2.5">
+            <h3 class="text-[10px] font-bold text-slate-800 tracking-wider uppercase border-b pb-0.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.projects = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.projects || 'Projects'"></span>
+            </h3>
             <div class="space-y-2.5">
               <template x-for="(proj, idx) in form.projects" :key="idx">
-                <div class="space-y-0.5">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('projects', idx)">
                   <div class="flex justify-between items-start text-[9.5px] font-bold">
-                    <span class="text-slate-900" x-text="proj.title"></span>
-                    <span class="text-gray-500 font-normal" x-text="proj.duration"></span>
+                    <span class="text-slate-900" contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></span>
+                    <span class="text-gray-500 font-normal" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></span>
                   </div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed">
-                    <template x-for="bullet in proj.bullets">
-                      <li x-text="bullet"></li>
+                  <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Education (Injected) -->
+          <div x-show="visibleSections.education && form.education && form.education.length > 0" class="space-y-2.5">
+            <h3 class="text-[10px] font-bold text-slate-800 tracking-wider uppercase border-b pb-0.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.education = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.education || 'Education'"></span>
+            </h3>
+            <div class="space-y-2">
+              <template x-for="(edu, idx) in form.education" :key="idx">
+                <div class="flex justify-between items-start text-[9.5px] cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('education', idx)">
+                  <div>
+                    <span class="font-bold text-slate-900" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></span>
+                    <span class="text-gray-500"> - </span>
+                    <span class="italic" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></span>
+                  </div>
+                  <span class="text-gray-500" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || 'Duration'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Skills (Injected) -->
+          <div x-show="visibleSections.skills" class="space-y-2.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('skills')">
+            <h3 class="text-[10px] font-bold text-slate-800 tracking-wider uppercase border-b pb-0.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.skills = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.skills || 'Technical Skills'"></span>
+            </h3>
+            <div class="space-y-1 text-[8.5px] text-gray-600 leading-normal font-sans">
+              <div x-show="form.skills.languages.length"><strong>Languages:</strong> <span x-text="form.skills.languages.join(', ')"></span></div>
+              <div x-show="form.skills.frameworks.length"><strong>Frameworks:</strong> <span x-text="form.skills.frameworks.join(', ')"></span></div>
+              <div x-show="form.skills.tools.length"><strong>Tools:</strong> <span x-text="form.skills.tools.join(', ')"></span></div>
+              <div x-show="form.skills.other.length"><strong>Other:</strong> <span x-text="form.skills.other.join(', ')"></span></div>
+            </div>
+          </div>
+
+          <!-- Certifications (Injected) -->
+          <div x-show="visibleSections.certifications && form.certifications && form.certifications.length > 0" class="space-y-2.5">
+            <h3 class="text-[10px] font-bold text-slate-800 tracking-wider uppercase border-b pb-0.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.certifications = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.certifications || 'Certifications'"></span>
+            </h3>
+            <div class="space-y-1.5">
+              <template x-for="(cert, idx) in form.certifications" :key="idx">
+                <div class="flex justify-between items-start text-[8.5px] text-gray-600 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('certifications', idx)">
+                  <div>
+                    <span class="font-bold text-slate-900" contenteditable="true" @blur="cert.name = $event.target.innerText" x-text="cert.name || 'Cert Name'"></span>
+                    <span class="text-gray-500"> at </span>
+                    <span class="italic text-gray-600" contenteditable="true" @blur="cert.authority = $event.target.innerText" x-text="cert.authority || 'Authority'"></span>
+                  </div>
+                  <span class="text-gray-500" contenteditable="true" @blur="cert.duration = $event.target.innerText" x-text="cert.duration || 'Duration'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Extracurriculars (Injected) -->
+          <div x-show="visibleSections.extracurriculars && form.extracurriculars && form.extracurriculars.length > 0" class="space-y-2.5">
+            <h3 class="text-[10px] font-bold text-slate-800 tracking-wider uppercase border-b pb-0.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.extracurriculars = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.extracurriculars || 'Leadership & Extracurriculars'"></span>
+            </h3>
+            <div class="space-y-2.5">
+              <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('extracurriculars', idx)">
+                  <div class="flex justify-between items-start text-[9.5px] font-bold">
+                    <span class="text-slate-900">
+                      <span contenteditable="true" @blur="ex.role = $event.target.innerText" x-text="ex.role || 'Role'"></span>
+                      <span class="font-normal text-gray-400"> — </span>
+                      <span class="italic font-normal text-slate-700" contenteditable="true" @blur="ex.organization = $event.target.innerText" x-text="ex.organization || 'Organization'"></span>
+                    </span>
+                    <span class="text-gray-500 font-normal" contenteditable="true" @blur="ex.duration = $event.target.innerText" x-text="ex.duration || 'Duration'"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-gray-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="ex.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
                     </template>
                   </ul>
                 </div>
@@ -1647,47 +1991,154 @@
              LAYOUT 6: CREATIVE DEVELOPER 
              ============================================== -->
         <div x-show="selectedTemplate === 'creative_dev'" class="space-y-4 text-slate-800 bg-white font-sans">
-          <div class="flex flex-col md:flex-row justify-between items-start gap-4 border-b pb-4">
+          <div class="flex flex-col md:flex-row justify-between items-start gap-4 border-b pb-4 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('contact')" :style="{ borderBottomColor: themeColor }">
             <div>
-              <h1 class="text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent" x-text="form.name || 'Candidate Name'"></h1>
-              <div class="text-xs font-bold text-slate-700 tracking-widest mt-1 uppercase" x-text="targetJobTitle || 'Creative Builder'"></div>
+              <h1 class="text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent outline-none focus:bg-violet-50 rounded p-0.5"
+                  :style="{ textTransform: textCase }" 
+                  contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
+              <div class="text-xs font-bold text-slate-700 tracking-widest mt-1 uppercase" 
+                   contenteditable="true" @blur="targetJobTitle = $event.target.innerText" x-text="targetJobTitle || 'Creative Builder'"></div>
             </div>
             <div class="text-[8.5px] text-slate-500 font-mono space-y-0.5">
-              <div class="flex items-center gap-1 font-sans">📬 <span x-text="form.contact.email"></span></div>
-              <div class="flex items-center gap-1 font-sans">📞 <span x-text="form.contact.phone"></span></div>
-              <div class="flex items-center gap-1 font-sans">📍 <span x-text="form.contact.location"></span></div>
+              <div class="flex items-center gap-1 font-sans">📬 <span contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></span></div>
+              <div class="flex items-center gap-1 font-sans">📞 <span contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone"></span></div>
+              <div class="flex items-center gap-1 font-sans">📍 <span contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location"></span></div>
             </div>
           </div>
 
           <!-- Summary -->
-          <div x-show="form.summary">
-            <p class="text-[10px] leading-relaxed text-slate-600 border-l-2 border-purple-500 pl-3 italic" x-text="form.summary"></p>
+          <div x-show="visibleSections.summary && form.summary" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')">
+            <p class="text-[10px] leading-relaxed text-slate-600 border-l-2 border-purple-500 pl-3 italic m-0 outline-none focus:bg-violet-50 rounded"
+               :style="{ borderLeftColor: themeColor }"
+               contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="form.summary"></p>
           </div>
 
           <!-- Skills block -->
-          <div class="p-3 bg-purple-500/5 rounded-xl border border-purple-500/10">
-            <div class="text-[9px] font-bold text-purple-700 uppercase tracking-widest mb-1.5">Skillset Pills</div>
+          <div x-show="visibleSections.skills" class="p-3 bg-purple-50/40 rounded-xl border border-purple-100 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded transition-all" @click="focusFormElement('skills')">
+            <div class="text-[9px] font-bold text-purple-700 uppercase tracking-widest mb-1.5" :style="{ color: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.skills = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.skills || 'Technical Competencies'"></span>
+            </div>
             <div class="flex flex-wrap gap-1">
-              <template x-for="s in (form.skills.languages || []).concat(form.skills.frameworks || [])">
+              <template x-for="s in (form.skills.languages || []).concat(form.skills.frameworks || []).concat(form.skills.tools || []).concat(form.skills.other || [])">
                 <span class="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 text-purple-700 px-2 py-0.5 rounded-full text-[8px] font-bold" x-text="s"></span>
               </template>
             </div>
           </div>
 
           <!-- Experience -->
-          <div x-show="form.experience.length > 0" class="space-y-3">
-            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Work Experience</h3>
-            <div class="space-y-3 pl-3.5 border-l border-gray-100">
+          <div x-show="visibleSections.experience && form.experience.length > 0" class="space-y-3">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500" :style="{ backgroundColor: themeColor }"></span> 
+              <span contenteditable="true" @blur="form.sectionTitles.experience = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.experience || 'Work Experience'"></span>
+            </h3>
+            <div class="space-y-3 pl-3.5 border-l border-gray-100" :style="{ borderLeftStyle: dividerStyle }">
               <template x-for="(exp, idx) in form.experience" :key="idx">
-                <div class="space-y-0.5 relative">
+                <div class="space-y-0.5 relative cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('experience', idx)">
                   <div class="flex justify-between items-start text-[10px] font-bold">
-                    <span class="text-slate-800" x-text="exp.role"></span>
-                    <span class="text-purple-600 text-[8.5px]" x-text="exp.duration"></span>
+                    <span class="text-slate-800">
+                      <span contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Role'"></span>
+                      <span class="font-normal text-gray-400"> at </span>
+                      <span class="italic font-normal text-slate-700" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
+                    </span>
+                    <span class="text-purple-600 text-[8.5px]" :style="{ color: themeColor }" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
                   </div>
-                  <div class="text-[8.5px] text-gray-500 font-medium" x-text="exp.company"></div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed">
-                    <template x-for="bullet in exp.bullets">
-                      <li x-text="bullet"></li>
+                  <div class="text-[8px] text-gray-400 italic outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Projects (Injected) -->
+          <div x-show="visibleSections.projects && form.projects.length > 0" class="space-y-3">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-pink-500" :style="{ backgroundColor: themeColor }"></span> 
+              <span contenteditable="true" @blur="form.sectionTitles.projects = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.projects || 'Projects'"></span>
+            </h3>
+            <div class="space-y-3 pl-3.5 border-l border-gray-100" :style="{ borderLeftStyle: dividerStyle }">
+              <template x-for="(proj, idx) in form.projects" :key="idx">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('projects', idx)">
+                  <div class="flex justify-between items-start text-[10px] font-bold">
+                    <span class="text-slate-800" contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></span>
+                    <span class="text-pink-600 text-[8.5px]" :style="{ color: themeColor }" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Education (Injected) -->
+          <div x-show="visibleSections.education && form.education.length > 0" class="space-y-3">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500" :style="{ backgroundColor: themeColor }"></span> 
+              <span contenteditable="true" @blur="form.sectionTitles.education = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.education || 'Education'"></span>
+            </h3>
+            <div class="space-y-2 pl-3.5 border-l border-gray-100" :style="{ borderLeftStyle: dividerStyle }">
+              <template x-for="(edu, idx) in form.education" :key="idx">
+                <div class="flex justify-between items-start text-[9.5px] cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('education', idx)">
+                  <div>
+                    <span class="font-bold text-slate-800" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></span>
+                    <span class="text-gray-500"> — </span>
+                    <span class="italic text-slate-600" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></span>
+                  </div>
+                  <span class="text-purple-600 text-[8.5px]" :style="{ color: themeColor }" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || 'Duration'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Certifications (Injected) -->
+          <div x-show="visibleSections.certifications && form.certifications.length > 0" class="space-y-3">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-pink-500" :style="{ backgroundColor: themeColor }"></span> 
+              <span contenteditable="true" @blur="form.sectionTitles.certifications = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.certifications || 'Certifications'"></span>
+            </h3>
+            <div class="space-y-1.5 pl-3.5 border-l border-gray-100" :style="{ borderLeftStyle: dividerStyle }">
+              <template x-for="(cert, idx) in form.certifications" :key="idx">
+                <div class="flex justify-between items-start text-[8.5px] cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('certifications', idx)">
+                  <div>
+                    <span class="font-bold text-slate-800" contenteditable="true" @blur="cert.name = $event.target.innerText" x-text="cert.name || 'Cert Name'"></span>
+                    <span class="text-gray-500"> at </span>
+                    <span class="italic text-slate-600" contenteditable="true" @blur="cert.authority = $event.target.innerText" x-text="cert.authority || 'Authority'"></span>
+                  </div>
+                  <span class="text-pink-600 text-[8.5px]" :style="{ color: themeColor }" contenteditable="true" @blur="cert.duration = $event.target.innerText" x-text="cert.duration || 'Duration'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Extracurriculars (Injected) -->
+          <div x-show="visibleSections.extracurriculars && form.extracurriculars.length > 0" class="space-y-3">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500" :style="{ backgroundColor: themeColor }"></span> 
+              <span contenteditable="true" @blur="form.sectionTitles.extracurriculars = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.extracurriculars || 'Leadership & Extracurriculars'"></span>
+            </h3>
+            <div class="space-y-3 pl-3.5 border-l border-gray-100" :style="{ borderLeftStyle: dividerStyle }">
+              <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('extracurriculars', idx)">
+                  <div class="flex justify-between items-start text-[10px] font-bold">
+                    <span class="text-slate-800" contenteditable="true" @blur="ex.role = $event.target.innerText" x-text="ex.role || 'Role'"></span>
+                    <span class="text-purple-600 text-[8.5px]" :style="{ color: themeColor }" contenteditable="true" @blur="ex.duration = $event.target.innerText" x-text="ex.duration || 'Duration'"></span>
+                  </div>
+                  <div class="text-[8.5px] text-slate-500 italic" contenteditable="true" @blur="ex.organization = $event.target.innerText" x-text="ex.organization || 'Organization'"></div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="ex.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
                     </template>
                   </ul>
                 </div>
@@ -1701,32 +2152,153 @@
              ============================================== -->
         <div x-show="selectedTemplate === 'executive_elite'" class="space-y-4 font-times text-black">
           <!-- Centered Navy Header -->
-          <div class="text-center pb-3 border-b-2 border-indigo-900">
-            <h1 class="text-2xl font-bold uppercase tracking-widest text-indigo-950 m-0" x-text="form.name || 'Candidate Name'"></h1>
+          <div class="text-center pb-3 border-b-2 border-indigo-900" :style="{ borderBottomColor: themeColor }">
+            <h1 class="text-2xl font-bold uppercase tracking-widest text-indigo-950 m-0 outline-none focus:bg-violet-50 rounded" 
+                :style="{ textTransform: textCase, color: themeColor }"
+                contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
             <div class="text-[8.5px] text-gray-600 uppercase tracking-widest mt-1 flex justify-center gap-x-2 font-sans">
-              <span x-text="form.contact.email"></span> | <span x-text="form.contact.phone"></span> | <span x-text="form.contact.location"></span>
+              <span contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></span> | 
+              <span contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone"></span> | 
+              <span contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location"></span>
             </div>
           </div>
 
           <!-- Summary -->
-          <div x-show="form.summary">
-            <p class="text-[9.5px] leading-relaxed text-gray-800 text-justify" x-text="form.summary"></p>
+          <div x-show="visibleSections.summary && form.summary" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')">
+            <p class="text-[9.5px] leading-relaxed text-gray-800 text-justify m-0 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="form.summary"></p>
           </div>
 
           <!-- Experience -->
-          <div x-show="form.experience && form.experience.length > 0">
-            <h3 class="text-[10px] font-bold text-indigo-950 uppercase tracking-wider mb-2 border-b border-indigo-100 pb-0.5">Professional Experience</h3>
+          <div x-show="visibleSections.experience && form.experience && form.experience.length > 0">
+            <h3 class="text-[10px] font-bold text-indigo-950 uppercase tracking-wider mb-2 border-b border-indigo-100 pb-0.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor + '20' }">
+              <span contenteditable="true" @blur="form.sectionTitles.experience = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.experience || 'Professional Experience'"></span>
+            </h3>
             <div class="space-y-3.5">
               <template x-for="(exp, idx) in form.experience" :key="idx">
-                <div class="space-y-0.5">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('experience', idx)">
                   <div class="flex justify-between items-start text-[9.5px] font-bold">
-                    <span x-text="exp.role"></span>
-                    <span class="font-normal" x-text="exp.duration"></span>
+                    <span contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Job Role'"></span>
+                    <span class="font-normal text-[8.5px] text-gray-500" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
                   </div>
-                  <div class="text-[8.5px] italic text-gray-700" x-text="exp.company"></div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-[8.5px] leading-relaxed text-gray-800">
-                    <template x-for="bullet in exp.bullets">
-                      <li x-text="bullet"></li>
+                  <div class="text-[8.5px] italic text-gray-700">
+                    <span contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
+                    <span class="font-sans not-italic text-gray-400" x-show="exp.location"> - </span>
+                    <span class="not-italic text-gray-500" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[8.5px] leading-relaxed text-gray-800" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Projects (Injected) -->
+          <div x-show="visibleSections.projects && form.projects && form.projects.length > 0">
+            <h3 class="text-[10px] font-bold text-indigo-950 uppercase tracking-wider mb-2 border-b border-indigo-100 pb-0.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor + '20' }">
+              <span contenteditable="true" @blur="form.sectionTitles.projects = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.projects || 'Key Projects'"></span>
+            </h3>
+            <div class="space-y-3.5">
+              <template x-for="(proj, idx) in form.projects" :key="idx">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('projects', idx)">
+                  <div class="flex justify-between items-start text-[9.5px] font-bold">
+                    <span contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></span>
+                    <span class="font-normal text-[8.5px] text-gray-500" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[8.5px] leading-relaxed text-gray-800" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Education (Injected) -->
+          <div x-show="visibleSections.education && form.education && form.education.length > 0">
+            <h3 class="text-[10px] font-bold text-indigo-950 uppercase tracking-wider mb-2 border-b border-indigo-100 pb-0.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor + '20' }">
+              <span contenteditable="true" @blur="form.sectionTitles.education = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.education || 'Education'"></span>
+            </h3>
+            <div class="space-y-2">
+              <template x-for="(edu, idx) in form.education" :key="idx">
+                <div class="flex justify-between items-start text-[9.5px] cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('education', idx)">
+                  <div>
+                    <span class="font-bold text-indigo-950" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></span>
+                    <span> - </span>
+                    <span class="italic text-gray-700" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></span>
+                  </div>
+                  <span class="text-gray-500" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || 'Duration'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Skills (Injected) -->
+          <div x-show="visibleSections.skills">
+            <h3 class="text-[10px] font-bold text-indigo-950 uppercase tracking-wider mb-2 border-b border-indigo-100 pb-0.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor + '20' }">
+              <span contenteditable="true" @blur="form.sectionTitles.skills = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.skills || 'Technical Skills'"></span>
+            </h3>
+            <div class="space-y-0.5 text-[8.5px] text-gray-800 font-sans leading-normal">
+              <div x-show="form.skills.languages.length"><strong>Languages:</strong> <span x-text="form.skills.languages.join(', ')"></span></div>
+              <div x-show="form.skills.frameworks.length"><strong>Frameworks:</strong> <span x-text="form.skills.frameworks.join(', ')"></span></div>
+              <div x-show="form.skills.tools.length"><strong>Tools:</strong> <span x-text="form.skills.tools.join(', ')"></span></div>
+              <div x-show="form.skills.other.length"><strong>Other:</strong> <span x-text="form.skills.other.join(', ')"></span></div>
+            </div>
+          </div>
+
+          <!-- Certifications (Injected) -->
+          <div x-show="visibleSections.certifications && form.certifications && form.certifications.length > 0">
+            <h3 class="text-[10px] font-bold text-indigo-950 uppercase tracking-wider mb-2 border-b border-indigo-100 pb-0.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor + '20' }">
+              <span contenteditable="true" @blur="form.sectionTitles.certifications = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.certifications || 'Certifications'"></span>
+            </h3>
+            <div class="space-y-1.5">
+              <template x-for="(cert, idx) in form.certifications" :key="idx">
+                <div class="flex justify-between items-start text-[8.5px] text-gray-800 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('certifications', idx)">
+                  <div>
+                    <span class="font-bold text-indigo-950" contenteditable="true" @blur="cert.name = $event.target.innerText" x-text="cert.name || 'Cert Name'"></span>
+                    <span class="text-gray-400"> at </span>
+                    <span class="italic text-gray-700" contenteditable="true" @blur="cert.authority = $event.target.innerText" x-text="cert.authority || 'Authority'"></span>
+                  </div>
+                  <span class="text-gray-500" contenteditable="true" @blur="cert.duration = $event.target.innerText" x-text="cert.duration || 'Duration'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Extracurriculars (Injected) -->
+          <div x-show="visibleSections.extracurriculars && form.extracurriculars && form.extracurriculars.length > 0">
+            <h3 class="text-[10px] font-bold text-indigo-950 uppercase tracking-wider mb-2 border-b border-indigo-100 pb-0.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor + '20' }">
+              <span contenteditable="true" @blur="form.sectionTitles.extracurriculars = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.extracurriculars || 'Leadership & Activities'"></span>
+            </h3>
+            <div class="space-y-3.5">
+              <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('extracurriculars', idx)">
+                  <div class="flex justify-between items-start text-[9.5px] font-bold">
+                    <span class="text-slate-900">
+                      <span contenteditable="true" @blur="ex.role = $event.target.innerText" x-text="ex.role || 'Role'"></span>
+                      <span class="font-normal text-gray-400"> — </span>
+                      <span class="italic font-normal text-slate-700" contenteditable="true" @blur="ex.organization = $event.target.innerText" x-text="ex.organization || 'Organization'"></span>
+                    </span>
+                    <span class="text-gray-500 font-normal" contenteditable="true" @blur="ex.duration = $event.target.innerText" x-text="ex.duration || 'Duration'"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[8.5px] leading-relaxed text-gray-800" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="ex.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
                     </template>
                   </ul>
                 </div>
@@ -1740,36 +2312,158 @@
              ============================================== -->
         <div x-show="selectedTemplate === 'startup_sans'" class="space-y-4 text-slate-800 bg-white font-sans">
           <!-- Bold Left Border Accent Title -->
-          <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+          <div class="flex flex-col md:flex-row justify-between items-start gap-4 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('contact')">
             <div>
-              <h1 class="text-3xl font-extrabold tracking-tight text-slate-900" x-text="form.name || 'Candidate Name'"></h1>
-              <div class="text-xs font-bold text-brand uppercase mt-0.5" x-text="targetJobTitle || 'Startup Dev'"></div>
+              <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 outline-none focus:bg-violet-50 rounded" 
+                  :style="{ textTransform: textCase, color: textColor }"
+                  contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
+              <div class="text-xs font-bold text-brand uppercase mt-0.5" 
+                   :style="{ color: themeColor }"
+                   contenteditable="true" @blur="targetJobTitle = $event.target.innerText" x-text="targetJobTitle || 'Job Title'"></div>
             </div>
             <div class="text-[9px] text-gray-500 font-mono text-right">
-              <div x-text="form.contact.email"></div>
-              <div x-text="form.contact.phone"></div>
-              <div x-text="form.contact.location"></div>
+              <div contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></div>
+              <div contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone"></div>
+              <div contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location"></div>
             </div>
           </div>
 
           <!-- Summary -->
-          <div x-show="form.summary">
-            <p class="text-[9.5px] leading-relaxed text-slate-600 m-0" x-text="form.summary"></p>
+          <div x-show="visibleSections.summary && form.summary" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')">
+            <p class="text-[9.5px] leading-relaxed text-slate-600 m-0 outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="form.summary"></p>
           </div>
 
           <!-- Experience -->
-          <div x-show="form.experience && form.experience.length > 0">
-            <h3 class="text-[10px] font-extrabold text-slate-900 uppercase tracking-widest border-l-4 border-brand pl-2 mb-2">Work Experience</h3>
+          <div x-show="visibleSections.experience && form.experience && form.experience.length > 0">
+            <h3 class="text-[10px] font-extrabold text-slate-900 uppercase tracking-widest border-l-4 pl-2 mb-2"
+                :style="{ borderLeftColor: themeColor, borderLeftStyle: dividerStyle === 'none' ? 'none' : dividerStyle }">
+              <span contenteditable="true" @blur="form.sectionTitles.experience = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.experience || 'Work Experience'"></span>
+            </h3>
             <div class="space-y-3.5">
               <template x-for="(exp, idx) in form.experience" :key="idx">
-                <div class="space-y-0.5">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('experience', idx)">
                   <div class="flex justify-between items-start text-[9.5px] font-bold text-slate-900">
-                    <span x-text="`${exp.role} @ ${exp.company}`"></span>
-                    <span class="text-gray-500 font-normal" x-text="exp.duration"></span>
+                    <span>
+                      <span contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Role'"></span>
+                      <span> @ </span>
+                      <span class="font-medium text-slate-700" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
+                    </span>
+                    <span class="text-gray-500 font-normal" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
                   </div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed">
-                    <template x-for="bullet in exp.bullets">
-                      <li x-text="bullet"></li>
+                  <div class="text-[8px] text-gray-400 italic outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Projects (Injected) -->
+          <div x-show="visibleSections.projects && form.projects && form.projects.length > 0">
+            <h3 class="text-[10px] font-extrabold text-slate-900 uppercase tracking-widest border-l-4 pl-2 mb-2"
+                :style="{ borderLeftColor: themeColor, borderLeftStyle: dividerStyle === 'none' ? 'none' : dividerStyle }">
+              <span contenteditable="true" @blur="form.sectionTitles.projects = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.projects || 'Projects'"></span>
+            </h3>
+            <div class="space-y-3.5">
+              <template x-for="(proj, idx) in form.projects" :key="idx">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('projects', idx)">
+                  <div class="flex justify-between items-start text-[9.5px] font-bold text-slate-900">
+                    <span contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></span>
+                    <span class="text-gray-500 font-normal" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Education (Injected) -->
+          <div x-show="visibleSections.education && form.education && form.education.length > 0">
+            <h3 class="text-[10px] font-extrabold text-slate-900 uppercase tracking-widest border-l-4 pl-2 mb-2"
+                :style="{ borderLeftColor: themeColor, borderLeftStyle: dividerStyle === 'none' ? 'none' : dividerStyle }">
+              <span contenteditable="true" @blur="form.sectionTitles.education = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.education || 'Education'"></span>
+            </h3>
+            <div class="space-y-2.5">
+              <template x-for="(edu, idx) in form.education" :key="idx">
+                <div class="flex justify-between items-start text-[9.5px] cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('education', idx)">
+                  <div>
+                    <span class="font-bold text-slate-900" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></span>
+                    <span class="text-gray-500"> - </span>
+                    <span class="italic text-slate-700" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></span>
+                  </div>
+                  <span class="text-gray-500" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || 'Duration'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Skills (Injected) -->
+          <div x-show="visibleSections.skills" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('skills')">
+            <h3 class="text-[10px] font-extrabold text-slate-900 uppercase tracking-widest border-l-4 pl-2 mb-2"
+                :style="{ borderLeftColor: themeColor, borderLeftStyle: dividerStyle === 'none' ? 'none' : dividerStyle }">
+              <span contenteditable="true" @blur="form.sectionTitles.skills = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.skills || 'Technical Competencies'"></span>
+            </h3>
+            <div class="space-y-1 text-[8.5px] text-gray-600 leading-normal font-sans">
+              <div x-show="form.skills.languages.length"><strong>Languages:</strong> <span x-text="form.skills.languages.join(', ')"></span></div>
+              <div x-show="form.skills.frameworks.length"><strong>Frameworks:</strong> <span x-text="form.skills.frameworks.join(', ')"></span></div>
+              <div x-show="form.skills.tools.length"><strong>Tools:</strong> <span x-text="form.skills.tools.join(', ')"></span></div>
+              <div x-show="form.skills.other.length"><strong>Other:</strong> <span x-text="form.skills.other.join(', ')"></span></div>
+            </div>
+          </div>
+
+          <!-- Certifications (Injected) -->
+          <div x-show="visibleSections.certifications && form.certifications && form.certifications.length > 0">
+            <h3 class="text-[10px] font-extrabold text-slate-900 uppercase tracking-widest border-l-4 pl-2 mb-2"
+                :style="{ borderLeftColor: themeColor, borderLeftStyle: dividerStyle === 'none' ? 'none' : dividerStyle }">
+              <span contenteditable="true" @blur="form.sectionTitles.certifications = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.certifications || 'Certifications'"></span>
+            </h3>
+            <div class="space-y-2">
+              <template x-for="(cert, idx) in form.certifications" :key="idx">
+                <div class="flex justify-between items-start text-[8.5px] text-slate-800 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('certifications', idx)">
+                  <div>
+                    <span class="font-bold text-slate-900" contenteditable="true" @blur="cert.name = $event.target.innerText" x-text="cert.name || 'Cert Name'"></span>
+                    <span class="text-gray-400"> at </span>
+                    <span class="italic text-slate-700" contenteditable="true" @blur="cert.authority = $event.target.innerText" x-text="cert.authority || 'Authority'"></span>
+                  </div>
+                  <span class="text-gray-500" contenteditable="true" @blur="cert.duration = $event.target.innerText" x-text="cert.duration || 'Duration'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Extracurriculars (Injected) -->
+          <div x-show="visibleSections.extracurriculars && form.extracurriculars && form.extracurriculars.length > 0">
+            <h3 class="text-[10px] font-extrabold text-slate-900 uppercase tracking-widest border-l-4 pl-2 mb-2"
+                :style="{ borderLeftColor: themeColor, borderLeftStyle: dividerStyle === 'none' ? 'none' : dividerStyle }">
+              <span contenteditable="true" @blur="form.sectionTitles.extracurriculars = $event.target.innerText" :style="{ textTransform: textCase, color: themeColor }" x-text="form.sectionTitles.extracurriculars || 'Leadership & Extracurriculars'"></span>
+            </h3>
+            <div class="space-y-3.5">
+              <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('extracurriculars', idx)">
+                  <div class="flex justify-between items-start text-[9.5px] font-bold text-slate-900">
+                    <span>
+                      <span contenteditable="true" @blur="ex.role = $event.target.innerText" x-text="ex.role || 'Role'"></span>
+                      <span class="font-normal text-gray-400"> — </span>
+                      <span class="italic font-normal text-slate-700" contenteditable="true" @blur="ex.organization = $event.target.innerText" x-text="ex.organization || 'Organization'"></span>
+                    </span>
+                    <span class="text-gray-500 font-normal" contenteditable="true" @blur="ex.duration = $event.target.innerText" x-text="ex.duration || 'Duration'"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="ex.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
                     </template>
                   </ul>
                 </div>
@@ -1782,37 +2476,153 @@
              LAYOUT 9: ACADEMIC CV 
              ============================================== -->
         <div x-show="selectedTemplate === 'academic_cv'" class="space-y-4 font-times text-black">
-          <div class="text-center pb-2">
-            <h1 class="text-2xl font-bold uppercase m-0" x-text="form.name || 'Candidate Name'"></h1>
-            <div class="text-[9px] mt-1 italic" x-text="`${form.contact.email} | ${form.contact.phone} | ${form.contact.location}`"></div>
+          <div class="text-center pb-2 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('contact')">
+            <h1 class="text-2xl font-bold uppercase m-0 outline-none focus:bg-violet-50 rounded"
+                :style="{ textTransform: textCase, color: textColor }"
+                contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
+            <div class="text-[9px] mt-1 italic font-sans" contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="`${form.contact.email} | ${form.contact.phone} | ${form.contact.location}`"></div>
+          </div>
+
+          <!-- Summary (Injected) -->
+          <div x-show="visibleSections.summary && form.summary" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')">
+            <h3 class="text-[10px] font-bold uppercase tracking-wider border-b border-black mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.summary = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.summary || '1. Objective & Profile'"></span>
+            </h3>
+            <p class="text-[9px] leading-relaxed text-justify m-0 outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="form.summary"></p>
           </div>
 
           <!-- Education -->
-          <div x-show="form.education && form.education.length > 0">
-            <h3 class="text-[10px] font-bold uppercase tracking-wider border-b border-black mb-1.5">1. Education History</h3>
+          <div x-show="visibleSections.education && form.education && form.education.length > 0">
+            <h3 class="text-[10px] font-bold uppercase tracking-wider border-b border-black mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.education = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.education || '2. Education History'"></span>
+            </h3>
             <div class="space-y-2 pl-3">
               <template x-for="(edu, idx) in form.education" :key="idx">
-                <div class="text-[9px] leading-relaxed">
-                  <div class="font-bold" x-text="`${edu.degree} — ${edu.institution}`"></div>
-                  <div class="text-gray-600" x-text="`Graduated: ${edu.duration}`"></div>
+                <div class="text-[9px] leading-relaxed cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('education', idx)">
+                  <div class="font-bold">
+                    <span contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></span>
+                    <span> — </span>
+                    <span class="italic font-normal" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></span>
+                  </div>
+                  <div class="text-gray-500 font-sans" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="`Graduated: ${edu.duration}`"></div>
                 </div>
               </template>
             </div>
           </div>
 
           <!-- Experience -->
-          <div x-show="form.experience && form.experience.length > 0">
-            <h3 class="text-[10px] font-bold uppercase tracking-wider border-b border-black mb-1.5">2. Research & Academic Experience</h3>
+          <div x-show="visibleSections.experience && form.experience && form.experience.length > 0">
+            <h3 class="text-[10px] font-bold uppercase tracking-wider border-b border-black mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.experience = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.experience || '3. Research & Academic Experience'"></span>
+            </h3>
             <div class="space-y-3 pl-3">
               <template x-for="(exp, idx) in form.experience" :key="idx">
-                <div class="space-y-0.5">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('experience', idx)">
                   <div class="flex justify-between items-start text-[9px] font-bold">
-                    <span x-text="`${exp.role} at ${exp.company}`"></span>
-                    <span class="font-normal" x-text="exp.duration"></span>
+                    <span>
+                      <span contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Role'"></span>
+                      <span> at </span>
+                      <span class="font-normal italic" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
+                    </span>
+                    <span class="font-normal" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
                   </div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-[8.5px] leading-relaxed text-gray-800">
-                    <template x-for="bullet in exp.bullets">
-                      <li x-text="bullet"></li>
+                  <div class="text-[8px] text-gray-500 italic outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[8.5px] leading-relaxed text-gray-800" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Projects (Injected) -->
+          <div x-show="visibleSections.projects && form.projects && form.projects.length > 0">
+            <h3 class="text-[10px] font-bold uppercase tracking-wider border-b border-black mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.projects = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.projects || '4. Selected Publications & Projects'"></span>
+            </h3>
+            <div class="space-y-3 pl-3">
+              <template x-for="(proj, idx) in form.projects" :key="idx">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('projects', idx)">
+                  <div class="flex justify-between items-start text-[9px] font-bold">
+                    <span contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></span>
+                    <span class="font-normal" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[8.5px] leading-relaxed text-gray-800" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Skills (Injected) -->
+          <div x-show="visibleSections.skills" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('skills')">
+            <h3 class="text-[10px] font-bold uppercase tracking-wider border-b border-black mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.skills = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.skills || '5. Skills & Methodologies'"></span>
+            </h3>
+            <div class="space-y-0.5 text-[9px] text-gray-800 leading-normal pl-3 font-sans">
+              <div x-show="form.skills.languages.length"><strong>Languages:</strong> <span x-text="form.skills.languages.join(', ')"></span></div>
+              <div x-show="form.skills.frameworks.length"><strong>Frameworks:</strong> <span x-text="form.skills.frameworks.join(', ')"></span></div>
+              <div x-show="form.skills.tools.length"><strong>Tools:</strong> <span x-text="form.skills.tools.join(', ')"></span></div>
+              <div x-show="form.skills.other.length"><strong>Other:</strong> <span x-text="form.skills.other.join(', ')"></span></div>
+            </div>
+          </div>
+
+          <!-- Certifications (Injected) -->
+          <div x-show="visibleSections.certifications && form.certifications && form.certifications.length > 0" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('certifications')">
+            <h3 class="text-[10px] font-bold uppercase tracking-wider border-b border-black mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.certifications = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.certifications || '6. Professional Certifications'"></span>
+            </h3>
+            <div class="space-y-1.5 pl-3">
+              <template x-for="(cert, idx) in form.certifications" :key="idx">
+                <div class="flex justify-between items-start text-[9px]">
+                  <div>
+                    <span class="font-bold" contenteditable="true" @blur="cert.name = $event.target.innerText" x-text="cert.name || 'Cert Name'"></span>
+                    <span> - </span>
+                    <span class="italic text-gray-600" contenteditable="true" @blur="cert.authority = $event.target.innerText" x-text="cert.authority || 'Authority'"></span>
+                  </div>
+                  <span contenteditable="true" @blur="cert.duration = $event.target.innerText" x-text="cert.duration || 'Duration'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Extracurriculars (Injected) -->
+          <div x-show="visibleSections.extracurriculars && form.extracurriculars && form.extracurriculars.length > 0" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('extracurriculars')">
+            <h3 class="text-[10px] font-bold uppercase tracking-wider border-b border-black mb-1.5"
+                :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.extracurriculars = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.extracurriculars || '7. Extracurricular Honors'"></span>
+            </h3>
+            <div class="space-y-3 pl-3">
+              <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
+                <div class="space-y-0.5">
+                  <div class="flex justify-between items-start font-bold text-[9px]">
+                    <div>
+                      <span contenteditable="true" @blur="ex.role = $event.target.innerText" x-text="ex.role || 'Role'"></span>
+                      <span> - </span>
+                      <span class="italic font-normal" contenteditable="true" @blur="ex.organization = $event.target.innerText" x-text="ex.organization || 'Organization'"></span>
+                    </div>
+                    <span class="font-normal" contenteditable="true" @blur="ex.duration = $event.target.innerText" x-text="ex.duration || 'Duration'"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-[8.5px] leading-relaxed text-gray-800" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="ex.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
                     </template>
                   </ul>
                 </div>
@@ -1822,36 +2632,69 @@
         </div>
 
         <!-- ==============================================
-             LAYOUT 10: SIMPLE STANDARD 
+             LAYOUT 10: SIMPLE STANDARD (ATS OPTIMIZED)
              ============================================== -->
         <div x-show="selectedTemplate === 'simple_standard'" class="space-y-3.5 text-slate-800 bg-white font-sans text-[9.5px]">
           <!-- Standard Left aligned header -->
-          <div>
-            <h1 class="text-2xl font-bold tracking-tight text-slate-900 m-0" x-text="form.name || 'Candidate Name'"></h1>
+          <div class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('contact')">
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 m-0 outline-none focus:bg-violet-50 rounded p-0.5" 
+                :style="{ textTransform: textCase, color: textColor }"
+                contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
             <div class="text-[8.5px] text-gray-500 space-x-1.5 flex flex-wrap mt-0.5 font-sans">
-              <span x-text="form.contact.email"></span>
+              <span contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></span>
               <span>•</span>
-              <span x-text="form.contact.phone"></span>
+              <span contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone"></span>
               <span x-show="form.contact.location">
                 <span>•</span>
-                <span x-text="form.contact.location"></span>
+                <span contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location"></span>
+              </span>
+              <span x-show="form.contact.linkedin">
+                <span>•</span>
+                <span contenteditable="true" @blur="form.contact.linkedin = $event.target.innerText" x-text="form.contact.linkedin"></span>
+              </span>
+              <span x-show="form.contact.github">
+                <span>•</span>
+                <span contenteditable="true" @blur="form.contact.github = $event.target.innerText" x-text="form.contact.github"></span>
+              </span>
+              <span x-show="form.contact.website">
+                <span>•</span>
+                <span contenteditable="true" @blur="form.contact.website = $event.target.innerText" x-text="form.contact.website"></span>
               </span>
             </div>
           </div>
 
+          <!-- Summary (Injected) -->
+          <div x-show="visibleSections.summary && form.summary" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')">
+            <div class="font-bold text-[10px] uppercase tracking-wider border-b border-slate-300 pb-0.5 mb-2 text-slate-800"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.summary = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.summary || 'Summary'"></span>
+            </div>
+            <p class="leading-relaxed text-slate-600 m-0 outline-none focus:bg-violet-50 rounded p-0.5" contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="form.summary"></p>
+          </div>
+
           <!-- Experience -->
-          <div x-show="form.experience && form.experience.length > 0">
-            <div class="font-bold text-[10px] uppercase tracking-wider border-b border-slate-300 pb-0.5 mb-2 text-slate-800">Work Experience</div>
+          <div x-show="visibleSections.experience && form.experience && form.experience.length > 0">
+            <div class="font-bold text-[10px] uppercase tracking-wider border-b border-slate-300 pb-0.5 mb-2 text-slate-800"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.experience = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.experience || 'Work Experience'"></span>
+            </div>
             <div class="space-y-3">
               <template x-for="(exp, idx) in form.experience" :key="idx">
-                <div class="space-y-0.5">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('experience', idx)">
                   <div class="flex justify-between items-start font-bold">
-                    <span class="text-slate-900" x-text="`${exp.role} — ${exp.company}`"></span>
-                    <span class="text-gray-500 font-normal text-[8.5px]" x-text="exp.duration"></span>
+                    <span class="text-slate-900">
+                      <span contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Role'"></span>
+                      <span> — </span>
+                      <span class="font-medium text-slate-700" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></span>
+                    </span>
+                    <span class="text-gray-500 font-normal text-[8.5px]" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
                   </div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed">
-                    <template x-for="bullet in exp.bullets">
-                      <li x-text="bullet"></li>
+                  <div class="text-[8px] text-gray-400 italic outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
+                      </li>
                     </template>
                   </ul>
                 </div>
@@ -1860,18 +2703,106 @@
           </div>
 
           <!-- Projects -->
-          <div x-show="form.projects && form.projects.length > 0">
-            <div class="font-bold text-[10px] uppercase tracking-wider border-b border-slate-300 pb-0.5 mb-2 text-slate-800">Projects</div>
+          <div x-show="visibleSections.projects && form.projects && form.projects.length > 0">
+            <div class="font-bold text-[10px] uppercase tracking-wider border-b border-slate-300 pb-0.5 mb-2 text-slate-800"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.projects = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.projects || 'Projects'"></span>
+            </div>
             <div class="space-y-3">
               <template x-for="(proj, idx) in form.projects" :key="idx">
-                <div class="space-y-0.5">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('projects', idx)">
                   <div class="flex justify-between items-start font-bold">
-                    <span class="text-slate-900" x-text="proj.title"></span>
-                    <span class="text-gray-500 font-normal text-[8.5px]" x-text="proj.duration"></span>
+                    <span class="text-slate-900" contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></span>
+                    <span class="text-gray-500 font-normal text-[8.5px]" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></span>
                   </div>
-                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed">
-                    <template x-for="bullet in proj.bullets">
-                      <li x-text="bullet"></li>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Education (Injected) -->
+          <div x-show="visibleSections.education && form.education && form.education.length > 0">
+            <div class="font-bold text-[10px] uppercase tracking-wider border-b border-slate-300 pb-0.5 mb-2 text-slate-800"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.education = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.education || 'Education'"></span>
+            </div>
+            <div class="space-y-2">
+              <template x-for="(edu, idx) in form.education" :key="idx">
+                <div class="flex justify-between items-start text-[9.5px] cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('education', idx)">
+                  <div>
+                    <span class="font-bold text-slate-900" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></span>
+                    <span class="text-gray-400"> - </span>
+                    <span class="italic text-slate-700" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></span>
+                  </div>
+                  <span class="text-gray-500" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || 'Graduation'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Skills (Injected) -->
+          <div x-show="visibleSections.skills" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('skills')">
+            <div class="font-bold text-[10px] uppercase tracking-wider border-b border-slate-300 pb-0.5 mb-2 text-slate-800"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.skills = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.skills || 'Skills & Competencies'"></span>
+            </div>
+            <div class="space-y-0.5 text-[8.5px] text-gray-800 font-sans leading-normal">
+              <div x-show="form.skills.languages.length"><strong>Languages:</strong> <span x-text="form.skills.languages.join(', ')"></span></div>
+              <div x-show="form.skills.frameworks.length"><strong>Frameworks:</strong> <span x-text="form.skills.frameworks.join(', ')"></span></div>
+              <div x-show="form.skills.tools.length"><strong>Tools:</strong> <span x-text="form.skills.tools.join(', ')"></span></div>
+              <div x-show="form.skills.other.length"><strong>Other:</strong> <span x-text="form.skills.other.join(', ')"></span></div>
+            </div>
+          </div>
+
+          <!-- Certifications (Injected) -->
+          <div x-show="visibleSections.certifications && form.certifications && form.certifications.length > 0">
+            <div class="font-bold text-[10px] uppercase tracking-wider border-b border-slate-300 pb-0.5 mb-2 text-slate-800"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.certifications = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.certifications || 'Certifications'"></span>
+            </div>
+            <div class="space-y-1.5">
+              <template x-for="(cert, idx) in form.certifications" :key="idx">
+                <div class="flex justify-between items-start text-[8.5px] text-gray-800 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('certifications', idx)">
+                  <div>
+                    <span class="font-bold text-slate-900" contenteditable="true" @blur="cert.name = $event.target.innerText" x-text="cert.name || 'Cert Name'"></span>
+                    <span class="text-gray-400"> at </span>
+                    <span class="italic text-gray-600" contenteditable="true" @blur="cert.authority = $event.target.innerText" x-text="cert.authority || 'Authority'"></span>
+                  </div>
+                  <span class="text-gray-500" contenteditable="true" @blur="cert.duration = $event.target.innerText" x-text="cert.duration || 'Duration'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Extracurriculars (Injected) -->
+          <div x-show="visibleSections.extracurriculars && form.extracurriculars && form.extracurriculars.length > 0">
+            <div class="font-bold text-[10px] uppercase tracking-wider border-b border-slate-300 pb-0.5 mb-2 text-slate-800"
+                 :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.extracurriculars = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.extracurriculars || 'Leadership & Extracurriculars'"></span>
+            </div>
+            <div class="space-y-3">
+              <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
+                <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('extracurriculars', idx)">
+                  <div class="flex justify-between items-start text-[9.5px] font-bold">
+                    <span class="text-slate-900">
+                      <span contenteditable="true" @blur="ex.role = $event.target.innerText" x-text="ex.role || 'Role'"></span>
+                      <span class="font-normal text-gray-400"> — </span>
+                      <span class="italic font-normal text-slate-700" contenteditable="true" @blur="ex.organization = $event.target.innerText" x-text="ex.organization || 'Organization'"></span>
+                    </span>
+                    <span class="text-gray-500 font-normal" contenteditable="true" @blur="ex.duration = $event.target.innerText" x-text="ex.duration || 'Duration'"></span>
+                  </div>
+                  <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8.5px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="ex.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
                     </template>
                   </ul>
                 </div>
@@ -1883,48 +2814,57 @@
         <!-- ==============================================
              LAYOUT 11: EUROPASS CV (EUROPEAN STANDARD)
              ============================================== -->
-        <div x-show="selectedTemplate === 'europass_cv'" class="space-y-4 text-slate-800 bg-white font-sans text-[9px] relative pl-4 border-l-2 border-slate-200">
+        <div x-show="selectedTemplate === 'europass_cv'" class="space-y-4 text-slate-800 bg-white font-sans text-[9px] relative pl-4 border-l-2 border-slate-200" :style="{ borderLeftColor: themeColor }">
           <!-- Europass Header / Personal Information -->
-          <div class="grid grid-cols-12 gap-3 pb-3 border-b border-slate-200">
+          <div class="grid grid-cols-12 gap-3 pb-3 border-b border-slate-200 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('contact')">
             <div class="col-span-8">
-              <h1 class="text-xl font-bold tracking-wide text-blue-900 m-0" x-text="form.name || 'Candidate Name'"></h1>
+              <h1 class="text-xl font-bold tracking-wide text-blue-900 m-0 outline-none focus:bg-violet-50 rounded" 
+                  :style="{ textTransform: textCase, color: themeColor }"
+                  contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
               <div class="text-[8.5px] text-gray-500 mt-1 space-y-0.5">
-                <div x-show="form.contact.email">Email: <span class="text-blue-900 font-semibold" x-text="form.contact.email"></span></div>
-                <div x-show="form.contact.phone">Phone: <span x-text="form.contact.phone"></span></div>
-                <div x-show="form.contact.location">Address: <span x-text="form.contact.location"></span></div>
+                <div>Email: <span class="text-blue-900 font-semibold" contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></span></div>
+                <div>Phone: <span contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone"></span></div>
+                <div>Address: <span contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location"></span></div>
               </div>
             </div>
-            <div class="col-span-4 text-right text-[8.5px] text-gray-500 space-y-0.5">
-              <div x-show="form.contact.linkedin">LinkedIn: <span class="text-blue-900" x-text="form.contact.linkedin"></span></div>
-              <div x-show="form.contact.github">GitHub: <span class="text-blue-900" x-text="form.contact.github"></span></div>
-              <div x-show="form.contact.website">Website: <span class="text-blue-900" x-text="form.contact.website"></span></div>
+            <div class="col-span-4 text-right text-[8.5px] text-gray-500 space-y-0.5 font-sans">
+              <div x-show="form.contact.linkedin">LinkedIn: <span class="text-blue-900" contenteditable="true" @blur="form.contact.linkedin = $event.target.innerText" x-text="form.contact.linkedin"></span></div>
+              <div x-show="form.contact.github">GitHub: <span class="text-blue-900" contenteditable="true" @blur="form.contact.github = $event.target.innerText" x-text="form.contact.github"></span></div>
+              <div x-show="form.contact.website">Website: <span class="text-blue-900" contenteditable="true" @blur="form.contact.website = $event.target.innerText" x-text="form.contact.website"></span></div>
             </div>
           </div>
 
           <!-- Professional Summary -->
-          <div x-show="form.summary" class="grid grid-cols-12 gap-3">
-            <div class="col-span-3 font-bold text-blue-900 uppercase text-[8px] tracking-wider">Work Applied For</div>
+          <div x-show="visibleSections.summary && form.summary" class="grid grid-cols-12 gap-3 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')">
+            <div class="col-span-3 font-bold text-blue-900 uppercase text-[8px] tracking-wider" :style="{ color: themeColor }">
+              <span contenteditable="true" @blur="form.sectionTitles.summary = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.summary || 'Work Applied For'"></span>
+            </div>
             <div class="col-span-9">
-              <div class="font-bold text-[9.5px] text-slate-900 mb-1" x-text="targetJobTitle || 'Job Title'"></div>
-              <p class="leading-relaxed text-slate-600 m-0" x-text="form.summary"></p>
+              <div class="font-bold text-[9.5px] text-slate-900 mb-1" contenteditable="true" @blur="targetJobTitle = $event.target.innerText" x-text="targetJobTitle || 'Job Title'"></div>
+              <p class="leading-relaxed text-slate-600 m-0 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="form.summary"></p>
             </div>
           </div>
 
           <!-- Work Experience -->
-          <div x-show="form.experience && form.experience.length > 0" class="space-y-3">
+          <div x-show="visibleSections.experience && form.experience && form.experience.length > 0" class="space-y-3">
             <div class="grid grid-cols-12 gap-3">
-              <div class="col-span-12 font-bold text-blue-900 uppercase text-[8px] tracking-wider border-b border-slate-100 pb-1">Work Experience</div>
+              <div class="col-span-12 font-bold text-blue-900 uppercase text-[8px] tracking-wider border-b border-slate-100 pb-1"
+                   :style="{ color: themeColor, borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px') }">
+                <span contenteditable="true" @blur="form.sectionTitles.experience = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.experience || 'Work Experience'"></span>
+              </div>
             </div>
             <template x-for="(exp, idx) in form.experience" :key="idx">
-              <div class="grid grid-cols-12 gap-3">
-                <div class="col-span-3 text-gray-500 font-semibold" x-text="exp.duration"></div>
+              <div class="grid grid-cols-12 gap-3 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('experience', idx)">
+                <div class="col-span-3 text-gray-500 font-semibold outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></div>
                 <div class="col-span-9">
-                  <div class="font-bold text-slate-900" x-text="exp.role || 'Job Role'"></div>
-                  <div class="text-gray-500 font-medium" x-text="exp.company || 'Company'"></div>
-                  <div class="text-gray-400 text-[8.5px]" x-show="exp.location" x-text="exp.location"></div>
-                  <ul class="list-disc pl-4 mt-1.5 space-y-0.5 text-slate-600 text-[8px] leading-relaxed">
-                    <template x-for="bullet in exp.bullets">
-                      <li x-text="bullet"></li>
+                  <div class="font-bold text-slate-900 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Job Role'"></div>
+                  <div class="text-gray-500 font-medium outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></div>
+                  <div class="text-gray-400 text-[8.5px] outline-none focus:bg-violet-50 rounded" x-show="exp.location" contenteditable="true" @blur="exp.location = $event.target.innerText" x-text="exp.location || 'Location'"></div>
+                  <ul class="list-disc pl-4 mt-1.5 space-y-0.5 text-slate-600 text-[8px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
+                      </li>
                     </template>
                   </ul>
                 </div>
@@ -1933,18 +2873,23 @@
           </div>
 
           <!-- Projects -->
-          <div x-show="form.projects && form.projects.length > 0" class="space-y-3">
+          <div x-show="visibleSections.projects && form.projects && form.projects.length > 0" class="space-y-3">
             <div class="grid grid-cols-12 gap-3">
-              <div class="col-span-12 font-bold text-blue-900 uppercase text-[8px] tracking-wider border-b border-slate-100 pb-1">Projects</div>
+              <div class="col-span-12 font-bold text-blue-900 uppercase text-[8px] tracking-wider border-b border-slate-100 pb-1"
+                   :style="{ color: themeColor, borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px') }">
+                <span contenteditable="true" @blur="form.sectionTitles.projects = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.projects || 'Projects'"></span>
+              </div>
             </div>
             <template x-for="(proj, idx) in form.projects" :key="idx">
-              <div class="grid grid-cols-12 gap-3">
-                <div class="col-span-3 text-gray-500 font-semibold" x-text="proj.duration"></div>
+              <div class="grid grid-cols-12 gap-3 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('projects', idx)">
+                <div class="col-span-3 text-gray-500 font-semibold outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></div>
                 <div class="col-span-9">
-                  <div class="font-bold text-slate-900" x-text="proj.title || 'Project Title'"></div>
-                  <ul class="list-disc pl-4 mt-1 space-y-0.5 text-slate-600 text-[8px] leading-relaxed">
-                    <template x-for="bullet in proj.bullets">
-                      <li x-text="bullet"></li>
+                  <div class="font-bold text-slate-900 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></div>
+                  <ul class="list-disc pl-4 mt-1 space-y-0.5 text-slate-600 text-[8px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
                     </template>
                   </ul>
                 </div>
@@ -1953,36 +2898,87 @@
           </div>
 
           <!-- Education -->
-          <div x-show="form.education && form.education.length > 0" class="space-y-3">
+          <div x-show="visibleSections.education && form.education && form.education.length > 0" class="space-y-3">
             <div class="grid grid-cols-12 gap-3">
-              <div class="col-span-12 font-bold text-blue-900 uppercase text-[8px] tracking-wider border-b border-slate-100 pb-1">Education and Training</div>
+              <div class="col-span-12 font-bold text-blue-900 uppercase text-[8px] tracking-wider border-b border-slate-100 pb-1"
+                   :style="{ color: themeColor, borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px') }">
+                <span contenteditable="true" @blur="form.sectionTitles.education = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.education || 'Education and Training'"></span>
+              </div>
             </div>
             <template x-for="(edu, idx) in form.education" :key="idx">
-              <div class="grid grid-cols-12 gap-3">
-                <div class="col-span-3 text-gray-500 font-semibold" x-text="edu.duration"></div>
+              <div class="grid grid-cols-12 gap-3 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('education', idx)">
+                <div class="col-span-3 text-gray-500 font-semibold outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || 'Duration'"></div>
                 <div class="col-span-9">
-                  <div class="font-bold text-slate-900" x-text="edu.degree"></div>
-                  <div class="text-gray-500" x-text="edu.institution"></div>
-                  <div class="text-gray-400 text-[8px]" x-show="edu.location" x-text="edu.location"></div>
+                  <div class="font-bold text-slate-900 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></div>
+                  <div class="text-gray-500 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></div>
+                  <div class="text-gray-400 text-[8px] outline-none focus:bg-violet-50 rounded" x-show="edu.location" contenteditable="true" @blur="edu.location = $event.target.innerText" x-text="edu.location || 'Location'"></div>
                 </div>
               </div>
             </template>
           </div>
 
           <!-- Skills -->
-          <div>
+          <div x-show="visibleSections.skills">
             <div class="grid grid-cols-12 gap-3">
-              <div class="col-span-12 font-bold text-blue-900 uppercase text-[8px] tracking-wider border-b border-slate-100 pb-1">Personal Skills</div>
+              <div class="col-span-12 font-bold text-blue-900 uppercase text-[8px] tracking-wider border-b border-slate-100 pb-1"
+                   :style="{ color: themeColor, borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px') }">
+                <span contenteditable="true" @blur="form.sectionTitles.skills = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.skills || 'Personal Skills'"></span>
+              </div>
             </div>
-            <div class="grid grid-cols-12 gap-3 pt-1">
+            <div class="grid grid-cols-12 gap-3 pt-1 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('skills')">
               <div class="col-span-3 text-gray-500 font-semibold">Technical Competencies</div>
-              <div class="col-span-9 space-y-1 text-slate-700 leading-normal">
+              <div class="col-span-9 space-y-1 text-slate-700 leading-normal font-sans">
                 <div x-show="form.skills.languages.length"><strong>Languages:</strong> <span x-text="form.skills.languages.join(', ')"></span></div>
                 <div x-show="form.skills.frameworks.length"><strong>Frameworks:</strong> <span x-text="form.skills.frameworks.join(', ')"></span></div>
                 <div x-show="form.skills.tools.length"><strong>Tools:</strong> <span x-text="form.skills.tools.join(', ')"></span></div>
                 <div x-show="form.skills.other.length"><strong>Other:</strong> <span x-text="form.skills.other.join(', ')"></span></div>
               </div>
             </div>
+          </div>
+
+          <!-- Certifications (Injected) -->
+          <div x-show="visibleSections.certifications && form.certifications && form.certifications.length > 0" class="space-y-3">
+            <div class="grid grid-cols-12 gap-3">
+              <div class="col-span-12 font-bold text-blue-900 uppercase text-[8px] tracking-wider border-b border-slate-100 pb-1"
+                   :style="{ color: themeColor, borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px') }">
+                <span contenteditable="true" @blur="form.sectionTitles.certifications = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.certifications || 'Certifications'"></span>
+              </div>
+            </div>
+            <template x-for="(cert, idx) in form.certifications" :key="idx">
+              <div class="grid grid-cols-12 gap-3 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('certifications', idx)">
+                <div class="col-span-3 text-gray-500 font-semibold outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.duration = $event.target.innerText" x-text="cert.duration || 'Duration'"></div>
+                <div class="col-span-9">
+                  <div class="font-bold text-slate-900 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.name = $event.target.innerText" x-text="cert.name || 'Cert Name'"></div>
+                  <div class="text-gray-500 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.authority = $event.target.innerText" x-text="cert.authority || 'Authority'"></div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Extracurriculars (Injected) -->
+          <div x-show="visibleSections.extracurriculars && form.extracurriculars && form.extracurriculars.length > 0" class="space-y-3">
+            <div class="grid grid-cols-12 gap-3">
+              <div class="col-span-12 font-bold text-blue-900 uppercase text-[8px] tracking-wider border-b border-slate-100 pb-1"
+                   :style="{ color: themeColor, borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px') }">
+                <span contenteditable="true" @blur="form.sectionTitles.extracurriculars = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.extracurriculars || 'Leadership & Activities'"></span>
+              </div>
+            </div>
+            <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
+              <div class="grid grid-cols-12 gap-3 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('extracurriculars', idx)">
+                <div class="col-span-3 text-gray-500 font-semibold outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="ex.duration = $event.target.innerText" x-text="ex.duration || 'Duration'"></div>
+                <div class="col-span-9">
+                  <div class="font-bold text-slate-900 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="ex.role = $event.target.innerText" x-text="ex.role || 'Role'"></div>
+                  <div class="text-gray-500 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="ex.organization = $event.target.innerText" x-text="ex.organization || 'Organization'"></div>
+                  <ul class="list-disc pl-4 mt-1 space-y-0.5 text-slate-600 text-[8px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                    <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
+                      <li>
+                        <span contenteditable="true" @blur="ex.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
 
@@ -1991,42 +2987,53 @@
              ============================================== -->
         <div x-show="selectedTemplate === 'marissa_mayer'" class="space-y-4 text-slate-800 bg-white font-sans text-[9px]">
           <!-- Header Bar -->
-          <div class="p-4 bg-slate-900 text-white rounded-xl flex justify-between items-center">
+          <div class="p-4 bg-slate-900 text-white rounded-xl flex justify-between items-center cursor-pointer hover:ring-1 hover:ring-brand/30 rounded transition-all" @click="focusFormElement('contact')" :style="{ backgroundColor: textColor }">
             <div>
-              <h1 class="text-2xl font-black tracking-tight" x-text="form.name || 'Candidate Name'"></h1>
-              <div class="text-[9px] text-gray-300 font-bold uppercase tracking-widest mt-0.5" x-text="targetJobTitle || 'Professional Title'"></div>
+              <h1 class="text-2xl font-black tracking-tight outline-none focus:bg-violet-50 rounded" 
+                  :style="{ textTransform: textCase }"
+                  contenteditable="true" @blur="form.name = $event.target.innerText" x-text="form.name || 'Candidate Name'"></h1>
+              <div class="text-[9px] text-gray-300 font-bold uppercase tracking-widest mt-0.5" 
+                   contenteditable="true" @blur="targetJobTitle = $event.target.innerText" x-text="targetJobTitle || 'Professional Title'"></div>
             </div>
             <div class="text-[8px] text-right space-y-0.5 text-gray-300 font-mono">
-              <div x-text="form.contact.email"></div>
-              <div x-text="form.contact.phone"></div>
-              <div x-text="form.contact.location" x-show="form.contact.location"></div>
-              <div x-text="form.contact.linkedin" x-show="form.contact.linkedin"></div>
-              <div x-text="form.contact.github" x-show="form.contact.github"></div>
-              <div x-text="form.contact.website" x-show="form.contact.website"></div>
+              <div contenteditable="true" @blur="form.contact.email = $event.target.innerText" x-text="form.contact.email"></div>
+              <div contenteditable="true" @blur="form.contact.phone = $event.target.innerText" x-text="form.contact.phone"></div>
+              <div contenteditable="true" @blur="form.contact.location = $event.target.innerText" x-text="form.contact.location" x-show="form.contact.location"></div>
+              <div contenteditable="true" @blur="form.contact.linkedin = $event.target.innerText" x-text="form.contact.linkedin" x-show="form.contact.linkedin"></div>
+              <div contenteditable="true" @blur="form.contact.github = $event.target.innerText" x-text="form.contact.github" x-show="form.contact.github"></div>
+              <div contenteditable="true" @blur="form.contact.website = $event.target.innerText" x-text="form.contact.website" x-show="form.contact.website"></div>
             </div>
           </div>
 
           <!-- Highlight/Quote callout block -->
-          <div x-show="form.summary" class="p-3 bg-slate-50 border-l-4 border-slate-900 rounded-r-lg italic text-slate-700 leading-relaxed" x-text="`“${form.summary}”`"></div>
+          <div x-show="visibleSections.summary && form.summary" class="p-3 bg-slate-50 border-l-4 border-slate-900 rounded-r-lg italic text-slate-700 leading-relaxed cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('summary')"
+               :style="{ borderLeftColor: themeColor }">
+            <span class="outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="form.summary = $event.target.innerText" x-text="`“${form.summary}”`"></span>
+          </div>
 
           <!-- Two-column grid -->
           <div class="grid grid-cols-12 gap-4">
             <!-- Left main column (7 cols) -->
             <div class="col-span-7 space-y-4">
               <!-- Experience -->
-              <div x-show="form.experience && form.experience.length > 0">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2">Experience</h3>
+              <div x-show="visibleSections.experience && form.experience && form.experience.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2"
+                    :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor + '20' }">
+                  <span contenteditable="true" @blur="form.sectionTitles.experience = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.experience || 'Experience'"></span>
+                </h3>
                 <div class="space-y-3">
                   <template x-for="(exp, idx) in form.experience" :key="idx">
-                    <div class="space-y-0.5">
+                    <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('experience', idx)">
                       <div class="flex justify-between items-start font-bold">
-                        <span class="text-slate-900" x-text="exp.role || 'Job Role'"></span>
-                        <span class="text-gray-500 font-normal text-[8.5px]" x-text="exp.duration"></span>
+                        <span class="text-slate-900 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.role = $event.target.innerText" x-text="exp.role || 'Job Role'"></span>
+                        <span class="text-gray-500 font-normal text-[8.5px] outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.duration = $event.target.innerText" x-text="exp.duration || 'Duration'"></span>
                       </div>
-                      <div class="text-[8.5px] text-gray-500 italic" x-text="exp.company || 'Company'"></div>
-                      <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8px] leading-relaxed">
-                        <template x-for="bullet in exp.bullets">
-                          <li x-text="bullet"></li>
+                      <div class="text-[8.5px] text-gray-500 italic outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="exp.company = $event.target.innerText" x-text="exp.company || 'Company'"></div>
+                      <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                        <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                          <li>
+                            <span contenteditable="true" @blur="exp.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Accomplishment...'"></span>
+                          </li>
                         </template>
                       </ul>
                     </div>
@@ -2035,18 +3042,49 @@
               </div>
 
               <!-- Projects -->
-              <div x-show="form.projects && form.projects.length > 0">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2">Projects</h3>
+              <div x-show="visibleSections.projects && form.projects && form.projects.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2"
+                    :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor + '20' }">
+                  <span contenteditable="true" @blur="form.sectionTitles.projects = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.projects || 'Projects'"></span>
+                </h3>
                 <div class="space-y-3">
                   <template x-for="(proj, idx) in form.projects" :key="idx">
-                    <div class="space-y-0.5">
+                    <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('projects', idx)">
                       <div class="flex justify-between items-start font-bold">
-                        <span class="text-slate-900" x-text="proj.title"></span>
-                        <span class="text-gray-500 font-normal text-[8.5px]" x-text="proj.duration"></span>
+                        <span class="text-slate-900" contenteditable="true" @blur="proj.title = $event.target.innerText" x-text="proj.title || 'Project Title'"></span>
+                        <span class="text-gray-500 font-normal text-[8.5px]" contenteditable="true" @blur="proj.duration = $event.target.innerText" x-text="proj.duration || 'Duration'"></span>
                       </div>
-                      <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8px] leading-relaxed">
-                        <template x-for="bullet in proj.bullets">
-                          <li x-text="bullet"></li>
+                      <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                        <template x-for="(bullet, bIdx) in proj.bullets" :key="bIdx">
+                          <li>
+                            <span contenteditable="true" @blur="proj.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                          </li>
+                        </template>
+                      </ul>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Extracurriculars (Injected) -->
+              <div x-show="visibleSections.extracurriculars && form.extracurriculars && form.extracurriculars.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2"
+                    :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor + '20' }">
+                  <span contenteditable="true" @blur="form.sectionTitles.extracurriculars = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.extracurriculars || 'Leadership'"></span>
+                </h3>
+                <div class="space-y-3">
+                  <template x-for="(ex, idx) in form.extracurriculars" :key="idx">
+                    <div class="space-y-0.5 cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('extracurriculars', idx)">
+                      <div class="flex justify-between items-start font-bold">
+                        <span class="text-slate-900" contenteditable="true" @blur="ex.role = $event.target.innerText" x-text="ex.role || 'Role'"></span>
+                        <span class="text-gray-500 font-normal text-[8.5px]" contenteditable="true" @blur="ex.duration = $event.target.innerText" x-text="ex.duration || 'Duration'"></span>
+                      </div>
+                      <div class="text-[8.5px] text-gray-500 italic" contenteditable="true" @blur="ex.organization = $event.target.innerText" x-text="ex.organization || 'Organization'"></div>
+                      <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[8px] leading-relaxed" :style="{ listStyleType: bulletStyle || 'disc' }">
+                        <template x-for="(bullet, bIdx) in ex.bullets" :key="bIdx">
+                          <li>
+                            <span contenteditable="true" @blur="ex.bullets[bIdx] = $event.target.innerText" x-text="bullet || 'Detail...'"></span>
+                          </li>
                         </template>
                       </ul>
                     </div>
@@ -2058,8 +3096,11 @@
             <!-- Right column (5 cols) -->
             <div class="col-span-5 space-y-4">
               <!-- Skills with visual meters -->
-              <div>
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2">Skills &amp; Strengths</h3>
+              <div x-show="visibleSections.skills" class="cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-1 transition-all" @click="focusFormElement('skills')">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2"
+                    :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor + '20' }">
+                  <span contenteditable="true" @blur="form.sectionTitles.skills = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.skills || 'Skills & Strengths'"></span>
+                </h3>
                 <div class="space-y-2">
                   <template x-for="(cat, cIdx) in ['languages', 'frameworks', 'tools', 'other']">
                     <div x-show="form.skills[cat] && form.skills[cat].length > 0">
@@ -2072,7 +3113,7 @@
                               <span x-text="sIdx === 0 ? '90%' : sIdx === 1 ? '80%' : '70%'"></span>
                             </div>
                             <div class="h-1 bg-slate-100 rounded-full overflow-hidden">
-                              <div class="h-full bg-slate-900 rounded-full" :style="{ width: (sIdx === 0 ? 90 : sIdx === 1 ? 80 : 70) + '%' }"></div>
+                              <div class="h-full bg-slate-900 rounded-full" :style="{ width: (sIdx === 0 ? 90 : sIdx === 1 ? 80 : 70) + '%', backgroundColor: themeColor }"></div>
                             </div>
                           </div>
                         </template>
@@ -2083,28 +3124,35 @@
               </div>
 
               <!-- Education -->
-              <div x-show="form.education && form.education.length > 0">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2">Education</h3>
+              <div x-show="visibleSections.education && form.education && form.education.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2"
+                    :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor + '20' }">
+                  <span contenteditable="true" @blur="form.sectionTitles.education = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.education || 'Education'"></span>
+                </h3>
                 <div class="space-y-2">
-                  <template x-for="edu in form.education">
-                    <div class="text-[8.5px] leading-snug">
-                      <div class="font-bold text-slate-800" x-text="edu.degree"></div>
-                      <div class="text-slate-600" x-text="edu.institution"></div>
-                      <div class="text-gray-400" x-text="edu.duration"></div>
+                  <template x-for="(edu, idx) in form.education" :key="idx">
+                    <div class="text-[8.5px] leading-snug cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('education', idx)">
+                      <div class="font-bold text-slate-800 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.degree = $event.target.innerText" x-text="edu.degree || 'Degree'"></div>
+                      <div class="text-slate-600 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.institution = $event.target.innerText" x-text="edu.institution || 'University'"></div>
+                      <div class="text-gray-400 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="edu.duration = $event.target.innerText" x-text="edu.duration || 'Duration'"></div>
                     </div>
                   </template>
                 </div>
               </div>
 
               <!-- Certifications -->
-              <div x-show="form.certifications && form.certifications.length > 0">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2">Certifications</h3>
+              <div x-show="visibleSections.certifications && form.certifications && form.certifications.length > 0">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2"
+                    :style="{ borderBottomStyle: dividerStyle, borderBottomWidth: dividerStyle === 'none' ? '0px' : (dividerStyle === 'double' ? '3px' : '1px'), color: themeColor, borderColor: themeColor + '20' }">
+                  <span contenteditable="true" @blur="form.sectionTitles.certifications = $event.target.innerText" :style="{ textTransform: textCase }" x-text="form.sectionTitles.certifications || 'Certifications'"></span>
+                </h3>
                 <div class="space-y-1.5">
-                  <template x-for="cert in form.certifications">
-                    <div class="text-[8px] text-slate-700 leading-snug">
-                      <span class="font-bold text-slate-900" x-text="cert.name"></span>
-                      <span x-show="cert.authority" x-text="` - ${cert.authority}`"></span>
-                      <span class="text-gray-400" x-show="cert.duration" x-text="` (${cert.duration})`"></span>
+                  <template x-for="(cert, idx) in form.certifications" :key="idx">
+                    <div class="text-[8px] text-slate-700 leading-snug cursor-pointer hover:ring-1 hover:ring-brand/30 rounded p-0.5 transition-all" @click="focusFormElement('certifications', idx)">
+                      <span class="font-bold text-slate-900 outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.name = $event.target.innerText" x-text="cert.name || 'Cert Name'"></span>
+                      <span x-show="cert.authority"> - </span>
+                      <span class="italic outline-none focus:bg-violet-50 rounded" contenteditable="true" @blur="cert.authority = $event.target.innerText" x-text="cert.authority || 'Authority'"></span>
+                      <span class="text-gray-400 outline-none focus:bg-violet-50 rounded" x-show="cert.duration" contenteditable="true" @blur="cert.duration = $event.target.innerText" x-text="` (${cert.duration})`"></span>
                     </div>
                   </template>
                 </div>
@@ -2112,6 +3160,7 @@
             </div>
           </div>
         </div>
+          </div>
         </div> <!-- closes x-show="activePreviewTab === 'resume'" -->
 
         <!-- COVER LETTER TEMPLATE -->

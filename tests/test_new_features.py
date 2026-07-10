@@ -773,5 +773,68 @@ def test_export_report_pdf_pending_status(factory, premium_user, analysis_record
     assert b"Report not ready yet" in response.content
 
 
+@pytest.mark.django_db
+def test_export_resume_pdf_advanced_styles(factory, premium_user, analysis_record):
+    # Cache structured resume with new fields and layout options
+    analysis_record.structured_resume = {
+        "name": "Jane Doe",
+        "contact": {"email": "jane@example.com"},
+        "experience": [{"role": "Senior Dev", "company": "Acme Corp", "duration": "3 years", "bullets": ["Accomplished something great"]}],
+        "education": [{"degree": "B.S. CS", "institution": "Stanford", "duration": "2020-2024"}],
+        "projects": [{"title": "Cool Project", "duration": "6 months", "bullets": ["Built a compiler"]}],
+        "skills": {"languages": ["Python", "JavaScript"]},
+        "certifications": [{"name": "AWS Certified", "authority": "Amazon", "duration": "2025"}],
+        "extracurriculars": [{"role": "President", "organization": "CS Club", "duration": "1 year", "bullets": ["Organized hackathons"]}],
+        "sectionTitles": {
+            "summary": "About Me",
+            "experience": "My Work Experience",
+            "projects": "What I Built",
+            "education": "Studies",
+            "skills": "Competencies",
+            "certifications": "Certificates",
+            "extracurriculars": "Activities"
+        },
+        "style": {
+            "selectedTemplate": "jakes_resume",
+            "fontChoice": "font-cambria",
+            "lineHeight": "1.5",
+            "margins": "1.2rem",
+            "textColor": "#2d3748",
+            "fontSize": "12px",
+            "themeColor": "#0f766e",
+            "bulletStyle": "square",
+            "dividerStyle": "dashed",
+            "textCase": "uppercase",
+            "visibleSections": {
+                "summary": True,
+                "experience": True,
+                "projects": True,
+                "education": True,
+                "skills": True,
+                "certifications": True,
+                "extracurriculars": True
+            }
+        }
+    }
+    analysis_record.save()
+
+    # Verify that PDF renders successfully for all 12 templates with these styles
+    templates = [
+        "jakes_resume", "deedy_cv", "hbs_traditional", "modern_tech",
+        "minimalist_clean", "creative_dev", "executive_elite", "startup_sans",
+        "academic_cv", "simple_standard", "europass_cv", "marissa_mayer"
+    ]
+    for layout in templates:
+        url = reverse("export_resume_pdf", kwargs={"analysis_id": analysis_record.slug}) + f"?template={layout}"
+        request = factory.get(url)
+        request.user = premium_user
+
+        response = export_resume_pdf(request, analysis_id=analysis_record.slug)
+        assert response.status_code == 200
+        assert response["Content-Type"] == "application/pdf"
+        assert f"Optimized_Resume_{layout}.pdf" in response["Content-Disposition"]
+
+
+
 
 

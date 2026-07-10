@@ -23,8 +23,8 @@
         .name {
             font-size: 20pt;
             font-weight: bold;
-            color: {{ pdf_theme_color }};
-            text-transform: uppercase;
+            color: {{ pdf_text_color }};
+            text-transform: {{ text_case }};
             margin-bottom: 2px;
         }
         .role-title {
@@ -38,8 +38,8 @@
             font-size: 10.5pt;
             font-weight: bold;
             color: {{ pdf_theme_color }};
-            text-transform: uppercase;
-            border-bottom: 1.5px solid {% if selected_template == 'hbs_traditional' or selected_template == 'academic_cv' %}#000000{% else %}#e2e8f0{% endif %};
+            text-transform: {{ text_case }};
+            border-bottom: {% if divider_style == 'none' %}0px none{% elif divider_style == 'double' %}3px double{% else %}1.5px {{ divider_style }}{% endif %} {{ pdf_theme_color }};
             padding-bottom: 2px;
             margin-top: 14px;
             margin-bottom: 8px;
@@ -69,6 +69,7 @@
             margin-top: 3px;
             margin-bottom: 0;
             padding-left: 12px;
+            list-style-type: {{ bullet_style }};
         }
         .bullets li {
             margin-bottom: 2.5px;
@@ -150,8 +151,8 @@
                 {% if resume.contact.website %}<div class="contact-item"><span class="contact-label">Website:</span><br/>{{ resume.contact.website }}</div>{% endif %}
 
                 <!-- Education -->
-                {% if resume.education %}
-                <div class="section-title" style="font-size: 9pt;">Education</div>
+                {% if visible_sections.education and resume.education %}
+                <div class="section-title" style="font-size: 9pt;">{{ section_titles.education|default:"Education" }}</div>
                 {% for edu in resume.education %}
                 <div class="item" style="margin-bottom: 6px;">
                     <div style="font-weight: bold; font-size: 8.5pt;">{{ edu.degree }}</div>
@@ -162,8 +163,8 @@
                 {% endif %}
 
                 <!-- Skills -->
-                {% if resume.skills %}
-                <div class="section-title" style="font-size: 9pt;">Skills</div>
+                {% if visible_sections.skills and resume.skills %}
+                <div class="section-title" style="font-size: 9pt;">{{ section_titles.skills|default:"Skills" }}</div>
                 {% if resume.skills.languages %}
                 <div class="skill-category">Languages:</div>
                 <div style="margin-bottom: 4px;">
@@ -182,20 +183,38 @@
                     {% for s in resume.skills.tools %}<span class="skill-tag">{{ s }}</span>{% endfor %}
                 </div>
                 {% endif %}
+                {% if resume.skills.other %}
+                <div class="skill-category">Other:</div>
+                <div style="margin-bottom: 4px;">
+                    {% for s in resume.skills.other %}<span class="skill-tag">{{ s }}</span>{% endfor %}
+                </div>
+                {% endif %}
+                {% endif %}
+
+                <!-- Certifications in Sidebar -->
+                {% if visible_sections.certifications and resume.certifications %}
+                <div class="section-title" style="font-size: 9pt;">{{ section_titles.certifications|default:"Certifications" }}</div>
+                {% for cert in resume.certifications %}
+                <div class="item" style="margin-bottom: 6px;">
+                    <div style="font-weight: bold; font-size: 8.5pt;">{{ cert.name }}</div>
+                    <div style="font-size: 8pt; color: #475569;">{{ cert.authority }}</div>
+                    {% if cert.duration %}<div style="font-size: 7.5pt; color: #94a3b8;">{{ cert.duration }}</div>{% endif %}
+                </div>
+                {% endfor %}
                 {% endif %}
             </td>
 
             <!-- Right Content column -->
             <td class="content">
-                {% if resume.summary %}
-                <div class="section-title" style="margin-top: 0;">Summary</div>
+                {% if visible_sections.summary and resume.summary %}
+                <div class="section-title" style="margin-top: 0;">{{ section_titles.summary|default:"Summary" }}</div>
                 <div style="text-align: justify; font-size: 8.5pt; margin-bottom: 10px;">
                     {{ resume.summary }}
                 </div>
                 {% endif %}
 
-                {% if resume.experience %}
-                <div class="section-title">Experience</div>
+                {% if visible_sections.experience and resume.experience %}
+                <div class="section-title">{{ section_titles.experience|default:"Experience" }}</div>
                 {% for job in resume.experience %}
                 <div class="item">
                     <table style="width: 100%;">
@@ -220,8 +239,8 @@
                 {% endfor %}
                 {% endif %}
 
-                {% if resume.projects %}
-                <div class="section-title">Selected Projects</div>
+                {% if visible_sections.projects and resume.projects %}
+                <div class="section-title">{{ section_titles.projects|default:"Projects" }}</div>
                 {% for proj in resume.projects %}
                 <div class="item">
                     <table style="width: 100%;">
@@ -233,6 +252,30 @@
                     {% if proj.bullets %}
                     <ul class="bullets">
                         {% for bullet in proj.bullets %}<li>{{ bullet }}</li>{% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <!-- Extracurriculars in Main Content -->
+                {% if visible_sections.extracurriculars and resume.extracurriculars %}
+                <div class="section-title">{{ section_titles.extracurriculars|default:"Leadership & Extracurriculars" }}</div>
+                {% for ex in resume.extracurriculars %}
+                <div class="item">
+                    <table style="width: 100%;">
+                        <tr>
+                            <td>
+                                <span class="item-title">{{ ex.role }}</span>
+                                <span style="font-weight: normal; color: #64748b;"> — </span>
+                                <span class="item-subtitle">{{ ex.organization }}</span>
+                            </td>
+                            <td class="item-right" style="vertical-align: top; width: 100px;">{{ ex.duration }}</td>
+                        </tr>
+                    </table>
+                    {% if ex.bullets %}
+                    <ul class="bullets">
+                        {% for bullet in ex.bullets %}<li>{{ bullet }}</li>{% endfor %}
                     </ul>
                     {% endif %}
                 </div>
@@ -255,15 +298,15 @@
         </div>
     </div>
 
-    {% if resume.summary %}
-    <div class="section-title">Profile Summary</div>
+    {% if visible_sections.summary and resume.summary %}
+    <div class="section-title">{{ section_titles.summary|default:"Profile Summary" }}</div>
     <div style="text-align: justify; font-size: 8.5pt; margin-bottom: 12px;">
         {{ resume.summary }}
     </div>
     {% endif %}
 
-    {% if resume.experience %}
-    <div class="section-title">Professional Experience</div>
+    {% if visible_sections.experience and resume.experience %}
+    <div class="section-title">{{ section_titles.experience|default:"Professional Experience" }}</div>
     {% for job in resume.experience %}
     <div class="item">
         <table style="width: 100%;">
@@ -288,8 +331,8 @@
     {% endfor %}
     {% endif %}
 
-    {% if resume.projects %}
-    <div class="section-title">Projects</div>
+    {% if visible_sections.projects and resume.projects %}
+    <div class="section-title">{{ section_titles.projects|default:"Projects" }}</div>
     {% for proj in resume.projects %}
     <div class="item">
         <table style="width: 100%;">
@@ -307,8 +350,8 @@
     {% endfor %}
     {% endif %}
 
-    {% if resume.education %}
-    <div class="section-title">Education</div>
+    {% if visible_sections.education and resume.education %}
+    <div class="section-title">{{ section_titles.education|default:"Education" }}</div>
     {% for edu in resume.education %}
     <div class="item" style="margin-bottom: 6px;">
         <table style="width: 100%;">
@@ -327,8 +370,8 @@
     {% endfor %}
     {% endif %}
 
-    {% if resume.skills %}
-    <div class="section-title">Skills & Competencies</div>
+    {% if visible_sections.skills and resume.skills %}
+    <div class="section-title">{{ section_titles.skills|default:"Skills & Competencies" }}</div>
     <table style="width: 100%; border-collapse: collapse; margin-top: 5px;">
         {% if resume.skills.languages %}
         <tr>
@@ -356,6 +399,52 @@
         {% endif %}
     </table>
     {% endif %}
+
+    <!-- Certifications in Single Column -->
+    {% if visible_sections.certifications and resume.certifications %}
+    <div class="section-title">{{ section_titles.certifications|default:"Certifications" }}</div>
+    {% for cert in resume.certifications %}
+    <div class="item" style="margin-bottom: 6px;">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <span style="font-weight: bold; font-size: 9pt;">{{ cert.name }}</span>
+                    <span style="color: #64748b;"> at </span>
+                    <span style="font-style: italic;">{{ cert.authority }}</span>
+                </td>
+                <td class="item-right" style="vertical-align: top; width: 100px;">
+                    {{ cert.duration }}
+                </td>
+            </tr>
+        </table>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Extracurriculars in Single Column -->
+    {% if visible_sections.extracurriculars and resume.extracurriculars %}
+    <div class="section-title">{{ section_titles.extracurriculars|default:"Leadership & Extracurriculars" }}</div>
+    {% for ex in resume.extracurriculars %}
+    <div class="item">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <span class="item-title">{{ ex.role }}</span>
+                    <span style="color: #64748b;"> — </span>
+                    <span class="item-subtitle">{{ ex.organization }}</span>
+                </td>
+                <td class="item-right" style="vertical-align: top; width: 100px;">{{ ex.duration }}</td>
+            </tr>
+        </table>
+        {% if ex.bullets %}
+        <ul class="bullets">
+            {% for bullet in ex.bullets %}<li>{{ bullet }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+
     {% endif %}
 
 </body>

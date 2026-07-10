@@ -1560,8 +1560,10 @@ def export_resume_pdf(request, analysis_id):
     
     # 2. Font Choice mapping
     font_choice = request.GET.get("font", style.get("fontChoice", "font-inter")).lower()
-    if any(serif in font_choice for serif in ["times", "georgia", "playfair"]):
+    if any(f in font_choice for f in ["times", "georgia", "garamond", "cambria", "playfair", "lora", "merriweather"]):
         pdf_font = "Times-Roman"
+    elif any(f in font_choice for f in ["courier", "consolas", "fira", "source"]):
+        pdf_font = "Courier"
     else:
         pdf_font = "Helvetica"
         
@@ -1592,6 +1594,31 @@ def export_resume_pdf(request, analysis_id):
     else:
         pdf_font_size = "9.5pt"
 
+    # 6. Bullets, Dividers, Casing & Visibility
+    bullet_style = request.GET.get("bulletStyle", style.get("bulletStyle", "disc"))
+    divider_style = request.GET.get("dividerStyle", style.get("dividerStyle", "solid"))
+    text_case = request.GET.get("textCase", style.get("textCase", "none"))
+    visible_sections = request.GET.get("visibleSections", style.get("visibleSections", {}))
+    
+    if not isinstance(visible_sections, dict):
+        visible_sections = {}
+    default_sections = {
+        "summary": True,
+        "experience": True,
+        "projects": True,
+        "education": True,
+        "skills": True,
+        "certifications": True,
+        "extracurriculars": True
+    }
+    for k, v in default_sections.items():
+        if k not in visible_sections:
+            visible_sections[k] = v
+
+    section_titles = resume_data.get("sectionTitles", {}) if isinstance(resume_data, dict) else {}
+    if not isinstance(section_titles, dict):
+        section_titles = {}
+
     from django.template.loader import render_to_string
     import io
     from xhtml2pdf import pisa
@@ -1605,6 +1632,11 @@ def export_resume_pdf(request, analysis_id):
         "pdf_margins": pdf_margins,
         "pdf_text_color": text_color,
         "pdf_theme_color": theme_color,
+        "bullet_style": bullet_style,
+        "divider_style": divider_style,
+        "text_case": text_case,
+        "visible_sections": visible_sections,
+        "section_titles": section_titles,
     }
 
     # Render unified layout template
@@ -2155,13 +2187,85 @@ def auto_vet_view(request):
 def skills_gap_view(request):
     """Renders the Skills Gap Analysis visualization and competency mapping page."""
     if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        try:
-            body = json.loads(request.body) if request.body else {}
-        except json.JSONDecodeError:
-            body = {}
+        # Check if request has files or form data vs JSON body
+        if request.content_type == "application/json":
+            try:
+                body = json.loads(request.body) if request.body else {}
+            except json.JSONDecodeError:
+                body = {}
+            resume_text = body.get("resume_text", "").strip()
+            job_desc = body.get("job_description", "").strip()
+        else:
+            resume_input_type = request.POST.get("resume_input_type", "paste")
+            job_desc = request.POST.get("job_description", "").strip()
+            resume_text = ""
             
-        resume_text = body.get("resume_text", "").strip()
-        job_desc = body.get("job_description", "").strip()
+            if resume_input_type == "paste":
+                resume_text = request.POST.get("resume_text", "").strip()
+            elif resume_input_type == "file":
+                resume_file = request.FILES.get("resume")
+                if resume_file:
+                    import os
+                    ext = os.path.splitext(resume_file.name)[1].lower()
+                    if ext in [".pdf", ".docx", ".jpg", ".jpeg", ".png"]:
+                        try:
+                            if ext in [".jpg", ".jpeg", ".png"]:
+                                from .utils import extract_text_from_image
+                                image_bytes = resume_file.read()
+                                mime_type = "image/png" if ext == ".png" else "image/jpeg"
+                                resume_text = extract_text_from_image(image_bytes, mime_type)
+                            else:
+                                from .utils import extract_text
+                                resume_text, _, _ = extract_text(resume_file, ext)
+                        except Exception as e:
+                            print(f"[skills_gap_view] File extract error: {e}")
+                else:
+                    resume_text = request.POST.get("resume_text", "").strip()
+            elif resume_input_type == "image":
+                resume_image = request.FILES.get("resume_image")
+                if resume_image:
+                    try:
+                        from .utils import extract_text_from_image
+                        image_bytes = resume_image.read()
+                        mime_type = resume_image.content_type or "image/jpeg"
+                        resume_text = extract_text_from_image(image_bytes, mime_type)
+                    except Exception as e:
+                        print(f"[skills_gap_view] Image extract error: {e}")
+                else:
+                    resume_text = request.POST.get("resume_text", "").strip()
+            elif resume_input_type == "cloud":
+                resume_url = request.POST.get("resume_url", "").strip()
+                if resume_url and (resume_url.startswith("http://") or resume_url.startswith("https://")):
+                    import requests
+                    import io
+                    try:
+                        headers = {"User-Agent": "Mozilla/5.0"}
+                        res = requests.get(resume_url, headers=headers, timeout=15)
+                        if res.status_code == 200:
+                            content_type = res.headers.get("Content-Type", "").lower()
+                            if "pdf" in content_type or resume_url.endswith(".pdf"):
+                                from .utils import extract_text
+                                f = io.BytesIO(res.content)
+                                setattr(f, "name", "cloud_resume.pdf")
+                                resume_text, _, _ = extract_text(f, ".pdf")
+                            elif "officedocument" in content_type or resume_url.endswith(".docx"):
+                                from .utils import extract_text
+                                f = io.BytesIO(res.content)
+                                setattr(f, "name", "cloud_resume.docx")
+                                resume_text, _, _ = extract_text(f, ".docx")
+                            elif "image" in content_type or any(img_ext in resume_url for img_ext in [".jpg", ".jpeg", ".png"]):
+                                from .utils import extract_text_from_image
+                                mime_type = "image/png" if "png" in content_type else "image/jpeg"
+                                resume_text = extract_text_from_image(res.content, mime_type)
+                            else:
+                                resume_text = res.text
+                    except Exception as e:
+                        print(f"[skills_gap_view] Cloud import failed: {e}")
+                        pass
+                        
+            # Fallback
+            if not resume_text:
+                resume_text = request.POST.get("resume_text", "").strip()
         
         if resume_text and job_desc:
             from .utils import analyze_skills_gap
