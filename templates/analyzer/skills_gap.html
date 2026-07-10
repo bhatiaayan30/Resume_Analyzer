@@ -13,6 +13,10 @@
     resources: [],
     radarChart: null,
 
+    // Dynamic loading messages
+    loadingText: 'Mapping Competencies...',
+    loadingInterval: null,
+
     // Multi-input options
     resumeInputType: 'file',
     fileSelected: false,
@@ -220,6 +224,20 @@
         
         this.uploading = true;
         this.analyzed = false;
+        this.loadingText = 'Extracting resume credentials...';
+        
+        let messages = [
+            'Extracting resume credentials...',
+            'Tokenizing candidate metadata...',
+            'Calculating semantic keyword proximity...',
+            'Mapping skills gap nodes...',
+            'Constructing upskilling path...'
+        ];
+        let idx = 0;
+        this.loadingInterval = setInterval(() => {
+            idx = (idx + 1) % messages.length;
+            this.loadingText = messages[idx];
+        }, 1500);
         
         setTimeout(() => {
             this.submitAnalysis();
@@ -261,6 +279,10 @@
         })
         .then(res => res.json())
         .then(data => {
+            if (this.loadingInterval) {
+                clearInterval(this.loadingInterval);
+                this.loadingInterval = null;
+            }
             this.uploading = false;
             this.analyzed = true;
             
@@ -276,6 +298,10 @@
             this.changeRole();
         })
         .catch(err => {
+            if (this.loadingInterval) {
+                clearInterval(this.loadingInterval);
+                this.loadingInterval = null;
+            }
             console.error(err);
             this.uploading = false;
             alert('Error running skills gap analysis.');
@@ -397,22 +423,36 @@
 
             <!-- Cloud / LinkedIn -->
             <div x-show="resumeInputType === 'cloud'" class="flex flex-col w-full rounded-2xl border border-dashed border-gray-700/60 bg-slate-950/20 p-4 gap-3">
-                <div class="grid grid-cols-4 gap-2">
-                    <button type="button" @click="selectCloudProvider('Google Drive')" class="flex flex-col items-center justify-center p-2 rounded-xl bg-gray-900/40 border border-white/5 hover:border-brand/40 transition-all gap-1 cursor-pointer">
-                         <svg class="w-6 h-6" viewBox="0 0 512 512"><path d="m38.7 419.3 22.6 39c4.7 8.2 11.4 14.7 19.4 19.4l80.6-139.6H0c0 9.1 2.3 18.2 7 26.4z" style="fill:#0066da"/><path d="M256 173.9 175.4 34.3c-7.9 4.7-14.7 11.1-19.4 19.4L7 311.7c-4.6 8-7 17.1-7 26.4h161.3z" style="fill:#00ac47"/><path d="M431.4 477.7c7.9-4.7 14.7-11.1 19.4-19.4l9.4-16.1 44.9-77.7c4.7-8.2 7-17.3 7-26.4H350.7l34.3 67.4z" style="fill:#ea4335"/><path d="m256 173.9 80.6-139.6c-7.9-4.7-17-7-26.4-7H201.8c-9.4 0-18.5 2.6-26.4 7z" style="fill:#00832d"/><path d="M350.7 338.1H161.3L80.6 477.7c7.9 4.7 17 7 26.4 7h298c9.4 0 18.5-2.6 26.4-7z" style="fill:#2684fc"/><path d="M430.5 182.7 356 53.7c-4.7-8.2-11.4-14.7-19.4-19.4L256 173.9l94.7 164.2h161c0-9.1-2.3-18.2-7-26.4z" style="fill:#ffba00"/></svg>
-                         <span class="text-[8px] font-semibold text-gray-300">G-Drive</span>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <button type="button" @click="selectCloudProvider('Google Drive')" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#34A853]/60 hover:bg-[#34A853]/5 hover:shadow-[0_0_15px_rgba(52,168,83,0.15)] transition-all gap-2 group cursor-pointer">
+                         <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                           <path d="m38.7 419.3 22.6 39c4.7 8.2 11.4 14.7 19.4 19.4l80.6-139.6H0c0 9.1 2.3 18.2 7 26.4z" style="fill:#0066da"/>
+                           <path d="M256 173.9 175.4 34.3c-7.9 4.7-14.7 11.1-19.4 19.4L7 311.7c-4.6 8-7 17.1-7 26.4h161.3z" style="fill:#00ac47"/>
+                           <path d="M431.4 477.7c7.9-4.7 14.7-11.1 19.4-19.4l9.4-16.1 44.9-77.7c4.7-8.2 7-17.3 7-26.4H350.7l34.3 67.4z" style="fill:#ea4335"/>
+                           <path d="m256 173.9 80.6-139.6c-7.9-4.7-17-7-26.4-7H201.8c-9.4 0-18.5 2.6-26.4 7z" style="fill:#00832d"/>
+                           <path d="M350.7 338.1H161.3L80.6 477.7c7.9 4.7 17 7 26.4 7h298c9.4 0 18.5-2.6 26.4-7z" style="fill:#2684fc"/>
+                           <path d="M430.5 182.7 356 53.7c-4.7-8.2-11.4-14.7-19.4-19.4L256 173.9l94.7 164.2h161c0-9.1-2.3-18.2-7-26.4z" style="fill:#ffba00"/>
+                         </svg>
+                        <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">Google Drive</span>
                     </button>
-                    <button type="button" @click="selectCloudProvider('Dropbox')" class="flex flex-col items-center justify-center p-2 rounded-xl bg-gray-900/40 border border-white/5 hover:border-brand/40 transition-all gap-1 cursor-pointer">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="#0061FE"><path d="M6 1.807L0 5.629l6 3.822 6.001-3.822L6 1.807zM18 1.807l-6 3.822 6 3.822 6-3.822-6-3.822zM0 13.274l6 3.822 6.001-3.822L6 9.452l-6 3.822zM18 9.452l-6 3.822 6 3.822 6-3.822-6-3.822zM6 18.371l6.001 3.822 6-3.822-6-3.822L6 18.371z"/></svg>
-                        <span class="text-[8px] font-semibold text-gray-300">Dropbox</span>
+                    <button type="button" @click="selectCloudProvider('Dropbox')" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#0061FE]/60 hover:bg-[#0061FE]/5 hover:shadow-[0_0_15px_rgba(0,97,254,0.15)] transition-all gap-2 group cursor-pointer">
+                        <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="#0061FE" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M6 1.807L0 5.629l6 3.822 6.001-3.822L6 1.807zM18 1.807l-6 3.822 6 3.822 6-3.822-6-3.822zM0 13.274l6 3.822 6.001-3.822L6 9.452l-6 3.822zM18 9.452l-6 3.822 6 3.822 6-3.822-6-3.822zM6 18.371l6.001 3.822 6-3.822-6-3.822L6 18.371z"/>
+                        </svg>
+                        <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">Dropbox</span>
                     </button>
-                    <button type="button" @click="selectCloudProvider('OneDrive')" class="flex flex-col items-center justify-center p-2 rounded-xl bg-gray-900/40 border border-white/5 hover:border-brand/40 transition-all gap-1 cursor-pointer">
-                         <svg class="w-6 h-6" viewBox="35.98 139.2 648.03 430.85" fill="#0078D4"><path d="M 215.078125 205.089844 C 116.011719 205.09375 41.957031 286.1875 36.382812 376.527344 C 39.835938 395.992188 51.175781 434.429688 68.941406 432.457031 C 91.144531 429.988281 147.066406 432.457031 194.765625 346.105469 C 229.609375 283.027344 301.285156 205.085938 215.078125 205.089844 Z"/><path d="M 192.171875 238.8125 C 158.871094 291.535156 114.042969 367.085938 98.914062 390.859375 C 80.929688 419.121094 33.304688 407.113281 37.25 366.609375 C 36.863281 369.894531 36.5625 373.210938 36.355469 376.546875 C 29.84375 481.933594 113.398438 569.453125 217.375 569.453125 C 331.96875 569.453125 605.269531 426.671875 577.609375 283.609375 C 548.457031 199.519531 466.523438 139.203125 373.664062 139.203125 C 280.808594 139.203125 221.296875 192.699219 192.171875 238.8125 Z"/></svg>
-                         <span class="text-[8px] font-semibold text-gray-300">OneDrive</span>
+                    <button type="button" @click="selectCloudProvider('OneDrive')" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#0078D4]/60 hover:bg-[#0078D4]/5 hover:shadow-[0_0_15px_rgba(0,120,212,0.15)] transition-all gap-2 group cursor-pointer">
+                         <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="35.98 139.2 648.03 430.85" fill="#0078D4" xmlns="http://www.w3.org/2000/svg">
+                           <path d="M 215.078125 205.089844 C 116.011719 205.09375 41.957031 286.1875 36.382812 376.527344 C 39.835938 395.992188 51.175781 434.429688 68.941406 432.457031 C 91.144531 429.988281 147.066406 432.457031 194.765625 346.105469 C 229.609375 283.027344 301.285156 205.085938 215.078125 205.089844 Z"/>
+                           <path d="M 192.171875 238.8125 C 158.871094 291.535156 114.042969 367.085938 98.914062 390.859375 C 80.929688 419.121094 33.304688 407.113281 37.25 366.609375 C 36.863281 369.894531 36.5625 373.210938 36.355469 376.546875 C 29.84375 481.933594 113.398438 569.453125 217.375 569.453125 C 331.96875 569.453125 605.269531 426.671875 577.609375 283.609375 C 548.457031 199.519531 466.523438 139.203125 373.664062 139.203125 C 280.808594 139.203125 221.296875 192.699219 192.171875 238.8125 Z"/>
+                         </svg>
+                        <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">OneDrive</span>
                     </button>
-                    <button type="button" @click="selectCloudProvider('LinkedIn')" class="flex flex-col items-center justify-center p-2 rounded-xl bg-gray-900/40 border border-white/5 hover:border-brand/40 transition-all gap-1 cursor-pointer">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="#0077B5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                        <span class="text-[8px] font-semibold text-gray-300">LinkedIn</span>
+                    <button type="button" @click="selectCloudProvider('LinkedIn')" class="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-900/40 border border-white/5 hover:border-[#0077B5]/60 hover:bg-[#0077B5]/5 hover:shadow-[0_0_15px_rgba(0,119,181,0.15)] transition-all gap-2 group cursor-pointer">
+                        <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="#0077B5" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                        </svg>
+                        <span class="text-xs font-semibold text-gray-300 group-hover:text-white transition-colors duration-200">LinkedIn</span>
                     </button>
                 </div>
 
@@ -480,7 +520,7 @@
         </svg>
         <div class="space-y-1">
             <h3 class="text-lg font-bold text-white">Mapping Competencies</h3>
-            <p class="text-xs text-gray-400 font-light">Cross-checking skills definitions & alignment...</p>
+            <p class="text-xs text-brand font-semibold animate-pulse" x-text="loadingText"></p>
         </div>
     </div>
 
@@ -573,9 +613,9 @@
                 <!-- SVG Container for Metro Roadmap -->
                 <div class="relative bg-slate-950/40 border border-white/5 rounded-2xl p-6 h-64 flex items-center justify-center overflow-hidden">
                     <!-- Connecting Curve Line -->
-                    <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M 50 120 C 150 40, 250 200, 350 70 C 450 180, 550 40, 650 120" 
-                              fill="none" stroke="url(#metro-grad)" stroke-width="4" stroke-dasharray="8 6" class="animate-dash" />
+                    <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 12 50 C 22 35, 22 25, 32 25 C 42 25, 42 70, 52 70 C 62 70, 62 30, 72 30 C 82 30, 78 50, 88 50" 
+                              fill="none" stroke="url(#metro-grad)" stroke-width="0.8" stroke-dasharray="1.5 1.2" class="animate-dash" />
                         <defs>
                             <linearGradient id="metro-grad" x1="0%" y1="0%" x2="100%" y2="0%">
                                 <stop offset="0%" stop-color="#8b5cf6" />
@@ -588,7 +628,7 @@
                     <style>
                         @keyframes dash {
                             to {
-                                stroke-dashoffset: -40;
+                                stroke-dashoffset: -10;
                             }
                         }
                         .animate-dash {
