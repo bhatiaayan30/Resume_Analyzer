@@ -739,4 +739,49 @@ def tailor_resume_data(resume_json: dict, job_desc: str) -> dict:
         return resume_json
 
 
+def format_interview_questions(questions: list) -> list:
+    """Helper to format question answers into structured bullet points."""
+    if not isinstance(questions, list):
+        return []
+    formatted = []
+    import json
+    for item in questions:
+        if not isinstance(item, dict):
+            formatted.append({"question": str(item), "answer": ""})
+            continue
+        q = item.get("question", "")
+        a = item.get("answer", "")
+        
+        if isinstance(a, list):
+            # If it's a list, prefix each with a bullet
+            a_str = "\n".join(f"• {pt.strip()}" for pt in a if pt.strip())
+        elif isinstance(a, str):
+            # Try to parse string representation of list
+            stripped_a = a.strip()
+            if stripped_a.startswith("[") and stripped_a.endswith("]"):
+                try:
+                    # Clean up quotes if it uses python literal quotes
+                    cleaned_a = stripped_a.replace("'", '"')
+                    parsed_a = json.loads(cleaned_a)
+                    if isinstance(parsed_a, list):
+                        a_str = "\n".join(f"• {pt.strip()}" for pt in parsed_a if pt.strip())
+                    else:
+                        a_str = stripped_a
+                except Exception:
+                    a_str = stripped_a
+            else:
+                # If it has newlines, ensure each line is a bullet
+                lines = [line.strip() for line in a.split("\n") if line.strip()]
+                if len(lines) > 1:
+                    a_str = "\n".join(line if (line.startswith("•") or line.startswith("-") or line.startswith("*")) else f"• {line}" for line in lines)
+                else:
+                    a_str = a
+        else:
+            a_str = str(a)
+            
+        formatted.append({"question": q, "answer": a_str})
+    return formatted
+
+
+
 

@@ -1,7 +1,7 @@
 import sys
 import traceback
 from .models import ResumeAnalysis
-from .utils import analyze_with_ai, parse_resume_to_json
+from .utils import analyze_with_ai, parse_resume_to_json, format_interview_questions
 from .authenticity_engine import audit_authenticity
 
 def process_resume_analysis(analysis_slug: str):
@@ -57,7 +57,7 @@ def process_resume_analysis(analysis_slug: str):
         analysis_record.suggestions = analysis_data.get("suggestions", [])
         analysis_record.upskill_paths = analysis_data.get("upskill_paths", [])
         analysis_record.impact_critiques = analysis_data.get("impact_critiques", [])
-        analysis_record.interview_questions = analysis_data.get("interview_questions", [])
+        analysis_record.interview_questions = format_interview_questions(analysis_data.get("interview_questions", []))
         
         analysis_record.fraud_audit = {
             "ai_probability": max(ai_prob_llm, ai_prob_prog),

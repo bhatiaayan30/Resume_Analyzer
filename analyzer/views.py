@@ -39,7 +39,8 @@ from .tasks import process_resume_analysis
 from .utils import (
     analyze_with_ai, extract_text, generate_cover_letter, generate_otp, send_email_otp, send_sms_otp,
     suggest_bullet_rewrites, generate_next_interview_question, evaluate_interview_answer, parse_resume_to_json,
-    get_ai_summary_suggestions, get_ai_experience_bullets, localize_resume_data, send_welcome_email
+    get_ai_summary_suggestions, get_ai_experience_bullets, localize_resume_data, send_welcome_email,
+    format_interview_questions
 )
 
 razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -423,7 +424,7 @@ def analysis_results(request, analysis_id):
             "diff_data": diff_data,
             # Additional premium insights
             "impact_critiques": record.impact_critiques,
-            "interview_questions": record.interview_questions,
+            "interview_questions": format_interview_questions(record.interview_questions),
             "fraud_audit": record.fraud_audit,
             "searchability_checks": record.searchability_checks,
             "upskill_paths": record.upskill_paths,
@@ -765,6 +766,8 @@ def export_report_pdf(request, analysis_id):
     # Normalize skill dicts/strings
     matched = [{"skill": s.get('skill', '') if isinstance(s, dict) else s} for s in matched_skills]
     missing = [{"skill": s.get('skill', '') if isinstance(s, dict) else s} for s in missing_skills]
+
+    record.interview_questions = format_interview_questions(record.interview_questions)
 
     context = {
         "analysis": record,
