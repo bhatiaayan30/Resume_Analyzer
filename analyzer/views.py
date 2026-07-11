@@ -222,6 +222,39 @@ def analyze(request):
             elif "dropbox.com" in resume_url:
                 download_url = resume_url.replace("dl=0", "dl=1")
                 
+            import socket
+            import ipaddress
+
+            ALLOWED_CLOUD_HOSTS = {
+                "drive.google.com", "docs.google.com",
+                "dropbox.com", "www.dropbox.com",
+                "onedrive.live.com", "1drv.ms",
+                "linkedin.com", "www.linkedin.com",
+            }
+
+            def _is_safe_url(url: str) -> bool:
+                """Return False if the resolved IP is private/internal (SSRF guard)."""
+                from urllib.parse import urlparse
+                parsed = urlparse(url)
+                hostname = parsed.hostname
+                if not hostname:
+                    return False
+                # Whitelist check
+                if hostname not in ALLOWED_CLOUD_HOSTS:
+                    return False
+                try:
+                    resolved_ip = socket.gethostbyname(hostname)
+                    ip = ipaddress.ip_address(resolved_ip)
+                    if (ip.is_private or ip.is_loopback or ip.is_link_local
+                            or ip.is_reserved or ip.is_multicast):
+                        return False
+                except (socket.gaierror, ValueError):
+                    return False
+                return True
+
+            if not _is_safe_url(download_url):
+                return render_error("The provided URL is not from an allowed cloud storage provider.", 400)
+
             try:
                 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
                 response = requests.get(download_url, stream=True, headers=headers, timeout=15)
@@ -668,8 +701,8 @@ def generate_cover_letter_api(request, analysis_id):
         record.save()
         
         return JsonResponse({"cover_letter": letter})
-    except Exception as exc:
-        return JsonResponse({"error": str(exc)}, status=500)
+    except Exception:
+        return JsonResponse({"error": "Failed to generate cover letter. Please try again."}, status=500)
 
 
 @login_required
@@ -1025,6 +1058,17 @@ def api_analyze(request):
     expected_key = getattr(settings, "APP_API_KEY", "")
     if not expected_key or auth_header != f"Bearer {expected_key}":
         return JsonResponse({"error": "Unauthorized"}, status=401)
+
+    # Rate limiting: 60 requests per hour per API key
+    from django.core.cache import cache
+    import hashlib
+    key_hash = hashlib.sha256(auth_header.encode()).hexdigest()[:16]
+    rate_key = f"api_rate_{key_hash}"
+    request_count = cache.get(rate_key, 0)
+    if request_count >= 60:
+        return JsonResponse({"error": "Rate limit exceeded. Max 60 requests per hour."}, status=429)
+    cache.set(rate_key, request_count + 1, timeout=3600)
+
         
     resume_text = request.POST.get("resume_text", "")
     job_desc = request.POST.get("job_desc", "")
@@ -1048,8 +1092,8 @@ def api_analyze(request):
             "data": analysis_data,
             "usage": usage_data
         })
-    except Exception as exc:
-        return JsonResponse({"error": str(exc)}, status=500)
+    except Exception:
+        return JsonResponse({"error": "Analysis failed. Please try again."}, status=500)
 
 @login_required
 def market_insights(request):
@@ -1148,26 +1192,35 @@ def request_otp(request):
     import json
     from datetime import timedelta
     from django.utils import timezone
+    from django.core.cache import cache
     try:
         data = json.loads(request.body)
         purpose = data.get('purpose')
         if purpose != 'email':
             return JsonResponse({"status": "error", "message": "Invalid purpose"}, status=400)
-            
+
+        # Cooldown: prevent OTP spam (1 request per 60 seconds)
+        cooldown_key = f"otp_cooldown_{request.user.id}_{purpose}"
+        if cache.get(cooldown_key):
+            return JsonResponse({"status": "error", "message": "Please wait before requesting a new OTP."}, status=429)
+        cache.set(cooldown_key, True, timeout=60)
+
         # Invalidate old OTPs
         OTP.objects.filter(user=request.user, purpose=purpose, is_used=False).update(is_used=True)
-        
+        # Clear any previous attempt counter since a new code is being issued
+        cache.delete(f"otp_attempts_{request.user.id}_{purpose}")
+
         # Generate new OTP
         code = generate_otp()
         expires_at = timezone.now() + timedelta(minutes=10)
         OTP.objects.create(user=request.user, code=code, purpose=purpose, expires_at=expires_at)
-        
+
         # Send OTP
         send_email_otp(request.user, code)
-            
+
         return JsonResponse({"status": "success", "message": f"OTP sent to {purpose}"})
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+    except Exception:
+        return JsonResponse({"status": "error", "message": "Failed to send OTP. Please try again."}, status=500)
 
 
 @login_required
@@ -1176,38 +1229,47 @@ def verify_otp(request):
     """Verify the submitted OTP code."""
     import json
     from django.utils import timezone
+    from django.core.cache import cache
     try:
         data = json.loads(request.body)
         purpose = data.get('purpose')
         if purpose != 'email':
             return JsonResponse({"status": "error", "message": "Invalid purpose"}, status=400)
         code = data.get('code')
-        
+
         if not code:
             return JsonResponse({"status": "error", "message": "OTP code is required"}, status=400)
-            
+
+        # Brute-force protection: max 5 attempts per 10-minute window
+        attempts_key = f"otp_attempts_{request.user.id}_{purpose}"
+        attempts = cache.get(attempts_key, 0)
+        if attempts >= 5:
+            return JsonResponse({"status": "error", "message": "Too many incorrect attempts. Please request a new OTP."}, status=429)
+
         otp_obj = OTP.objects.filter(
-            user=request.user, 
-            purpose=purpose, 
-            code=code, 
+            user=request.user,
+            purpose=purpose,
+            code=code,
             is_used=False,
             expires_at__gt=timezone.now()
         ).first()
-        
+
         if not otp_obj:
+            cache.set(attempts_key, attempts + 1, timeout=600)
             return JsonResponse({"status": "error", "message": "Invalid or expired OTP"}, status=400)
-            
-        # Mark as used
+
+        # Mark as used and clear attempt counter
         otp_obj.is_used = True
         otp_obj.save()
-        
+        cache.delete(attempts_key)
+
         # Update user profile
         request.user.profile.email_verified = True
         request.user.profile.save()
-        
-        return JsonResponse({"status": "success", "message": f"Email verified successfully!"})
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+        return JsonResponse({"status": "success", "message": "Email verified successfully!"})
+    except Exception:
+        return JsonResponse({"status": "error", "message": "Verification failed. Please try again."}, status=500)
 
 
 @login_required
@@ -1288,44 +1350,60 @@ def request_secondary_otp(request):
     import json
     from datetime import timedelta
     from django.utils import timezone
+    from django.core.cache import cache
     try:
         data = json.loads(request.body)
         email_id = data.get('secondary_email_id')
         sec_email = get_object_or_404(SecondaryEmail, id=email_id, user=request.user)
-        
-        # Invalidate old OTPs for this user's secondary_email purpose
+
         purpose = "sec_email"
+
+        # Cooldown: 60 seconds between requests
+        cooldown_key = f"otp_cooldown_{request.user.id}_{purpose}"
+        if cache.get(cooldown_key):
+            return JsonResponse({"status": "error", "message": "Please wait before requesting a new OTP."}, status=429)
+        cache.set(cooldown_key, True, timeout=60)
+
+        # Invalidate old OTPs for this user's secondary_email purpose
         OTP.objects.filter(user=request.user, purpose=purpose, is_used=False).update(is_used=True)
-        
+        cache.delete(f"otp_attempts_{request.user.id}_{purpose}")
+
         code = generate_otp()
         expires_at = timezone.now() + timedelta(minutes=10)
         OTP.objects.create(user=request.user, code=code, purpose=purpose, expires_at=expires_at)
-        
-        # Send email OTP (resusing send_email_otp but targeting secondary email)
+
         from django.core.mail import send_mail
         from django.conf import settings
-        
+
         subject = "Verify your secondary email address"
         message = f"Your verification code is: {code}"
         from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@resumeanalyzer.com')
         send_mail(subject, message, from_email, [sec_email.email], fail_silently=False)
-        
+
         return JsonResponse({"status": "success", "message": "OTP sent to secondary email."})
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+    except Exception:
+        return JsonResponse({"status": "error", "message": "Failed to send OTP. Please try again."}, status=500)
 
 @login_required
 @require_http_methods(["POST"])
 def verify_secondary_otp(request):
     import json
     from django.utils import timezone
+    from django.core.cache import cache
     try:
         data = json.loads(request.body)
         email_id = data.get('secondary_email_id')
         code = data.get('code')
         sec_email = get_object_or_404(SecondaryEmail, id=email_id, user=request.user)
-        
+
         purpose = "sec_email"
+
+        # Brute-force protection: max 5 attempts per 10-minute window
+        attempts_key = f"otp_attempts_{request.user.id}_{purpose}"
+        attempts = cache.get(attempts_key, 0)
+        if attempts >= 5:
+            return JsonResponse({"status": "error", "message": "Too many incorrect attempts. Please request a new OTP."}, status=429)
+
         otp_obj = OTP.objects.filter(
             user=request.user,
             purpose=purpose,
@@ -1333,19 +1411,21 @@ def verify_secondary_otp(request):
             is_used=False,
             expires_at__gt=timezone.now()
         ).first()
-        
+
         if not otp_obj:
+            cache.set(attempts_key, attempts + 1, timeout=600)
             return JsonResponse({"status": "error", "message": "Invalid or expired OTP"}, status=400)
-            
+
         otp_obj.is_used = True
         otp_obj.save()
-        
+        cache.delete(attempts_key)
+
         sec_email.is_verified = True
         sec_email.save()
-        
+
         return JsonResponse({"status": "success", "message": "Secondary email verified successfully!"})
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+    except Exception:
+        return JsonResponse({"status": "error", "message": "Verification failed. Please try again."}, status=500)
 
 
 def payment_failed(request):
@@ -1539,8 +1619,8 @@ def recalculate_score_api(request, analysis_id):
             "impact_critiques": record.impact_critiques,
             "ats_format_issues": record.ats_format_issues
         })
-    except Exception as exc:
-        return JsonResponse({"error": str(exc)}, status=500)
+    except Exception:
+        return JsonResponse({"error": "Score recalculation failed. Please try again."}, status=500)
 
 
 @login_required
@@ -1728,8 +1808,8 @@ def parse_resume_for_builder_api(request):
         
         return JsonResponse({"status": "success", "resume": structured_data})
 
-    except Exception as exc:
-        return JsonResponse({"error": f"Failed to parse resume: {str(exc)}"}, status=500)
+    except Exception:
+        return JsonResponse({"error": "Failed to parse resume. Please try again."}, status=500)
 
 
 @login_required
@@ -2570,8 +2650,8 @@ def auto_tailor_resume_api(request):
     try:
         tailored_data = tailor_resume_data(resume_json, job_desc)
         return JsonResponse({"status": "success", "resume": tailored_data})
-    except Exception as e:
-        return JsonResponse({"error": f"Failed to tailor resume: {str(e)}"}, status=500)
+    except Exception:
+        return JsonResponse({"error": "Failed to tailor resume. Please try again."}, status=500)
 
 
 @login_required
@@ -2595,8 +2675,8 @@ def builder_skills_gap_api(request):
     try:
         analysis_result = analyze_skills_gap(resume_text, job_desc)
         return JsonResponse({"status": "success", "skills_gap": analysis_result})
-    except Exception as e:
-        return JsonResponse({"error": f"Failed to analyze skills gap: {str(e)}"}, status=500)
+    except Exception:
+        return JsonResponse({"error": "Skills gap analysis failed. Please try again."}, status=500)
 
 
 
