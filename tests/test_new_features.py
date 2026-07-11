@@ -835,6 +835,93 @@ def test_export_resume_pdf_advanced_styles(factory, premium_user, analysis_recor
         assert f"Optimized_Resume_{layout}.pdf" in response["Content-Disposition"]
 
 
+def test_innovative_prompt_builders():
+    from analyzer.prompt_builder import (
+        build_career_pivot_prompt,
+        build_debiased_resume_prompt,
+        build_behavioral_star_prep_prompt,
+        build_resume_roast_prompt,
+        build_system_design_challenge_prompt,
+        build_salary_negotiation_prompt,
+        build_github_optimization_prompt,
+        build_takehome_assignment_prompt,
+        build_rejection_recovery_prompt,
+        build_buzzword_audit_prompt,
+        build_adaptive_mock_interview_script_prompt,
+        build_linkedin_tailoring_prompt,
+        build_cultural_alignment_prompt,
+    )
+    
+    resume_text = "John Doe\nPython Developer\nLed cloud migration"
+    job_desc = "We need a Senior Python Developer with AWS scale expertise."
+    
+    # 1. Career Pivot
+    p1 = build_career_pivot_prompt(resume_text, "Data Scientist", "Finance")
+    assert "Data Scientist" in p1
+    assert "5-6 solid" in p1
+    
+    # 2. Debiased Resume
+    p2 = build_debiased_resume_prompt(resume_text)
+    assert "unbiased" in p2.lower()
+    assert "5-6 solid" in p2
+    
+    # 3. Behavioral STAR Prep
+    p3 = build_behavioral_star_prep_prompt(resume_text, job_desc)
+    assert "STAR" in p3
+    assert "5-6 solid" in p3
+    
+    # 4. Resume Roast
+    p4 = build_resume_roast_prompt(resume_text)
+    assert "roast" in p4.lower()
+    assert "5-6 solid" in p4
+    
+    # 5. System Design Challenge
+    p5 = build_system_design_challenge_prompt(resume_text, job_desc)
+    assert "system design" in p5.lower()
+    assert "5-6 solid" in p5
+    
+    # 6. Salary Negotiation
+    p6 = build_salary_negotiation_prompt(resume_text, job_desc, {"min": 100000, "max": 150000})
+    assert "negotiation" in p6.lower()
+    assert "5-6 solid" in p6
+    
+    # 7. GitHub Optimization
+    p7 = build_github_optimization_prompt(resume_text, job_desc)
+    assert "GitHub" in p7
+    assert "5-6 solid" in p7
+    
+    # 8. Take-home Assignment
+    p8 = build_takehome_assignment_prompt(resume_text, job_desc)
+    assert "take-home" in p8.lower()
+    assert "5-6 solid" in p8
+    
+    # 9. Rejection Recovery
+    p9 = build_rejection_recovery_prompt(resume_text, job_desc)
+    assert "rejection" in p9.lower()
+    assert "5-6 solid" in p9
+    
+    # 10. Buzzword Audit
+    p10 = build_buzzword_audit_prompt(resume_text)
+    assert "buzzword" in p10.lower()
+    assert "5-6 solid" in p10
+    
+    # 11. Adaptive Mock Interview
+    p11 = build_adaptive_mock_interview_script_prompt(resume_text, job_desc)
+    assert "interview" in p11.lower()
+    assert "5-6 solid" in p11
+    
+    # 12. LinkedIn Tailoring
+    p12 = build_linkedin_tailoring_prompt(resume_text, "Lead Engineer")
+    assert "LinkedIn" in p12
+    assert "5-6 solid" in p12
+    
+    # 13. Cultural Alignment
+    p13 = build_cultural_alignment_prompt(resume_text, job_desc, "Customer Obsession, Ownership")
+    assert "Customer Obsession" in p13
+    assert "5-6 solid" in p13
+
+
+
 
 
 

@@ -38,7 +38,7 @@ ANALYSIS_JSON_SCHEMA = """
         {"skill": "string", "learning_strategy": "string detailing how to learn this skill", "recommended_resources": [{"name": "string resource name", "url": "string URL to the resource"}]}
     ],
     "interview_questions": [
-        {"question": "string containing a tailored interview question based on the resume and JD", "answer": "detailed string with key points the candidate should cover"}
+        {"question": "string containing a tailored interview question based on the resume and JD", "answer": "detailed string with key points formatted as exactly 5-6 solid, crisp, and concise detailed points the candidate must cover"}
     ],
     "fraud_audit": {
         "ai_probability": <integer 0-100, probability that the resume was written by AI>,
@@ -126,7 +126,7 @@ def build_analysis_prompt(resume_text: str, job_desc: str) -> str:
     Identify:
     - Overused words, passive voice, and weak verbs in the Experience section.
     - Lack of quantification (metrics, numbers) in achievements.
-    - Generate EXACTLY 15 highly tailored interview questions covering technical skills, behavioral situations, experience gaps, and deep-dive questions about specific projects listed in the resume. Avoid generic interview questions. Provide detailed, comprehensive answers for each question detailing key points the candidate must cover.
+    - Generate EXACTLY 15 highly tailored interview questions covering technical skills, behavioral situations, experience gaps, and deep-dive questions about specific projects listed in the resume. Avoid generic interview questions. Provide detailed, comprehensive answers for each question formatted as exactly 5-6 solid, crisp, and concise detailed points the candidate must cover.
     - Extract skills and strictly categorize them as "hard" (technical, tools, specific knowledge) or "soft" (interpersonal, leadership, traits).
     
     Analyze and populate these new Recruiter Insights:
@@ -455,6 +455,232 @@ def build_auto_tailor_prompt(resume_json: dict, job_desc: str) -> str:
     
     Return ONLY the tailored resume as a valid JSON object matching the input schema. Do not write any markdown code fences (like ```json), prefix numbers, or extra text. Output only the raw valid JSON.
     """
+
+
+def build_career_pivot_prompt(resume_text: str, target_role: str, target_industry: str) -> str:
+    """Constructs the prompt to map transferable skills and build a pivot roadmap."""
+    return f"""
+    You are an elite career transition architect. Analyze the candidate's resume and build a comprehensive pivot blueprint.
+    Target Role: {target_role}
+    Target Industry: {target_industry}
+
+    Resume Content:
+    {resume_text[:20000]}
+
+    Please analyze:
+    1. Transferable skills that directly apply to the new target role.
+    2. Hard/technical and soft skill gaps that must be addressed immediately.
+    3. A structured, milestone-based learning curriculum to bridge those gaps.
+    4. Actionable resume modification strategies to reframe past experience for the pivot.
+
+    Return the analysis structured in exactly 5-6 solid, crisp, and concise points detailing the strategic pivot steps.
+    """
+
+
+def build_debiased_resume_prompt(resume_text: str) -> str:
+    """Constructs the prompt to blind-evaluate a resume by stripping bias indicators."""
+    return f"""
+    You are an unbiased merit-based talent evaluation engine. Review the resume content.
+    
+    Resume Content:
+    {resume_text[:25000]}
+
+    Identify and evaluate the candidate's qualification, experience, and skill alignment without considering:
+    - Names, email, phone numbers, or social media links.
+    - Specific locations, universities, or companies that might trigger elite institution bias.
+    - Age/graduation year indicators, gender-coded pronouns, or cultural references.
+
+    Output a clean assessment detailing core technical capabilities, achievements, and project impacts, formatted as exactly 5-6 solid, crisp, and concise points.
+    """
+
+
+def build_behavioral_star_prep_prompt(resume_text: str, job_desc: str) -> str:
+    """Constructs the prompt to formulate behavioral questions and STAR prep guides."""
+    return f"""
+    You are an expert executive coach. Formulate 5 highly targeted behavioral interview questions based on the candidate's resume gaps and job description requirements.
+    
+    Job Description:
+    {job_desc[:10000]}
+    
+    Resume:
+    {resume_text[:20000]}
+
+    For each question, provide a detailed preparation guide outlining how the candidate should structure their STAR (Situation, Task, Action, Result) narrative.
+    Ensure each guide is presented in exactly 5-6 solid, crisp, and concise points detailing what metrics to claim and what pitfalls to avoid.
+    """
+
+
+def build_resume_roast_prompt(resume_text: str) -> str:
+    """Constructs the prompt to generate a humorous but constructive resume roast."""
+    return f"""
+    You are a brutally honest, witty, and highly experienced senior developer and recruiter.
+    Analyze this resume and give it an entertaining, sarcastic, yet highly actionable "roast".
+    
+    Resume Content:
+    {resume_text[:25000]}
+
+    Point out clichés, overused buzzwords, formatting issues, lack of impact metrics, or general fluff.
+    Format your roast output as exactly 5-6 solid, crisp, and concise points that blend humor with highly practical improvements.
+    """
+
+
+def build_system_design_challenge_prompt(resume_text: str, job_desc: str) -> str:
+    """Constructs the prompt to generate tailored system design challenges."""
+    return f"""
+    You are a principal systems architect. Design a highly specific system design challenge tailored to this candidate's background and the scale of the target role.
+    
+    Job Description:
+    {job_desc[:10000]}
+    
+    Resume:
+    {resume_text[:20000]}
+
+    Formulate the system constraints, traffic estimates, functional requirements, and potential bottleneck areas.
+    Provide a comprehensive grading and evaluation checklist for the interviewer, structured as exactly 5-6 solid, crisp, and concise detailed points.
+    """
+
+
+def build_salary_negotiation_prompt(resume_text: str, job_desc: str, base_benchmark: dict) -> str:
+    """Constructs the prompt to build a personalized salary negotiation script."""
+    import json
+    return f"""
+    You are a professional compensation consultant and negotiation advocate.
+    Generate a personalized salary negotiation playbook for this candidate based on their profile, target job, and salary benchmarks.
+    
+    Job Description:
+    {job_desc[:10000]}
+    
+    Resume:
+    {resume_text[:20000]}
+    
+    Benchmarks:
+    {json.dumps(base_benchmark)}
+
+    Include:
+    - Anchoring scripts and justification points based on candidate strengths.
+    - Standard responses to counter common HR pushbacks (e.g. budget limits, equity trade-offs).
+    
+    Format the playbook response in exactly 5-6 solid, crisp, and concise detailed points.
+    """
+
+
+def build_github_optimization_prompt(resume_text: str, job_desc: str) -> str:
+    """Constructs the prompt to recommend specific portfolio projects and contributions."""
+    return f"""
+    You are a technical mentor and open-source contributor. Review the candidate's resume gaps against the job description.
+    
+    Job Description:
+    {job_desc[:10000]}
+    
+    Resume:
+    {resume_text[:20000]}
+
+    Recommend 3 concrete micro-projects or open-source issues they should build and publish on GitHub to demonstrate competence.
+    Detail the exact technology stack, architecture layout, and core problems each project should solve.
+    Provide the recommendations in exactly 5-6 solid, crisp, and concise points.
+    """
+
+
+def build_takehome_assignment_prompt(resume_text: str, job_desc: str) -> str:
+    """Constructs the prompt to build a realistic, tailored take-home coding assignment."""
+    return f"""
+    You are a lead engineer responsible for hiring. Generate a custom, realistic take-home coding assessment based on the job requirements.
+    
+    Job Description:
+    {job_desc[:10000]}
+    
+    Resume:
+    {resume_text[:20000]}
+
+    Specify:
+    - Clear functional requirements.
+    - Code design constraints (e.g. error handling, concurrency, testing).
+    - Detailed grading rubric and expectations.
+    
+    Format the assignment description and rubric in exactly 5-6 solid, crisp, and concise points.
+    """
+
+
+def build_rejection_recovery_prompt(resume_text: str, job_desc: str) -> str:
+    """Constructs the prompt to write strategic recovery letters after a rejection."""
+    return f"""
+    You are a career strategy expert. Write a professional recovery and outreach letter template for a candidate who received a rejection email.
+    
+    Job Description:
+    {job_desc[:10000]}
+    
+    Resume:
+    {resume_text[:20000]}
+
+    The goal is to maintain a professional connection, ask for specific feedback, and position the candidate for future roles or referrals.
+    Formulate the response and strategy in exactly 5-6 solid, crisp, and concise points, including the letter template.
+    """
+
+
+def build_buzzword_audit_prompt(resume_text: str) -> str:
+    """Constructs the prompt to scan the resume for fluff and propose replacements."""
+    return f"""
+    You are a precision copywriter and executive recruiter. Scan this resume for filler text, clichés, and overused buzzwords.
+    
+    Resume Content:
+    {resume_text[:25000]}
+
+    Identify the weak words/sentences and suggest exact, metrics-driven, action-oriented rewrites.
+    Structure your suggestions as exactly 5-6 solid, crisp, and concise points.
+    """
+
+
+def build_adaptive_mock_interview_script_prompt(resume_text: str, job_desc: str) -> str:
+    """Constructs the prompt to design an adaptive dialogue script for mock interviewers."""
+    return f"""
+    You are a master interviewer. Create an adaptive multi-turn interview dialogue script.
+    
+    Job Description:
+    {job_desc[:10000]}
+    
+    Resume:
+    {resume_text[:20000]}
+
+    Draft the logical progression of questions (technical, behavioral, situational) mapping out how the interviewer should pivot their questions based on the quality of candidate responses.
+    Present the adaptive script structure in exactly 5-6 solid, crisp, and concise points.
+    """
+
+
+def build_linkedin_tailoring_prompt(resume_text: str, target_role: str) -> str:
+    """Constructs the prompt to generate optimized LinkedIn headline and summary options."""
+    return f"""
+    You are a personal branding consultant. Generate optimized LinkedIn profile elements.
+    Target Role: {target_role}
+
+    Resume Content:
+    {resume_text[:25000]}
+
+    Provide:
+    - 3 catchy, high-impact headline variations incorporating SEO keywords.
+    - A compelling, first-person "About" summary that hooks recruiters.
+    
+    Format the profile optimization guidance and options in exactly 5-6 solid, crisp, and concise points.
+    """
+
+
+def build_cultural_alignment_prompt(resume_text: str, job_desc: str, company_values: str) -> str:
+    """Constructs the prompt to align resume experience with target company core values."""
+    return f"""
+    You are a corporate culture alignment coach. Review the candidate's resume and align achievements to the target company values.
+    
+    Job Description:
+    {job_desc[:10000]}
+    
+    Company Core Values:
+    {company_values}
+
+    Resume:
+    {resume_text[:20000]}
+
+    Provide guidance and specific bullet point adjustments to highlight competencies matching these values.
+    Format your recommendations in exactly 5-6 solid, crisp, and concise points.
+    """
+
 
 
 
