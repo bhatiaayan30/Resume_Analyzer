@@ -38,7 +38,7 @@ ANALYSIS_JSON_SCHEMA = """
         {"skill": "string", "learning_strategy": "string detailing how to learn this skill", "recommended_resources": [{"name": "string resource name", "url": "string URL to the resource"}]}
     ],
     "interview_questions": [
-        {"question": "string containing a tailored interview question based on the resume and JD", "answer": "detailed string with key points formatted as exactly 5-6 solid, crisp, and concise detailed points the candidate must cover"}
+        {"question": "string containing a tailored interview question based on the resume and JD", "answer": "detailed string with key points formatted as exactly 5 detailed bullet points the candidate must cover"}
     ],
     "fraud_audit": {
         "ai_probability": <integer 0-100, probability that the resume was written by AI>,
@@ -126,7 +126,7 @@ def build_analysis_prompt(resume_text: str, job_desc: str) -> str:
     Identify:
     - Overused words, passive voice, and weak verbs in the Experience section.
     - Lack of quantification (metrics, numbers) in achievements.
-    - Generate EXACTLY 15 highly tailored interview questions covering technical skills, behavioral situations, experience gaps, and deep-dive questions about specific projects listed in the resume. Avoid generic interview questions. Provide detailed, comprehensive answers for each question formatted as exactly 5-6 solid, crisp, and concise detailed points the candidate must cover.
+    - Generate EXACTLY 15 highly tailored interview questions covering technical skills, behavioral situations, experience gaps, and deep-dive questions about specific projects listed in the resume. Avoid generic interview questions. Each question must be strictly tailored to the candidate's specific resume experience, projects, and gaps. Provide detailed, comprehensive answers for each question formatted as exactly 5 detailed bullet points the candidate should cover.
     - Extract skills and strictly categorize them as "hard" (technical, tools, specific knowledge) or "soft" (interpersonal, leadership, traits).
     
     Analyze and populate these new Recruiter Insights:
@@ -497,7 +497,7 @@ def build_debiased_resume_prompt(resume_text: str) -> str:
 def build_behavioral_star_prep_prompt(resume_text: str, job_desc: str) -> str:
     """Constructs the prompt to formulate behavioral questions and STAR prep guides."""
     return f"""
-    You are an expert executive coach. Formulate 5 highly targeted behavioral interview questions based on the candidate's resume gaps and job description requirements.
+    You are an expert executive coach. Formulate 5 highly targeted behavioral interview questions based on the candidate's resume gaps and job description requirements. Each question must be strictly tailored to the candidate's specific resume experience, projects, and gaps.
     
     Job Description:
     {job_desc[:10000]}
@@ -506,7 +506,7 @@ def build_behavioral_star_prep_prompt(resume_text: str, job_desc: str) -> str:
     {resume_text[:20000]}
 
     For each question, provide a detailed preparation guide outlining how the candidate should structure their STAR (Situation, Task, Action, Result) narrative.
-    Ensure each guide is presented in exactly 5-6 solid, crisp, and concise points detailing what metrics to claim and what pitfalls to avoid.
+    Ensure each guide is presented in exactly 5 detailed bullet points detailing what metrics to claim and what pitfalls to avoid.
     """
 
 

@@ -868,7 +868,7 @@ def test_innovative_prompt_builders():
     # 3. Behavioral STAR Prep
     p3 = build_behavioral_star_prep_prompt(resume_text, job_desc)
     assert "STAR" in p3
-    assert "5-6 solid" in p3
+    assert "5 detailed bullet points" in p3
     
     # 4. Resume Roast
     p4 = build_resume_roast_prompt(resume_text)
@@ -919,6 +919,12 @@ def test_innovative_prompt_builders():
     p13 = build_cultural_alignment_prompt(resume_text, job_desc, "Customer Obsession, Ownership")
     assert "Customer Obsession" in p13
     assert "5-6 solid" in p13
+
+    # 14. Main Analysis Prompt
+    from analyzer.prompt_builder import build_analysis_prompt
+    p14 = build_analysis_prompt(resume_text, job_desc)
+    assert "5 detailed bullet points" in p14
+    assert "strictly tailored" in p14
 
 
 
