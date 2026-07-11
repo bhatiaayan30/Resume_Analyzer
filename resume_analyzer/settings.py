@@ -174,6 +174,7 @@ RAZORPAY_WEBHOOK_SECRET = config("RAZORPAY_WEBHOOK_SECRET", default="whsec_place
 
 # ── API Keys ───────────────────────────────────────────────────
 APP_API_KEY = config("APP_API_KEY", default="dummy-api-key-change-me")
+SUPPORT_EMAIL = config("SUPPORT_EMAIL", default="support@resumeanalyzer.com")
 
 # Plan IDs for Razorpay
 RAZORPAY_PLAN_ID_49 = config("RAZORPAY_PLAN_ID_49", default="")

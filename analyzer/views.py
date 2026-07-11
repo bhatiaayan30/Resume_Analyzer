@@ -43,7 +43,16 @@ from .utils import (
     format_interview_questions
 )
 
-razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+_razorpay_client = None
+
+def _get_razorpay_client():
+    """Lazy-init the Razorpay client so placeholder keys at import time don't break tests."""
+    global _razorpay_client
+    if _razorpay_client is None:
+        _razorpay_client = razorpay.Client(
+            auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+        )
+    return _razorpay_client
 
 def index(request):
     """Serve the upload form (Step 1) or landing page."""
@@ -883,7 +892,7 @@ def create_razorpay_order(request):
 
     try:
         # Create an Order in Razorpay
-        order = razorpay_client.order.create({
+        order = _get_razorpay_client().order.create({
             "amount": amount_in_paise,
             "currency": "INR",
             "receipt": f"receipt_tier_{tier}",
@@ -915,7 +924,7 @@ def razorpay_webhook(request):
     sig_header = request.META.get('HTTP_X_RAZORPAY_SIGNATURE', '')
     
     try:
-        razorpay_client.utility.verify_webhook_signature(payload, sig_header, settings.RAZORPAY_WEBHOOK_SECRET)
+        _get_razorpay_client().utility.verify_webhook_signature(payload, sig_header, settings.RAZORPAY_WEBHOOK_SECRET)
     except Exception as e:
         return HttpResponse(status=400)
 
@@ -1737,55 +1746,8 @@ def save_builder_resume_api(request):
         return JsonResponse({"error": "Candidate name is required."}, status=400)
 
     # Rebuild plain text from structured data for ATS re-analysis
-    lines = [name]
-    contact = data.get("contact", {})
-    if contact.get("email"):
-        lines.append(contact["email"])
-    if contact.get("phone"):
-        lines.append(contact["phone"])
-    if contact.get("location"):
-        lines.append(contact["location"])
-    summary = data.get("summary", "")
-    if summary:
-        lines.append("\nSUMMARY\n" + summary)
-    for exp in data.get("experience", []):
-        lines.append(f"\n{exp.get('role', '')} at {exp.get('company', '')} | {exp.get('duration', '')}")
-        for b in exp.get("bullets", []):
-            lines.append(f"• {b}")
-    for proj in data.get("projects", []):
-        lines.append(f"\nPROJECT: {proj.get('title', '')} | {proj.get('duration', '')}")
-        for b in proj.get("bullets", []):
-            lines.append(f"• {b}")
-    for edu in data.get("education", []):
-        lines.append(f"\n{edu.get('degree', '')} — {edu.get('institution', '')} | {edu.get('duration', '')}")
-    
-    certs = data.get("certifications", [])
-    if certs:
-        lines.append("\nCERTIFICATIONS")
-        for cert in certs:
-            if isinstance(cert, dict):
-                lines.append(f"• {cert.get('name', '')} — {cert.get('authority', '')} | {cert.get('duration', '')}")
-            else:
-                lines.append(f"• {cert}")
-                
-    extras = data.get("extracurriculars", [])
-    if extras:
-        lines.append("\nLEADERSHIP & EXTRACURRICULAR ACTIVITIES")
-        for ex in extras:
-            if isinstance(ex, dict):
-                lines.append(f"• {ex.get('role', '')} — {ex.get('organization', '')} | {ex.get('duration', '')}")
-                for b in ex.get("bullets", []):
-                    lines.append(f"  • {b}")
-            else:
-                lines.append(f"• {ex}")
+    plain_text = serialize_structured_resume_to_text(data)
 
-    skills = data.get("skills", {})
-    all_skills = []
-    for cat in ["languages", "frameworks", "tools", "other"]:
-        all_skills.extend(skills.get(cat, []))
-    if all_skills:
-        lines.append("\nSKILLS\n" + ", ".join(all_skills))
-    plain_text = "\n".join(lines)
 
     # Create a ResumeVersion entry
     resume_version = ResumeVersion.objects.create(
@@ -2525,12 +2487,12 @@ def support_view(request):
                 subject=email_subject,
                 message=email_body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=["bhatiaayan30@gmail.com"],
+                recipient_list=[settings.SUPPORT_EMAIL],
                 fail_silently=False,
             )
             return render(request, "analyzer/support.html", {"success": True})
-        except Exception as e:
-            return render(request, "analyzer/support.html", {"error": f"Failed to send ticket: {str(e)}"})
+        except Exception:
+            return render(request, "analyzer/support.html", {"error": "Failed to send your message. Please try again later."})
             
     return render(request, "analyzer/support.html")
 

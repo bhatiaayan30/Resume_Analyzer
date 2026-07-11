@@ -474,17 +474,7 @@ def suggest_bullet_rewrites(bullet_point: str, job_desc: str) -> dict:
             max_tokens=800
         )
         
-        content = response.choices[0].message.content.strip()
-        # Clean any markdown code fences if outputted
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-        content = content.strip()
-        
-        parsed = json.loads(content)
+        parsed = robust_json_loads(response.choices[0].message.content)
         if isinstance(parsed, list):
             # Fallback if the LLM/mock returned a simple list of suggestions
             return {
@@ -669,15 +659,7 @@ def get_ai_experience_bullets(job_title: str, company_type: str) -> list:
             temperature=0.7,
             max_tokens=800
         )
-        content = response.choices[0].message.content.strip()
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-        content = content.strip()
-        return json.loads(content)
+        return robust_json_loads(response.choices[0].message.content)
     except Exception as exc:
         print(f"[utils.get_ai_experience_bullets] Error: {exc}")
         return [
