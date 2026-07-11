@@ -38,7 +38,7 @@ ANALYSIS_JSON_SCHEMA = """
         {"skill": "string", "learning_strategy": "string detailing how to learn this skill", "recommended_resources": [{"name": "string resource name", "url": "string URL to the resource"}]}
     ],
     "interview_questions": [
-        {"question": "string containing a tailored interview question based on the resume and JD", "answer": "detailed string with key points formatted as exactly 5 detailed bullet points the candidate must cover"}
+        {"question": "string containing a tailored interview question based on the resume and JD", "answer": "A SINGLE STRING (not a JSON array) containing exactly 5 bullet points separated by newlines. Each bullet must start with the • character. Example format: '• First point here\n• Second point here\n• Third point here\n• Fourth point here\n• Fifth point here'"}
     ],
     "fraud_audit": {
         "ai_probability": <integer 0-100, probability that the resume was written by AI>,
@@ -126,7 +126,7 @@ def build_analysis_prompt(resume_text: str, job_desc: str) -> str:
     Identify:
     - Overused words, passive voice, and weak verbs in the Experience section.
     - Lack of quantification (metrics, numbers) in achievements.
-    - Generate EXACTLY 15 highly tailored interview questions covering technical skills, behavioral situations, experience gaps, and deep-dive questions about specific projects listed in the resume. Avoid generic interview questions. Each question must be strictly tailored to the candidate's specific resume experience, projects, and gaps. Provide detailed, comprehensive answers for each question formatted as exactly 5 detailed bullet points the candidate should cover.
+    - Generate EXACTLY 15 highly tailored interview questions covering technical skills, behavioral situations, experience gaps, and deep-dive questions about specific projects listed in the resume. Avoid generic interview questions. Each question must be strictly tailored to the candidate's specific resume experience, projects, and gaps. For each question, the "answer" field MUST be a SINGLE STRING (never a JSON array or list). Write exactly 5 bullet points inside that string, each prefixed with the • character and separated by newline characters. Do NOT return the answer as a JSON array of strings.
     - Extract skills and strictly categorize them as "hard" (technical, tools, specific knowledge) or "soft" (interpersonal, leadership, traits).
     
     Analyze and populate these new Recruiter Insights:

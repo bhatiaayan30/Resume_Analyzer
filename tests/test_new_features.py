@@ -923,7 +923,7 @@ def test_innovative_prompt_builders():
     # 14. Main Analysis Prompt
     from analyzer.prompt_builder import build_analysis_prompt
     p14 = build_analysis_prompt(resume_text, job_desc)
-    assert "5 detailed bullet points" in p14
+    assert "5 bullet points" in p14
     assert "strictly tailored" in p14
 
 

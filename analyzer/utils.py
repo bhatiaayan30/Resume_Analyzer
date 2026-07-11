@@ -740,46 +740,59 @@ def tailor_resume_data(resume_json: dict, job_desc: str) -> dict:
 
 
 def format_interview_questions(questions: list) -> list:
-    """Helper to format question answers into structured bullet points."""
+    """
+    Normalizes interview question answers into bullet-pointed strings.
+    Handles: Python lists, JSON-serialized arrays, numbered lists, dash/star prefixed lines.
+    """
+    import json
+    import re
+
     if not isinstance(questions, list):
         return []
+
+    def _normalize_answer(raw):
+        """Convert whatever the LLM gave us into a bullet-pointed string."""
+        if isinstance(raw, list):
+            points = [str(p).strip() for p in raw if str(p).strip()]
+            return "\n".join(f"• {p}" for p in points)
+
+        if not isinstance(raw, str):
+            return str(raw)
+
+        text = raw.strip()
+
+        # Try parsing stringified JSON/Python list: ['point', 'point']
+        if text.startswith("[") and text.endswith("]"):
+            try:
+                parsed = json.loads(text.replace("'", '"'))
+                if isinstance(parsed, list):
+                    points = [str(p).strip() for p in parsed if str(p).strip()]
+                    return "\n".join(f"• {p}" for p in points)
+            except (json.JSONDecodeError, ValueError):
+                pass
+
+        # Split on newlines and check if it looks like a multi-line answer
+        lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
+        if len(lines) <= 1:
+            return text  # single line, nothing to reformat
+
+        # Strip existing prefixes (-, *, •, 1., 2.) and re-prefix with •
+        cleaned = []
+        for line in lines:
+            stripped = re.sub(r'^[\-\*•]\s*', '', line)          # dash/star/bullet
+            stripped = re.sub(r'^\d+[\.\)]\s*', '', stripped)    # numbered (1. or 1))
+            cleaned.append(f"• {stripped}" if stripped else "")
+        return "\n".join(c for c in cleaned if c)
+
     formatted = []
-    import json
     for item in questions:
         if not isinstance(item, dict):
             formatted.append({"question": str(item), "answer": ""})
             continue
-        q = item.get("question", "")
-        a = item.get("answer", "")
-        
-        if isinstance(a, list):
-            # If it's a list, prefix each with a bullet
-            a_str = "\n".join(f"• {pt.strip()}" for pt in a if pt.strip())
-        elif isinstance(a, str):
-            # Try to parse string representation of list
-            stripped_a = a.strip()
-            if stripped_a.startswith("[") and stripped_a.endswith("]"):
-                try:
-                    # Clean up quotes if it uses python literal quotes
-                    cleaned_a = stripped_a.replace("'", '"')
-                    parsed_a = json.loads(cleaned_a)
-                    if isinstance(parsed_a, list):
-                        a_str = "\n".join(f"• {pt.strip()}" for pt in parsed_a if pt.strip())
-                    else:
-                        a_str = stripped_a
-                except Exception:
-                    a_str = stripped_a
-            else:
-                # If it has newlines, ensure each line is a bullet
-                lines = [line.strip() for line in a.split("\n") if line.strip()]
-                if len(lines) > 1:
-                    a_str = "\n".join(line if (line.startswith("•") or line.startswith("-") or line.startswith("*")) else f"• {line}" for line in lines)
-                else:
-                    a_str = a
-        else:
-            a_str = str(a)
-            
-        formatted.append({"question": q, "answer": a_str})
+        formatted.append({
+            "question": item.get("question", ""),
+            "answer": _normalize_answer(item.get("answer", "")),
+        })
     return formatted
 
 
