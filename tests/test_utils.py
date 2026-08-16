@@ -5,9 +5,9 @@ import pytest
 from analyzer.utils import analyze_with_ai
 
 
-@patch("analyzer.utils.Groq")
-def test_analyze_with_ai_success(mock_groq_class):
-    mock_client = mock_groq_class.return_value
+@patch("analyzer.utils._get_groq_client")
+def test_analyze_with_ai_success(mock_get_client):
+    mock_client = mock_get_client.return_value
     mock_response = MagicMock()
     mock_response.choices[0].message.content = """{
         "match_score": 85,
@@ -33,9 +33,9 @@ def test_analyze_with_ai_success(mock_groq_class):
     assert usage["completion_tokens"] == 50
 
 
-@patch("analyzer.utils.Groq")
-def test_analyze_with_ai_malformed_json(mock_groq_class):
-    mock_client = mock_groq_class.return_value
+@patch("analyzer.utils._get_groq_client")
+def test_analyze_with_ai_malformed_json(mock_get_client):
+    mock_client = mock_get_client.return_value
     mock_response = MagicMock()
     mock_response.choices[0].message.content = "Not a JSON object"
     mock_client.chat.completions.create.return_value = mock_response

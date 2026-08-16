@@ -16,7 +16,19 @@ import fitz  # PyMuPDF
 import pdfplumber
 from docx import Document
 from groq import Groq
+from functools import lru_cache
 from tenacity import retry, stop_after_attempt, wait_exponential
+
+
+@lru_cache(maxsize=1)
+def _get_groq_client() -> Groq:
+    """Return a singleton Groq client, reading the API key from Django settings or env."""
+    from django.conf import settings
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        raise RuntimeError("GROQ_API_KEY is not set. Add it to your .env file.")
+    return Groq(api_key=api_key)
+
 
 from analyzer.prompt_builder import (
     build_analysis_prompt,
@@ -156,14 +168,9 @@ def extract_text_from_image(image_bytes: bytes, mime_type: str) -> str:
     """
     Extract text from an image using Groq Vision API.
     """
-    from django.conf import settings
     import base64
-    
-    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        raise RuntimeError("GROQ_API_KEY environment variable is not set.")
 
-    client = Groq(api_key=api_key)
+    client = _get_groq_client()
     base64_encoded = base64.b64encode(image_bytes).decode('utf-8')
     
     try:
@@ -214,15 +221,7 @@ def analyze_with_ai(resume_text: str, job_description: str) -> Tuple[Dict[str, A
         RuntimeError         : GROQ_API_KEY is not set.
         json.JSONDecodeError : AI returned non-JSON.
     """
-    from django.conf import settings
-
-    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        raise RuntimeError(
-            "GROQ_API_KEY environment variable is not set. " "Add it to your .env file."
-        )
-
-    client = Groq(api_key=api_key)
+    client = _get_groq_client()
 
 
     # ── Fetch Prompt from Builder ─────────────
@@ -257,13 +256,7 @@ def analyze_skills_gap(resume_text: str, job_description: str) -> Dict[str, Any]
     Analyzes the skills gap between the candidate's resume and job description.
     Queries Groq API and returns parsed JSON alignment data.
     """
-    from django.conf import settings
-
-    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        raise RuntimeError("GROQ_API_KEY environment variable is not set.")
-
-    client = Groq(api_key=api_key)
+    client = _get_groq_client()
     prompt = build_skills_gap_prompt(resume_text, job_description)
     fast_model = os.environ.get("FAST_MODEL", "llama-3.3-70b-versatile")
 
@@ -290,13 +283,7 @@ def generate_cover_letter(resume_text: str, job_desc: str, tone: str = "Professi
     """
     Uses Groq (Llama-3) to write a highly customized cover letter based on the resume and job description.
     """
-    from django.conf import settings
-
-    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        raise ValueError("GROQ_API_KEY is not configured.")
-
-    client = Groq(api_key=api_key)
+    client = _get_groq_client()
 
     system_prompt = build_cover_letter_system_prompt(tone=tone)
     user_prompt = build_cover_letter_user_prompt(resume_text, job_desc, length=length, highlights=highlights)
@@ -450,20 +437,8 @@ def generate_offline_validation(bullet_point: str) -> dict:
 
 def suggest_bullet_rewrites(bullet_point: str, job_desc: str) -> dict:
     """Gets 3 improved options and a STAR/XYZ validation breakdown for a resume bullet point from AI."""
-    from django.conf import settings
-    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        return {
-            "suggestions": [
-                f"{bullet_point} (Enhanced version 1 - Quantified outcome)",
-                f"{bullet_point} (Enhanced version 2 - Skill integration)",
-                f"{bullet_point} (Enhanced version 3 - Strong action verb)"
-            ],
-            "validation": generate_offline_validation(bullet_point)
-        }
-        
     try:
-        client = Groq(api_key=api_key)
+        client = _get_groq_client()
         prompt = build_bullet_rewrite_prompt(bullet_point, job_desc)
         model = os.environ.get("FAST_MODEL", "llama-3.1-8b-instant")
         
@@ -505,13 +480,8 @@ def suggest_bullet_rewrites(bullet_point: str, job_desc: str) -> dict:
 
 def generate_next_interview_question(resume_text: str, job_desc: str, chat_history: list) -> str:
     """Generates the next question in the mock interview chat session."""
-    from django.conf import settings
-    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        return "Can you tell me about your experience working with technical systems?"
-        
     try:
-        client = Groq(api_key=api_key)
+        client = _get_groq_client()
         prompt = build_interview_question_prompt(resume_text, job_desc, chat_history)
         model = os.environ.get("FAST_MODEL", "llama-3.1-8b-instant")
         
@@ -529,12 +499,8 @@ def generate_next_interview_question(resume_text: str, job_desc: str, chat_histo
 def evaluate_interview_answer(question: str, answer: str, job_desc: str) -> dict:
     """Evaluates candidate response and provides feedback and score."""
     from django.conf import settings
-    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        return {"score": 75, "feedback": "Good response. Try to add more metrics."}
-        
     try:
-        client = Groq(api_key=api_key)
+        client = _get_groq_client()
         prompt = build_interview_feedback_prompt(question, answer, job_desc)
         model = os.environ.get("FAST_MODEL", "llama-3.1-8b-instant")
         
@@ -583,12 +549,8 @@ def robust_json_loads(text: str) -> Any:
 def parse_resume_to_json(resume_text: str) -> dict:
     """Converts plain text resume to structured JSON format."""
     from django.conf import settings
-    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        return {"name": "Candidate", "experience": [], "skills": {}}
-        
     try:
-        client = Groq(api_key=api_key)
+        client = _get_groq_client()
         prompt = build_resume_parser_prompt(resume_text)
         model = os.environ.get("QUALITY_MODEL", "llama-3.3-70b-versatile")
         
@@ -616,16 +578,8 @@ def parse_resume_to_json(resume_text: str) -> dict:
 
 def get_ai_summary_suggestions(job_title: str, industry: str, tone: str = "Professional") -> list:
     """Invokes AI to get 3 professional summary suggestions."""
-    from django.conf import settings
-    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        return [
-            f"Experienced {job_title} professional in {industry} industry.",
-            f"Result-driven professional seeking a {job_title} role to deliver value.",
-            f"Passionate specialist with technical competence matching {job_title} requirements."
-        ]
     try:
-        client = Groq(api_key=api_key)
+        client = _get_groq_client()
         prompt = build_summary_suggestion_prompt(job_title, industry, tone)
         model = os.environ.get("FAST_MODEL", "llama-3.1-8b-instant")
         response = client.chat.completions.create(
@@ -646,11 +600,8 @@ def get_ai_summary_suggestions(job_title: str, industry: str, tone: str = "Profe
 def get_ai_experience_bullets(job_title: str, company_type: str) -> list:
     """Invokes AI to get 5 high-impact bullet points."""
     from django.conf import settings
-    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        return [f"Delivered key projects for {job_title} at the company."] * 5
     try:
-        client = Groq(api_key=api_key)
+        client = _get_groq_client()
         prompt = build_experience_bullets_prompt(job_title, company_type)
         model = os.environ.get("FAST_MODEL", "llama-3.1-8b-instant")
         response = client.chat.completions.create(
@@ -673,13 +624,8 @@ def get_ai_experience_bullets(job_title: str, company_type: str) -> list:
 
 def localize_resume_data(resume_json: dict, target_lang: str, target_market: str) -> dict:
     """Invokes AI to translate and localize structured resume JSON data."""
-    from django.conf import settings
-    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        return resume_json
-        
     try:
-        client = Groq(api_key=api_key)
+        client = _get_groq_client()
         prompt = build_localization_prompt(resume_json, target_lang, target_market)
         model = os.environ.get("QUALITY_MODEL", "llama-3.3-70b-versatile")
         
@@ -699,12 +645,8 @@ def localize_resume_data(resume_json: dict, target_lang: str, target_market: str
 def tailor_resume_data(resume_json: dict, job_desc: str) -> dict:
     """Invokes AI to tailor structured resume JSON data to a job description."""
     from django.conf import settings
-    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        return resume_json
-        
     try:
-        client = Groq(api_key=api_key)
+        client = _get_groq_client()
         prompt = build_auto_tailor_prompt(resume_json, job_desc)
         model = os.environ.get("QUALITY_MODEL", "llama-3.3-70b-versatile")
         
